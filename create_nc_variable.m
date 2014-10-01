@@ -24,7 +24,7 @@ if numel(varData) == 1
     return;
     
 elseif sum(strcmp(varName, {'lat', 'lon', 'lev', 'time'})) > 0
-    dimCell = {varName};
+    dimCell = {varName, length(varData)};
     
 elseif numel(varData) == length(varData)
     dimCell = {'time'};

@@ -100,18 +100,20 @@ lon = get_nc_variable(fileName, 'lon');
 rvar = get_nc_variable(fileName, varName);
 
 %convert lat and lon to vector data
-lonVec = reshape(lon, numel(lon), 1);
 latVec = reshape(lat, numel(lat), 1);
+lonVec = reshape(lon, numel(lon), 1);
+coordVec = [latVec, lonVec];
 varVec = reshape(rvar, numel(rvar), 1);
 
 %create vector of interpolation coordinates
-[egLonGrid, egLatGrid] = meshgrid(egLon, egLat);
-egLonVec = reshape(egLonGrid, numel(egLonGrid), 1);
+[egLatGrid, egLonGrid] = meshgrid(egLat, egLon);
 egLatVec = reshape(egLatGrid, numel(egLatGrid), 1);
+egLonVec = reshape(egLonGrid, numel(egLonGrid), 1);
+ICoordVec = [egLatVec, egLonVec];
 
 %interpolate data using Delaunay triangularization
-F = scatteredInterpolant(lonVec, latVec, varVec);
-var = F(egLonVec, egLatVec);
+F = scatteredInterpolant(coordVec, varVec);
+var = F(ICoordVec);
 
 %compute output file name
 breaks = strfind(fileName, '_');
@@ -122,7 +124,7 @@ system(['cp ', fileName, ' ', outFile]);
 newVarName = [varName, 'Unrotated'];
 delete_nc_variable(outFile, varName);
 overwrite_nc_variable(outFile, 'lat', egLat, 'lat');
-overwrite_nc_variable(outFile, 'lon', egLat, 'lon');
+overwrite_nc_variable(outFile, 'lon', egLon, 'lon');
 overwrite_nc_variable(outFile, newVarName, var, newVarName);
 
 delete_nc_variable(outFile, varName);

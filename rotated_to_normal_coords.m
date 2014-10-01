@@ -113,7 +113,7 @@ ICoordVec = double([egLatVec, egLonVec]);
 
 %interpolate data using Delaunay triangularization
 F = scatteredInterpolant(coordVec, varVec, 'linear', 'none'); %or maybe nearest instead of none
-var = float(F(ICoordVec));
+var = single(F(ICoordVec));
 
 %compute output file name
 breaks = strfind(fileName, '_');

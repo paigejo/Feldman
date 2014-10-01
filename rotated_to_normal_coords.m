@@ -111,9 +111,22 @@ egLatVec = reshape(egLatGrid, numel(egLatGrid), 1);
 egLonVec = reshape(egLonGrid, numel(egLonGrid), 1);
 ICoordVec = double([egLatVec, egLonVec]);
 
+%get rid of nans
+latNan = isnan(latVec);
+lonNan = isnan(lonVec);
+varNan = isnan(varVec);
+inputNans = latNan | lonNan | varNan;
+coordVec = coordVec(~inputNans, :);
+
 %interpolate data using Delaunay triangularization
-F = scatteredInterpolant(coordVec, varVec, 'linear',  'none'); %or maybe nearest instead of none
+F = scatteredInterpolant(coordVec, varVec(~inputNans), 'linear',  'none'); %or maybe nearest instead of none
 var = single(F(ICoordVec));
+
+%make sure variable values are within maximum and minimum of data
+varMin = single(min(varVec(~varNan)));
+varMax = single(max(varVec(~varNan)));
+var(var > maxMax) = varMax;
+var(var < varMin) = varMin;
 
 %convert variable data to 3D matrix with (time, lat, lon) coords, singleton
 %time dimension
@@ -132,7 +145,6 @@ overwrite_nc_variable(outFile, 'lat', egLat, 'lat');
 overwrite_nc_variable(outFile, 'lon', egLon, 'lon');
 overwrite_nc_variable(outFile, newVarName, var, newVarName);
 
-varsToDelete = [varName, ...
-    ',rlat,rlon,lat_vertices,lon_vertices,rlat_vertices,rlon_vertices,lat_bnds,lon_bnds,rlat_bnds,rlon_bnds'];
+varsToDelete = 'rlat,rlon,lat_vertices,lon_vertices,rlat_vertices,rlon_vertices,lat_bnds,lon_bnds,rlat_bnds,rlon_bnds';
 delete_nc_variable(outFile, varsToDelete);
 end

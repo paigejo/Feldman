@@ -27,17 +27,38 @@ elseif sum(strcmp(varName, {'lat', 'lon', 'lev', 'time'})) > 0
     dimCell = {varName, length(varData)};
     
 elseif numel(varData) == length(varData)
-    dimCell = {'time'};
+    dimCell = {'time', Inf};
     
 elseif dims == 2
     dimCell = {'lat', size(varData, 1), 'lon', size(varData, 2)};
     
 elseif dims == 3
-    dimCell = {'time', Inf, 'lat', size(varData, 2), 'lon', size(varData, 3)};
+    dimCell = {'lat', size(varData, 2), 'lon', size(varData, 3), 'time', Inf};
+    
+    %make 'time' last dimension (because MATLAB needs it like that for some
+    %reason)
+    varData = permute(varData, [2, 3, 1]);
     
 elseif dims == 4
-    dimCell = {'time', Inf, 'lev', size(varData, 2), 'lat', size(varData, 3), 'lon', size(varData, 4)};
+    dimCell = {'lev', size(varData, 2), 'lat', size(varData, 3), ...
+        'lon', size(varData, 4), 'time', Inf};
+    
+    %make 'time' last dimension (because MATLAB needs it like that for some
+    %reason)
+    varData = permute(varData, [2, 3, 4, 1]);
 end
 nccreate(fName, varName, 'Dimensions', dimCell, 'Datatype', 'single');
 ncwrite(fName, varName, varData);
+
+%if we permuted the variable data, we need to permute it back with ncpdq
+if dims == 3
+    system(['/opt/local/bin/ncpdq -O -a time,lat,lon -v ', varName, ...
+        ' ', fName, ' ', fName]);
+    
+elseif dims == 4
+    system(['/opt/local/bin/ncpdq -O -a time,lev,lat,lon -v ', varName, ...
+        ' ', fName, ' ', fName]);
+    
+end
+
 end

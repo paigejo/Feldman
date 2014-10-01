@@ -15,8 +15,8 @@
 function overwrite_nc_variable(fName, varName, newData, newName)
 
 %delete old variable
-delete_nc_variable(fName, varName)
+delete_nc_variable(fName, varName);
 
 %make new variable with new data
-create_nc_variable(fName, newName, newData)
+create_nc_variable(fName, newName, newData);
 end

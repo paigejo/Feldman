@@ -19,7 +19,7 @@ function create_nc_variable(fName, varName, varData)
 %dimensions are which
 dims = ndims(varData);
 if numel(varData) == 1
-    nccreate(fName, varName, 'Datatype', 'double');
+    nccreate(fName, varName, 'Datatype', 'single');
     ncwrite(fName, varName, varData);
     return;
     
@@ -38,6 +38,6 @@ elseif dims == 3
 elseif dims == 4
     dimCell = {'time', Inf, 'lev', size(varData, 2), 'lat', size(varData, 3), 'lon', size(varData, 4)};
 end
-nccreate(fName, varName, 'Dimensions', dimCell, 'Datatype', 'double');
+nccreate(fName, varName, 'Dimensions', dimCell, 'Datatype', 'single');
 ncwrite(fName, varName, varData);
 end

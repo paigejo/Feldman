@@ -30,13 +30,13 @@ elseif numel(varData) == length(varData)
     dimCell = {'time'};
     
 elseif dims == 2
-    dimCell = {'lat', 'lon'};
+    dimCell = {'lat', size(varData, 1), 'lon', size(varData, 2)};
     
 elseif dims == 3
-    dimCell = {'time', 'lat', 'lon'};
+    dimCell = {'time', Inf, 'lat', size(varData, 2), 'lon', size(varData, 3)};
     
 elseif dims == 4
-    dimCell = {'time', 'lev', 'lat', 'lon'};
+    dimCell = {'time', Inf, 'lev', size(varData, 2), 'lat', size(varData, 3), 'lon', size(varData, 4)};
 end
 nccreate(fName, varName, 'Dimensions', dimCell, 'Datatype', 'double');
 ncwrite(fName, varName, varData);

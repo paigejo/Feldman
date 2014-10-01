@@ -112,7 +112,7 @@ egLonVec = reshape(egLonGrid, numel(egLonGrid), 1);
 ICoordVec = double([egLatVec, egLonVec]);
 
 %interpolate data using Delaunay triangularization
-F = scatteredInterpolant(coordVec, varVec, 'linear', 'none'); %or maybe nearest instead of none
+F = scatteredInterpolant(coordVec, varVec, 'linear',  'none'); %or maybe nearest instead of none
 var = single(F(ICoordVec));
 
 %compute output file name
@@ -127,11 +127,7 @@ overwrite_nc_variable(outFile, 'lat', egLat, 'lat');
 overwrite_nc_variable(outFile, 'lon', egLon, 'lon');
 overwrite_nc_variable(outFile, newVarName, var, newVarName);
 
-delete_nc_variable(outFile, varName);
-delete_nc_variable(outFile, 'rlat');
-delete_nc_variable(outFile, 'rlon');
-delete_nc_variable(outFile, 'lat_vertices');
-delete_nc_variable(outFile, 'lon_vertices');
-delete_nc_variable(outFile, 'lat_bnds');
-delete_nc_variable(outFile, 'lon_bnds');
+varsToDelete = [varName, ...
+    ',rlat,rlon,lat_vertices,lon_vertices,rlat_vertices,rlon_vertices,lat_bnds,lon_bnds,rlat_bnds,rlon_bnds'];
+delete_nc_variable(outFile, varsToDelete);
 end

@@ -125,7 +125,7 @@ var = single(F(ICoordVec));
 %make sure variable values are within maximum and minimum of data
 varMin = single(min(varVec(~varNan)));
 varMax = single(max(varVec(~varNan)));
-var(var > maxMax) = varMax;
+var(var > varMax) = varMax;
 var(var < varMin) = varMin;
 
 %convert variable data to 3D matrix with (time, lat, lon) coords, singleton

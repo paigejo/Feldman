@@ -17,7 +17,7 @@ function create_nc_variable(fName, varName, varData)
 
 %determine number of dimensions that exists and thereby infer which
 %dimensions are which
-dims = ndims(newData);
+dims = ndims(varData);
 if numel(newData) == 1
     nccreate(fName, varName, 'Datatype', 'double');
     ncwrite(fName, varName, varData);

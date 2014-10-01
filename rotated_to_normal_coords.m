@@ -102,18 +102,18 @@ rvar = get_nc_variable(fileName, varName);
 %convert lat and lon to vector data
 latVec = reshape(lat, numel(lat), 1);
 lonVec = reshape(lon, numel(lon), 1);
-coordVec = [latVec, lonVec];
+coordVec = double([latVec, lonVec]);
 varVec = reshape(rvar, numel(rvar), 1);
 
 %create vector of interpolation coordinates
 [egLatGrid, egLonGrid] = meshgrid(egLat, egLon);
 egLatVec = reshape(egLatGrid, numel(egLatGrid), 1);
 egLonVec = reshape(egLonGrid, numel(egLonGrid), 1);
-ICoordVec = [egLatVec, egLonVec];
+ICoordVec = double([egLatVec, egLonVec]);
 
 %interpolate data using Delaunay triangularization
-F = scatteredInterpolant(coordVec, varVec);
-var = F(ICoordVec);
+F = scatteredInterpolant(coordVec, varVec, 'linear', 'none'); %or maybe nearest instead of none
+var = float(F(ICoordVec));
 
 %compute output file name
 breaks = strfind(fileName, '_');

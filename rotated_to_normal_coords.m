@@ -115,6 +115,9 @@ ICoordVec = double([egLatVec, egLonVec]);
 F = scatteredInterpolant(coordVec, varVec, 'linear',  'none'); %or maybe nearest instead of none
 var = single(F(ICoordVec));
 
+%convert variable data to 2D matrix with lat/lon coords
+var = reshape(var, length(egLat), length(egLon));
+
 %compute output file name
 breaks = strfind(fileName, '_');
 outFile = [varName, 'Unrotated', fileName(breaks(1):end)];

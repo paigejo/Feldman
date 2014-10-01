@@ -1,12 +1,12 @@
 %This function will convert the given variable named varName from rotated
 %latitude and longitude coordinates to normal latitude and longitude
-%coordinates using linear interpolation.  This function assumes the data
-%for the given variable is already limited to a single time step.  Output
-%nc file has the same name as the original, but with [varName, 'Unrotated']
-%as the file name prefix instead of just varName.  Variables egLat and
-%egLon are the latitude and longitude vectors the user wants interpolated
-%variable values at (interpolated coordinates will be cross-product of
-%egLon with egLat).
+%coordinates using Delaunay triangularization (linear) interpolation.  This
+%function assumes the data for the given variable is already limited to a
+%single time step.  Output nc file has the same name as the original, but
+%with [varName, 'Unrotated'] as the file name prefix instead of just
+%varName.  Variables egLat and egLon are the latitude and longitude vectors
+%the user wants interpolated variable values at (interpolated coordinates
+%will be cross-product of egLon with egLat).
 
 %This function assumes the given variable is 2D (3D including time), and
 %only has data for 1 timestep in the given file
@@ -99,9 +99,19 @@ lat = get_nc_variable(fileName, 'lat');
 lon = get_nc_variable(fileName, 'lon');
 rvar = get_nc_variable(fileName, varName);
 
-%interpolate variable to normal latitude/longitude coordinates from egLat
-%and egLon
-var = interp2(lon, lat, rvar, egLon, egLat);
+%convert lat and lon to vector data
+lonVec = reshape(lon, numel(lon), 1);
+latVec = reshape(lat, numel(lat), 1);
+varVec = reshape(rvar, numel(rvar), 1);
+
+%create vector of interpolation coordinates
+[egLonGrid, egLatGrid] = meshgrid(egLon, egLat);
+egLonVec = reshape(egLonGrid, numel(egLonGrid), 1);
+egLatVec = reshape(egLatGrid, numel(egLatGrid), 1);
+
+%interpolate data using Delaunay triangularization
+F = scatteredInterpolant(lonVec, latVec, varVec);
+var = F(egLonVec, egLatVec);
 
 %compute output file name
 breaks = strfind(fileName, '_');

@@ -19,7 +19,7 @@ function create_nc_variable(fName, varName, varData)
 %dimensions are which
 dims = ndims(varData);
 if numel(varData) == 1
-    nccreate(fName, varName, 'Datatype', 'single');
+    nccreate(fName, varName, 'Datatype', 'single', 'Format', 'classic');
     ncwrite(fName, varName, varData);
     return;
     
@@ -47,7 +47,8 @@ elseif dims == 4
     %reason)
     varData = permute(varData, [2, 3, 4, 1]);
 end
-nccreate(fName, varName, 'Dimensions', dimCell, 'Datatype', 'single');
+nccreate(fName, varName, 'Dimensions', dimCell, 'Datatype', 'single', ...
+    'Format', 'classic');
 ncwrite(fName, varName, varData);
 
 %if we permuted the variable data, we need to permute it back with ncpdq

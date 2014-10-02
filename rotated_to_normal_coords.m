@@ -96,7 +96,7 @@ egLon = [0, 1.40625, 2.8125, 4.21875, 5.625, 7.03125, 8.4375, 9.84375, 11.25, ..
 
 %get all dimensions and variable data
 lat = get_nc_variable(fileName, 'lat');
-lon = get_nc_variable(fileName, 'lon');
+lon = get_nc_variable(fileName, 'lon') + 280; %because we want lon to be from 0 to 360
 rvar = get_nc_variable(fileName, varName);
 
 %convert lat and lon to vector data

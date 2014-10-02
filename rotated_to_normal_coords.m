@@ -119,7 +119,7 @@ inputNans = latNan | lonNan | varNan;
 coordVec = coordVec(~inputNans, :);
 
 %interpolate data using Delaunay triangularization
-F = scatteredInterpolant(coordVec, varVec(~inputNans), 'natural',  'none'); %or maybe nearest instead of none
+F = scatteredInterpolant(coordVec, varVec(~inputNans), 'natural',  'nearest'); %or maybe nearest instead of none
 var = single(F(ICoordVec));
 
 %make sure variable values are within maximum and minimum of data

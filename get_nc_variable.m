@@ -57,7 +57,7 @@ elseif nDims == 3
     %Then only time, lat, and lon will be included?????????
     
     %compute inverse permutation taking dim ordering back to normal
-    [~, forwardPermute] = sort([timeLoc, latLoc, lonLoc]);
+    [~, forwardPermute] = sort([-lonLoc, -latLoc, -timeLoc]);
     [~, inversePermute] = sort(forwardPermute);
     
     %permute dimensions to necessary order
@@ -67,7 +67,7 @@ elseif nDims == 4
     %Then we have time, lev, lat, and lon (OR ILEV??????)
     
     %compute inverse permutation taking dim ordering back to normal
-    [~, forwardPermute] = sort([timeLoc, levLoc, latLoc, lonLoc]);
+    [~, forwardPermute] = sort([-lonLoc, -latLoc, -levLoc, -timeLoc]);
     [~, inversePermute] = sort(forwardPermute);
     
     %permute dimensions to necessary order

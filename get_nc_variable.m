@@ -2,11 +2,17 @@
 %file path) and the variable name in the nc file, returns the variable data
 %from the nc file (converted from string to double form).  Also, corrects
 %for format: makes sure the order of dimensions is correct (time, lev, lat,
-%lon) or (time, lat, lon)
+%lon) or (time, lat, lon) in nco ordering, or the reverse order for Matlab.
 
 %NOTE: for the system call to ncdump to work, you might need to add the 
 %line setenv('DYLD_LIBRARY_PATH',''); to your statup.m file in MATLAB's
 %startup folder.
+
+%NOTE2: I think MATLAB orders dimensions in reverse order from ncdump
+
+%NOTE3: matlab deletes singleton dimensions.  If the given variable has a
+%singleton dimension, this function will assume that variable is time, and
+%will add the singleton dimension back in where time would be.
 
 function varData = get_nc_variable(fileName, varName)
 
@@ -32,6 +38,12 @@ endI = endIs(1) - 2 + startI;
 dimString = lower(ncdump(startI:endI));
 dims = strsplit(dimString, ' ');
 nDims = numel(dims);
+
+%sometimes MATLAB gets rid of singleton time dimension.  Add it back
+if nDims ~= ndims(varData)
+    varData = shiftDim(varData, -1);
+    varData = reshape(varData, [2 3 1]);
+end
 
 %determine dimension ordering
 timeLoc = strfind(dimString, 'time');

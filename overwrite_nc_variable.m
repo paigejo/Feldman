@@ -12,6 +12,8 @@
 %dimensions of newData are respectively: vector, 2, 3, or 4.  If newData is
 %single element, no dimensions are used.
 
+%NOTE3: I think MATLAB orders dimensions in reverse order from ncdump
+
 function overwrite_nc_variable(fName, varName, newData, newName)
 
 %delete old variable

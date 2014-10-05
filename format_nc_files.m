@@ -3,10 +3,11 @@
 %format (i.e. correct number of dimensions and units).  This function will
 %generate files with the prefix 'final' for each combined file in the
 %corresponding subdirectories.  Variables will be in form (time, lev, lat,
-%lon), (time, lat, lon), or (lat, lon).
+%lon), (time, lat, lon), or (lat, lon).  The input files should have only 1
+%time coordinate.
 
 %correcting variable formatting:
-%get_nc_variable -> ensure3D -> ensureCorrectDimensions -> unit conversion
+%get_nc_variable -> ensure3D (or ensure2D) -> ensureCorrectDimensions -> unit conversion
 
 %get_nc_variable: makes sure whatever dimensions exist are in correct order
 
@@ -24,7 +25,7 @@ function format_nc_files(dirPath, subDirectories)
 variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'clwvi', 'cli', ...
     'clw', 'n2o', 'tro3', 'hus', 'hur', 'ta', 'sic', 'sftlf', 'ps', ...
     'sndLImon', 'sndOImon', 'rlus', 'rlut', 'ts', 'tauu', 'tauv', ...
-    'tas', 'sfcWind', 'sim', 'lwsnl'};
+    'tas', 'sfcWind', 'sim', 'lwsnl', 'snw'};
 
 egLat = [-88.9277353522959, -87.5387052130272, -86.1414721015279, ...
     -84.7423855907142, -83.3425960440704, -81.9424662991732, ...
@@ -123,7 +124,8 @@ molMassN2O = 44.013; %g/mol
 
     function variable = ensure3D(variable)
         %Make sure variable is 3-dimensional (4D including time) by copying
-        %values along singleton dimensions
+        %values along singleton dimensions.  Time will not be included as a
+        %dimension since it is a trailing singleton dimension.
         
         if isempty(variable)
             error('ensure3D called on empty variable')
@@ -135,31 +137,22 @@ molMassN2O = 44.013; %g/mol
         %now copy values into necessary dimensions
         dims = ndims(variable);
         if numel(variable) == 1
-            variable = ones(1, goalLev, goalLat, goalLon)*variable;
+            variable = ones(goalLon, goalLat, goalLev)*variable;
             
         elseif numel(variable) == length(variable)
             error('variable input to ensure3D is a vector, which should not happen');
             
         elseif dims == 2
             
-            %add time and lev dimensions as first two dimensions, then copy
+            %add lev dimension as last dimension, then copy
             %values along lev dimension
-            variable = dimshift(variable, -2);
-            variable = repmat(variable, [1, goalLev, 1, 1]);
-            
-        elseif dims == 3
-            %then time, lat, and lon are the dimensions????
-            
-            %add lev dimension, then copy values along lev dimension
             variable = dimshift(variable, -1);
-            variable = repmat(variable, [1, goalLev, 1, 1]);
+            variable = repmat(variable, [1, 1, goalLev]);
             
-        else
+        elseif dims > 3
             error('ensure3D is being called on a variable with more than 3 dimensions');
         end
         
-        %add time dimension back in
-        variable = shiftdim(variable, -1);
     end
 
     function variable = ensure2D(variable)
@@ -173,7 +166,7 @@ molMassN2O = 44.013; %g/mol
         %now copy values into necessary dimensions
         dims = ndims(variable);
         if numel(variable) == 1
-            variable = ones(1, goalLat, goalLon)*variable;
+            variable = ones(goalLon, goalLat)*variable;
             
         elseif numel(variable) == length(variable)
             error('variable input to ensure2D is a vector, which should not happen');
@@ -208,8 +201,8 @@ for dir = subDirectories
     lon = get_nc_variable(finalFile, 'lon');
     lat = get_nc_variable(finalFile, 'lat');
     lev = get_nc_variable(finalFile, 'lev');
+    plev = get_nc_variable(finalFile, 'plev');
     
-    useGlobalVar = 0;
     for v = variableList
         varName = v{1};
         
@@ -233,7 +226,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CFC11');
+            overwrite_nc_variable(finalFile, varName, var, 'CFC11', 4);
             
         elseif strcmp(varName, 'cfc12')
             %if cfc12 doesn't exist, cfc12global should exist.  In that
@@ -255,7 +248,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CFC12');
+            overwrite_nc_variable(finalFile, varName, var, 'CFC12', 4);
             
         elseif strcmp(varName, 'ch4')
             %if ch4 doesn't exist, ch4global should exist.  In that
@@ -277,7 +270,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CH4');
+            overwrite_nc_variable(finalFile, varName, var, 'CH4', 4);
             
         elseif strcmp(varName, 'cl')
             %get cl data from combined file:
@@ -292,9 +285,11 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CLOUD');
+            overwrite_nc_variable(finalFile, varName, var, 'CLOUD', 4);
+        
+        %elseif strcmp(varName, 'clwvi')
             
-        elseif strcmp(varName, 'clwvi')
+        elseif strcmp(varName, 'snw')
             %get clwvi data from combined file:
             var = get_nc_variable(finalFile, varName);
             
@@ -308,7 +303,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'ICLDLWP');
+            overwrite_nc_variable(finalFile, varName, var, 'ICLDLWP', 4);
             
         elseif strcmp(varName, 'cli')
             %get cli data from combined file:
@@ -323,7 +318,7 @@ for dir = subDirectories
             cli = ensureCorrectDimensions(cli, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, cli, 'CLDICE');
+            overwrite_nc_variable(finalFile, varName, cli, 'CLDICE', 4);
             
         elseif strcmp(varName, 'clw')
             %get clwvi data from combined file:
@@ -338,7 +333,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CLDLIQ');
+            overwrite_nc_variable(finalFile, varName, var, 'CLDLIQ', 4);
             
             %calculate variable we want (cloud ice fraction)
             var = cli/(cli + var);
@@ -348,7 +343,7 @@ for dir = subDirectories
             var(isnan(var)) = 0;
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'FICE');
+            overwrite_nc_variable(finalFile, varName, var, 'FICE', 4);
             
         elseif strcmp(varName, 'n2o')
             %if n2o doesn't exist, n2oglobal should exist.  In that
@@ -370,7 +365,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'N2O');
+            overwrite_nc_variable(finalFile, varName, var, 'N2O', 4);
             
         elseif strcmp(varName, 'tro3')
             %NOT SURE IF THIS SHOULD BE A VMR!!!!
@@ -387,7 +382,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'O3VMR'); %NOT FINAL!!!!
+            overwrite_nc_variable(finalFile, varName, var, 'O3VMR', 4); %NOT FINAL!!!!
             
         elseif strcmp(varName, 'hus')
             %get his data from combined file:
@@ -405,7 +400,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'Q');
+            overwrite_nc_variable(finalFile, varName, var, 'Q', 4);
             
         elseif strcmp(varName, 'hur')
             %get hur data from combined file:
@@ -421,7 +416,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'RELHUM');
+            overwrite_nc_variable(finalFile, varName, var, 'RELHUM', 4);
             
         elseif strcmp(varName, 'ta')
             %get ta data from combined file:
@@ -436,12 +431,12 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'T');
+            overwrite_nc_variable(finalFile, varName, var, 'T', 4);
             
             %also create effective cloud temperature variable
             %IS THIS ACTUALLY NECESSARY OR DOES FILE AUTOMATICALLY USE TA
             %AS CLOUD EFFECTIVE TEMPERATURE????
-            create_nc_variable(file, 't_cld', var);
+            create_nc_variable(file, 't_cld', var, 4);
             
             
             
@@ -463,7 +458,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'ICEFRAC');
+            overwrite_nc_variable(finalFile, varName, var, 'ICEFRAC', 3);
             
         elseif strcmp(varName, 'sftlf')
             %get sftlf data from combined file:
@@ -471,14 +466,14 @@ for dir = subDirectories
             
             %do units need to be converted from pct to frac?
             
-            %make sftlf 2d (3d including time)
+            %make sftlf 2d
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'LANDFRAC');
+            overwrite_nc_variable(finalFile, varName, var, 'LANDFRAC', 2);
             
         elseif strcmp(varName, 'ps')
             %get ps data from combined file:
@@ -493,7 +488,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'PS');
+            overwrite_nc_variable(finalFile, varName, var, 'PS', 3);
             
         elseif strcmp(varName, 'sndLImon')
             %get snd data from combined file:
@@ -519,7 +514,7 @@ for dir = subDirectories
             var = var + sndLImon;
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'SNOWHLND'); %Is this only over land????
+            overwrite_nc_variable(finalFile, varName, var, 'SNOWHLND', 3); %Is this only over land????
             
         elseif strcmp(varName, 'rlus')
             
@@ -538,7 +533,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TS');
+            overwrite_nc_variable(finalFile, varName, var, 'TS', 3);
             
         elseif strcmp(varName, 'tauu')
             %get tauu data from combined file:
@@ -553,7 +548,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TAUX');
+            overwrite_nc_variable(finalFile, varName, var, 'TAUX', 3);
             
         elseif strcmp(varName, 'tauv')
             %get tauv data from combined file:
@@ -568,7 +563,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TAUY');
+            overwrite_nc_variable(finalFile, varName, var, 'TAUY', 3);
             
         elseif strcmp(varName, 'tas')
             %get tas data from combined file:
@@ -583,7 +578,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TREFHT');
+            overwrite_nc_variable(finalFile, varName, var, 'TREFHT', 3);
             
         elseif strcmp(varName, 'sfcWind')
             %get sfcWind data from combined file:
@@ -598,7 +593,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'SFCWIND'); %Doesn't exist in b30 file!!!!
+            overwrite_nc_variable(finalFile, varName, var, 'SFCWIND', 3); %Doesn't exist in b30 file!!!!
             
         end
     end

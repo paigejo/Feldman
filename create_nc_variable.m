@@ -2,6 +2,8 @@
 %it already exists in the file, this function returns an error.  In that
 %case, call overwrite_nc_variable to overwrite the original variable, which
 %does not return an error if the variable didn't exist in the first place.
+%Takes in the number of dimensions of the variable in case a singleton
+%time dimension has been removed.
 
 %NOTE1: the new data for the given variable will be double-precision.
 
@@ -14,11 +16,10 @@
 %NOTE3: if variable already exists in file, nccreate returns error, and
 %this function also returns an error.
 
-function create_nc_variable(fName, varName, varData)
+function create_nc_variable(fName, varName, varData, dims)
 
 %determine number of dimensions that exists and thereby infer which
 %dimensions are which
-dims = ndims(varData);
 if numel(varData) == 1
     nccreate(fName, varName, 'Datatype', 'single', 'Format', 'classic');
     ncwrite(fName, varName, varData);

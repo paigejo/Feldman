@@ -103,9 +103,6 @@ if length(curLat) == length(goalLat) && length(curLon) == length(goalLon)
     
 end
 
-%get rid of singleton time dimension
-variable = squeeze(variable);
-
 %make functions for interpolation
 latScale = curLat(2)-curLat(1);
 minLat = min(curLat);
@@ -115,7 +112,6 @@ if ~isnan(goalLev) && ~isnan(curLev)
     levScale = curLev(2)-curLev(1);
     minLev = min(curLev);
 end
-
     function goalVals = coordTransform(coords, curMin, curScale)
         goalVals = (coords - curMin)/curScale;
     end
@@ -137,7 +133,7 @@ else
         coordTransform(goalLat, minLat, latScale), ...
         coordTransform(goalLev, minLev, levScale));
     
-    interpVar = interp2(variable, ILat, ILon, ILev);
+    interpVar = interp3(variable, ILat, ILon, ILev);
 end
 
 %add singleton time dimension back to interpolated variable

@@ -3,7 +3,8 @@
 %This is necessary in order to deal with difference in variable dimensions
 %between the old and new variable data.  If you want to create a variable
 %or overwrite it if it already exists, call this function, not
-%create_nc_variable.
+%create_nc_variable.  This function also takes in the number of dimensions
+%of the variable, in case a singleton time dimension has been removed.
 
 %NOTE1: the new data for the given variable will be double-precision.
 
@@ -14,12 +15,12 @@
 
 %NOTE3: I think MATLAB orders dimensions in reverse order from ncdump
 
-function overwrite_nc_variable(fName, varName, newData, newName)
+function overwrite_nc_variable(fName, varName, newData, newName, dims)
 
 %delete old variable
 [~] = evalc('delete_nc_variable(fName, varName)');
 
 %make new variable with new data (use evalc to not output way too much
 %data.  Note: this may cause errors to go unnoticed until later
-[~] = evalc('create_nc_variable(fName, newName, newData)');
+[~] = evalc('create_nc_variable(fName, newName, newData, dims)');
 end

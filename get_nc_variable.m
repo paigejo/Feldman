@@ -10,11 +10,11 @@
 
 %NOTE2: I think MATLAB orders dimensions in reverse order from ncdump
 
-%NOTE3: matlab deletes singleton dimensions.  If the given variable has a
-%singleton dimension, this function will assume that variable is time, and
-%will add the singleton dimension back in where time would be.
+%NOTE3: matlab deletes trailing singleton dimensions, so if the last
+%dimension in the matlab ordering (reverse ordering) of the variable is a
+%singleton one, it will be ignored.
 
-function varData = get_nc_variable(fileName, varName)
+function [varData, nDims] = get_nc_variable(fileName, varName)
 
 varData = ncread(fileName, varName);
 
@@ -38,12 +38,6 @@ endI = endIs(1) - 2 + startI;
 dimString = lower(ncdump(startI:endI));
 dims = strsplit(dimString, ' ');
 nDims = numel(dims);
-
-%sometimes MATLAB gets rid of singleton time dimension.  Add it back
-if nDims ~= ndims(varData)
-    varData = shiftDim(varData, -1);
-    varData = reshape(varData, [2 3 1]);
-end
 
 %determine dimension ordering
 timeLoc = strfind(dimString, 'time');

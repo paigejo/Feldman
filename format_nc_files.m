@@ -232,7 +232,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'CFC11', 4);
@@ -260,7 +260,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'CFC12', 4);
@@ -288,7 +288,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'CH4', 4);
@@ -309,7 +309,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'CLOUD', 4);
@@ -332,7 +332,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'ICLDLWP', 4);
@@ -353,7 +353,7 @@ for dir = subDirectories
             cli = ensure3D(cli);
             
             %Use interpolation to make it exactly correct size
-            cli = ensureCorrectDimensions(cli, lat, lon, lev, egLat, egLon, egLev);
+            cli = ensureCorrectDimensions(cli, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, cli, 'CLDICE', 4);
@@ -374,7 +374,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'CLDLIQ', 4);
@@ -412,7 +412,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'N2O', 4);
@@ -437,7 +437,7 @@ for dir = subDirectories
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'O3VMR', 4);
@@ -464,7 +464,7 @@ for dir = subDirectories
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'Q', 4);
@@ -489,7 +489,7 @@ for dir = subDirectories
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'RELHUM', 4);
@@ -513,7 +513,7 @@ for dir = subDirectories
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'T', 4);
@@ -547,7 +547,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'ICEFRAC', 3);
@@ -568,7 +568,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'LANDFRAC', 2);
@@ -589,7 +589,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'PS', 3);
@@ -610,7 +610,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'TS', 3);
@@ -631,7 +631,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'TAUX', 3);
@@ -652,7 +652,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'TAUY', 3);
@@ -673,7 +673,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'TREFHT', 3);
@@ -699,7 +699,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
+            var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'SNOWHLND', 3);

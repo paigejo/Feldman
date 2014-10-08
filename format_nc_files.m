@@ -385,7 +385,7 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, 'CLDLIQ', var, 'CLDLIQ', 4);
             
             %calculate variable we want (cloud ice fraction)
-            var = cli/(cli + var);
+            var = cli./(cli + var);
             
             %if cli + var close to 0, may take NaN values.  In that case,
             %set to 0

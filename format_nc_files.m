@@ -345,10 +345,10 @@ for dir = subDirectories
         elseif strcmp(varName, 'cli')
             %get data from combined file if it exists, else use fill value
             if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+                cli = get_nc_variable(finalFile, varName);
                 
             else
-                var = 0;
+                cli = 0;
                 
             end
             

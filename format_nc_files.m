@@ -186,7 +186,7 @@ for dir = subDirectories
     cd(dirName);
     
     %get combined file name:
-    [~, fileRaw] = system('find . -maxdepth 1 -name combine_*');
+    [~, fileRaw] = system('find . -maxdepth 1 -name combined_\*');
     files = strsplit(fileRaw, '/');
     file = files{end};
     

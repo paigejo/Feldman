@@ -117,7 +117,7 @@ end
     end
 
 %do interpolation:
-if isnan(curLev) && ndims(variable) == 2
+if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     %%%if variable doesn't use levels:
     
     [ILon, ILat] = meshgrid(...
@@ -126,7 +126,7 @@ if isnan(curLev) && ndims(variable) == 2
     
     interpVar = interp2(variable, ILat, ILon);
     
-elseif isnan(curlev) && ndims(variable) == 3
+elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
     %In this case, do not interpolate across lev, only interpolate across
     %other dimensions
     

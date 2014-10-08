@@ -93,6 +93,8 @@ goalLev = [3.54463800000001, 7.38881350000001, 13.967214, 23.944625, ...
     510.455255000002, 600.524200000003, 696.796290000003, 787.702060000003, ...
     867.160760000001, 929.648875000002, 970.554830000001, 992.5561];
 
+%{
+  %commented out because having the same dimensions is not the same as having the same coords  
 %if dimensions are already correct, return variable
 if length(curLat) == length(goalLat) && length(curLon) == length(goalLon)
     
@@ -102,6 +104,8 @@ if length(curLat) == length(goalLat) && length(curLon) == length(goalLon)
     end
     
 end
+    
+%}
 
 %make functions for interpolation
 latScale = curLat(2)-curLat(1);
@@ -120,33 +124,31 @@ end
 if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     %%%if variable doesn't use levels:
     
-    [ILon, ILat] = meshgrid(...
+    [ILon, ILat] = ndgrid(...
         coordTransform(goalLon, minLon, lonScale), ...
         coordTransform(goalLat, minLat, latScale));
     
-    interpVar = interp2(variable, ILat, ILon);
+    interpVar = interpn(variable, ILon, ILat);
     
 elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
     %In this case, do not interpolate across lev, only interpolate across
     %other dimensions
     
-    [ILon, ILat, ILev] = meshgrid(...
+    [ILon, ILat, ILev] = ndgrid(...
         coordTransform(goalLon, minLon, lonScale), ...
         coordTransform(goalLat, minLat, latScale), ...
         1:length(curLev));
     
-    interpVar = interp3(variable, ILon, ILat, ILev);
+    interpVar = interpn(variable, ILon, ILat, ILev);
     
 else
     %%%if variable does use levels:
-    [ILon, ILat, ILev] = meshgrid(...
+    [ILon, ILat, ILev] = ndgrid(...
         coordTransform(goalLon, minLon, lonScale), ...
         coordTransform(goalLat, minLat, latScale), ...
         coordTransform(goalLev, minLev, levScale));
     
-    interpVar = interp3(variable, ILat, ILon, ILev);
+    interpVar = interpn(variable, ILon, ILat, ILev);
 end
 
-%add singleton time dimension back to interpolated variable
-interpVar = repmat(interpVar, ones(1, ndims(variable) + 1));
 end

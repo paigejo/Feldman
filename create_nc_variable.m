@@ -35,11 +35,11 @@ elseif dims == 2
     dimCell = {'lon', size(varData, 1), 'lat', size(varData, 2)};
     
 elseif dims == 3
-    dimCell = {'lon', size(varData, 2), 'lat', size(varData, 3), 'time', Inf};
+    dimCell = {'lon', size(varData, 1), 'lat', size(varData, 2), 'time', Inf};
     
 elseif dims == 4
-    dimCell = {'lon', size(varData, 2), 'lat', size(varData, 3), ...
-        'lev', size(varData, 4), 'time', Inf};
+    dimCell = {'lon', size(varData, 1), 'lat', size(varData, 2), ...
+        'lev', size(varData, 3), 'time', Inf};
     
 end
 

@@ -217,13 +217,13 @@ for dir = subDirectories
         if strcmp(varName, 'cfc11')
             %if cfc11 doesn't exist, cfc11global should exist.  In that
             %case, use that variable
-            if ~nc_variable_exists(finalFile, varName)
+            if ~nc_variable_exists(combinedFile, varName)
                 varName = 'cfc11global';
             end
             
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -245,13 +245,13 @@ for dir = subDirectories
         elseif strcmp(varName, 'cfc12')
             %if cfc12 doesn't exist, cfc12global should exist.  In that
             %case, use that variable
-            if ~nc_variable_exists(finalFile, varName)
+            if ~nc_variable_exists(combinedFile, varName)
                 varName = 'cfc12global';
             end
             
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -273,13 +273,13 @@ for dir = subDirectories
         elseif strcmp(varName, 'ch4')
             %if ch4 doesn't exist, ch4global should exist.  In that
             %case, use that variable
-            if ~nc_variable_exists(finalFile, varName)
+            if ~nc_variable_exists(combinedFile, varName)
                 varName = 'ch4global';
             end
             
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -300,8 +300,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'cl')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -322,8 +322,8 @@ for dir = subDirectories
         elseif strcmp(varName, 'clwvi')
             
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -344,8 +344,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'cli')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                cli = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                cli = get_nc_variable(combinedFile, varName);
                 
             else
                 cli = 0;
@@ -365,8 +365,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'clw')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -397,13 +397,13 @@ for dir = subDirectories
         elseif strcmp(varName, 'n2o')
             %if n2o doesn't exist, n2oglobal should exist.  In that
             %case, use that variable
-            if ~nc_variable_exists(finalFile, varName)
+            if ~nc_variable_exists(combinedFile, varName)
                 varName = 'n2oglobal';
             end
             
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -424,8 +424,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'tro3')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -449,8 +449,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'hus')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -476,8 +476,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'hur')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -501,8 +501,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'ta')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 287; %fill value is average global surface temperature in Kelvin
@@ -537,8 +537,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'sic')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -559,8 +559,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'sftlf')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -580,8 +580,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'ps')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 101325; %this is the mean sea-level pressure in Pa
@@ -601,8 +601,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'ts')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 287; %fill value is average global surface temperature in Kelvin
@@ -622,8 +622,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'tauu')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -643,8 +643,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'tauv')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;
@@ -664,8 +664,8 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'tas')
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 287; %fill value is average global surface temperature in Kelvin
@@ -685,13 +685,13 @@ for dir = subDirectories
             
         elseif strcmp(varName, 'snw')
             %if snw doesn't exist, try to use lwsnl
-            if ~nc_variable_exists(finalFile, varName)
+            if ~nc_variable_exists(combinedFile, varName)
                 varName = 'lwsnl';
             end
             
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(finalFile, varName)
-                var = get_nc_variable(finalFile, varName);
+            if nc_variable_exists(combinedFile, varName)
+                var = get_nc_variable(combinedFile, varName);
                 
             else
                 var = 0;

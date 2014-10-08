@@ -197,7 +197,7 @@ for dir = subDirectories
     
     %copy combined file, calling it 'format' file
     breaks = strfind(combinedFile, '_');
-    finalFile = ['format', combinedFile(breaks(1):end)];
+    finalFile = ['formatted', combinedFile(breaks(1):end)];
     system(['cp ', exampleFilePath, ' ', finalFile]);
     
     %get lon, lat, lev dimensions (and ilev?)

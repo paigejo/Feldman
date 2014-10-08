@@ -185,22 +185,26 @@ exampleFilePath = '~/Desktop/cmip5/b30.042a.cam2.h0.2010-12.nc';
 
 for dir = subDirectories
     dirName = dir{1};
+    ['opening ' dirName]
     
     %open subdirectory
     cd(dirPath);
     cd(dirName);
     
     %get combined file name:
+    ['finding combined file']
     [~, fileRaw] = system('find . -maxdepth 1 -name combined_\*');
     files = strsplit(fileRaw, '/');
     combinedFile = files{end};
     
     %copy combined file, calling it 'format' file
+    ['creating output file']
     breaks = strfind(combinedFile, '_');
     finalFile = ['formatted', combinedFile(breaks(1):end)];
     system(['cp ', exampleFilePath, ' ', finalFile]);
     
     %get lon, lat, lev dimensions (and ilev?)
+    ['reading in dimension data']
     lon = get_nc_variable(combinedFile, 'lon');
     lat = get_nc_variable(combinedFile, 'lat');
     lev = get_nc_variable(combinedFile, 'lev');
@@ -214,6 +218,8 @@ for dir = subDirectories
     for v = variableList
         varName = v{1};
         
+        'formatting 3D variables'
+        
         if strcmp(varName, 'cfc11')
             %if cfc11 doesn't exist, cfc11global should exist.  In that
             %case, use that variable
@@ -221,6 +227,9 @@ for dir = subDirectories
                 varName = 'cfc11global';
             end
             
+            ['formatting ', varName]
+            
+            'reading data'
             %get data from combined file if it exists, else use fill value
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
@@ -233,12 +242,15 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC11/molMassAir);
             
+            'ensuring 3D'
             %make cfc11 3d (4d including time)
             var = ensure3D(var);
             
+            'ensuring dimensions correct size'
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
+            'writing to output file'
             %overwrite variable
             overwrite_nc_variable(finalFile, 'CFC11', var, 'CFC11', 4);
             
@@ -249,7 +261,10 @@ for dir = subDirectories
                 varName = 'cfc12global';
             end
             
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -262,12 +277,15 @@ for dir = subDirectories
             var = var * (molMassCFC12/molMassAir);
             
             %make cfc12 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing to output file'
             overwrite_nc_variable(finalFile, 'CFC12', var, 'CFC12', 4);
             
         elseif strcmp(varName, 'ch4')
@@ -277,7 +295,10 @@ for dir = subDirectories
                 varName = 'ch4global';
             end
             
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -290,16 +311,23 @@ for dir = subDirectories
             var = var * (molMassCH4/molMassAir);
             
             %make ch4 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'CH4', var, 'CH4', 4);
             
         elseif strcmp(varName, 'cl')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -311,17 +339,23 @@ for dir = subDirectories
             %do units need to be converted from pct to frac???
             
             %make cl 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'CLOUD', var, 'CLOUD', 4);
             
         elseif strcmp(varName, 'clwvi')
             
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -334,16 +368,23 @@ for dir = subDirectories
             var = var/1000;
             
             %make clwvi 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'ICLDLWP', var, 'ICLDLWP', 4);
             
         elseif strcmp(varName, 'cli')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 cli = get_nc_variable(combinedFile, varName);
                 
@@ -355,16 +396,23 @@ for dir = subDirectories
             %no need to convert units since already in fraction unit????
             
             %make clwvi 3d (4d including time)
+            'ensuring 3D'
             cli = ensure3D(cli);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             cli = ensureCorrectDimensions(cli, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'CLDICE', cli, 'CLDICE', 4);
             
         elseif strcmp(varName, 'clw')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -376,15 +424,19 @@ for dir = subDirectories
             %no need to convert units since already in fraction unit????
             
             %make clwvi 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'CLDLIQ', var, 'CLDLIQ', 4);
             
             %calculate variable we want (cloud ice fraction)
+            'calculating cloud ice fraction'
             var = cli./(cli + var);
             
             %if cli + var close to 0, may take NaN values.  In that case,
@@ -392,6 +444,7 @@ for dir = subDirectories
             var(isnan(var)) = 0;
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'FICE', var, 'FICE', 4);
             
         elseif strcmp(varName, 'n2o')
@@ -401,7 +454,10 @@ for dir = subDirectories
                 varName = 'n2oglobal';
             end
             
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -414,16 +470,23 @@ for dir = subDirectories
             var = var * (molMassN2O/molMassAir);
             
             %make n2o 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writting data'
             overwrite_nc_variable(finalFile, 'N2O', var, 'N2O', 4);
             
         elseif strcmp(varName, 'tro3')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -436,19 +499,27 @@ for dir = subDirectories
             %conversion
             
             %make tro3 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %convert from plev to lev
+            'converting from plev to lev coordinates'
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'O3VMR', var, 'O3VMR', 4);
             
         elseif strcmp(varName, 'hus')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -458,24 +529,32 @@ for dir = subDirectories
             end
             
             %if necessary, convert units from g/kg to kg/kg
-            if(max(var) < 1)
-                var = var * 1000;
+            if(max(var) > 1)
+                var = var / 1000;
             end
             
             %make his 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %convert from plev to lev
+            'converting from plev to lev coordinates'
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'Q', var, 'Q', 4);
             
         elseif strcmp(varName, 'hur')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -488,19 +567,27 @@ for dir = subDirectories
             %units?????
             
             %make hur 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %convert from plev to lev
+            'converting from plev to lev coordinates'
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'RELHUM', var, 'RELHUM', 4);
             
         elseif strcmp(varName, 'ta')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -512,15 +599,19 @@ for dir = subDirectories
             %no unit conversion necessary, since already in K
             
             %make ta 3d (4d including time)
+            'ensuring 3D'
             var = ensure3D(var);
             
             %convert from plev to lev
+            'converting from plev to lev coordinates'
             var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'T', var, 'T', 4);
             
             
@@ -530,13 +621,17 @@ for dir = subDirectories
             %%%%%%%%%%%
             %Switching to 2D variables (3D including time):
             %%%%%%%%%%%
-            
+            'formatting 2D variables'
             
             
             
             
         elseif strcmp(varName, 'sic')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -549,16 +644,23 @@ for dir = subDirectories
             %units?????
             
             %make sic 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %overwrite variable
+            'writing data'
             overwrite_nc_variable(finalFile, 'ICEFRAC', var, 'ICEFRAC', 3);
             
         elseif strcmp(varName, 'sftlf')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -570,16 +672,23 @@ for dir = subDirectories
             %do units need to be converted from pct to frac?
             
             %make sftlf 2d
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writting data'
             overwrite_nc_variable(finalFile, 'LANDFRAC', var, 'LANDFRAC', 2);
             
         elseif strcmp(varName, 'ps')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -591,16 +700,23 @@ for dir = subDirectories
             %Units don't need to be converted from Pascals, right????
             
             %make ps 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writing data'
             overwrite_nc_variable(finalFile, 'PS', var, 'PS', 3);
             
         elseif strcmp(varName, 'ts')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -612,16 +728,23 @@ for dir = subDirectories
             %units don't need to be converted from K
             
             %make ts 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writing data'
             overwrite_nc_variable(finalFile, 'TS', var, 'TS', 3);
             
         elseif strcmp(varName, 'tauu')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -633,16 +756,23 @@ for dir = subDirectories
             %units don't need to be converted from Pa
             
             %make tauu 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writing data'
             overwrite_nc_variable(finalFile, 'TAUX', var, 'TAUX', 3);
             
         elseif strcmp(varName, 'tauv')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -654,16 +784,23 @@ for dir = subDirectories
             %units don't need to be converted from Pa
             
             %make tauv 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writing data'
             overwrite_nc_variable(finalFile, 'TAUY', var, 'TAUY', 3);
             
         elseif strcmp(varName, 'tas')
+            
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -675,12 +812,15 @@ for dir = subDirectories
             %units don't need to be converted from Pa
             
             %make tas 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writing data'
             overwrite_nc_variable(finalFile, 'TREFHT', var, 'TREFHT', 3);
             
         elseif strcmp(varName, 'snw')
@@ -689,7 +829,10 @@ for dir = subDirectories
                 varName = 'lwsnl';
             end
             
+            ['formatting ', varName]
+            
             %get data from combined file if it exists, else use fill value
+            'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 
@@ -701,12 +844,15 @@ for dir = subDirectories
             %units should already be in kg/m^2, so no need for conversion
             
             %make snw 2d (3d including time)
+            'ensuring 2D'
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
+            'ensuring dimensions correct size'
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
+            'writing data'
             overwrite_nc_variable(finalFile, 'SNOWHLND', var, 'SNOWHLND', 3);
             
         end

@@ -240,7 +240,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CFC11', 4);
+            overwrite_nc_variable(finalFile, 'CFC11', var, 'CFC11', 4);
             
         elseif strcmp(varName, 'cfc12')
             %if cfc12 doesn't exist, cfc12global should exist.  In that
@@ -268,7 +268,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CFC12', 4);
+            overwrite_nc_variable(finalFile, 'CFC12', var, 'CFC12', 4);
             
         elseif strcmp(varName, 'ch4')
             %if ch4 doesn't exist, ch4global should exist.  In that
@@ -296,7 +296,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CH4', 4);
+            overwrite_nc_variable(finalFile, 'CH4', var, 'CH4', 4);
             
         elseif strcmp(varName, 'cl')
             %get data from combined file if it exists, else use fill value
@@ -317,7 +317,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CLOUD', 4);
+            overwrite_nc_variable(finalFile, 'CLOUD', var, 'CLOUD', 4);
             
         elseif strcmp(varName, 'clwvi')
             
@@ -340,7 +340,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'ICLDLWP', 4);
+            overwrite_nc_variable(finalFile, 'ICLDLWP', var, 'ICLDLWP', 4);
             
         elseif strcmp(varName, 'cli')
             %get data from combined file if it exists, else use fill value
@@ -361,7 +361,7 @@ for dir = subDirectories
             cli = ensureCorrectDimensions(cli, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, cli, 'CLDICE', 4);
+            overwrite_nc_variable(finalFile, 'CLDICE', cli, 'CLDICE', 4);
             
         elseif strcmp(varName, 'clw')
             %get data from combined file if it exists, else use fill value
@@ -382,7 +382,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'CLDLIQ', 4);
+            overwrite_nc_variable(finalFile, 'CLDLIQ', var, 'CLDLIQ', 4);
             
             %calculate variable we want (cloud ice fraction)
             var = cli/(cli + var);
@@ -392,7 +392,7 @@ for dir = subDirectories
             var(isnan(var)) = 0;
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'FICE', 4);
+            overwrite_nc_variable(finalFile, 'FICE', var, 'FICE', 4);
             
         elseif strcmp(varName, 'n2o')
             %if n2o doesn't exist, n2oglobal should exist.  In that
@@ -420,7 +420,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'N2O', 4);
+            overwrite_nc_variable(finalFile, 'N2O', var, 'N2O', 4);
             
         elseif strcmp(varName, 'tro3')
             %get data from combined file if it exists, else use fill value
@@ -445,7 +445,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'O3VMR', 4);
+            overwrite_nc_variable(finalFile, 'O3VMR', var, 'O3VMR', 4);
             
         elseif strcmp(varName, 'hus')
             %get data from combined file if it exists, else use fill value
@@ -472,7 +472,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'Q', 4);
+            overwrite_nc_variable(finalFile, 'Q', var, 'Q', 4);
             
         elseif strcmp(varName, 'hur')
             %get data from combined file if it exists, else use fill value
@@ -497,7 +497,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'RELHUM', 4);
+            overwrite_nc_variable(finalFile, 'RELHUM', var, 'RELHUM', 4);
             
         elseif strcmp(varName, 'ta')
             %get data from combined file if it exists, else use fill value
@@ -521,7 +521,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, lev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'T', 4);
+            overwrite_nc_variable(finalFile, 'T', var, 'T', 4);
             
             
             
@@ -555,7 +555,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'ICEFRAC', 3);
+            overwrite_nc_variable(finalFile, 'ICEFRAC', var, 'ICEFRAC', 3);
             
         elseif strcmp(varName, 'sftlf')
             %get data from combined file if it exists, else use fill value
@@ -576,7 +576,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'LANDFRAC', 2);
+            overwrite_nc_variable(finalFile, 'LANDFRAC', var, 'LANDFRAC', 2);
             
         elseif strcmp(varName, 'ps')
             %get data from combined file if it exists, else use fill value
@@ -597,7 +597,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'PS', 3);
+            overwrite_nc_variable(finalFile, 'PS', var, 'PS', 3);
             
         elseif strcmp(varName, 'ts')
             %get data from combined file if it exists, else use fill value
@@ -618,7 +618,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TS', 3);
+            overwrite_nc_variable(finalFile, 'TS', var, 'TS', 3);
             
         elseif strcmp(varName, 'tauu')
             %get data from combined file if it exists, else use fill value
@@ -639,7 +639,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TAUX', 3);
+            overwrite_nc_variable(finalFile, 'TAUX', var, 'TAUX', 3);
             
         elseif strcmp(varName, 'tauv')
             %get data from combined file if it exists, else use fill value
@@ -660,7 +660,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TAUY', 3);
+            overwrite_nc_variable(finalFile, 'TAUY', var, 'TAUY', 3);
             
         elseif strcmp(varName, 'tas')
             %get data from combined file if it exists, else use fill value
@@ -681,7 +681,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'TREFHT', 3);
+            overwrite_nc_variable(finalFile, 'TREFHT', var, 'TREFHT', 3);
             
         elseif strcmp(varName, 'snw')
             %if snw doesn't exist, try to use lwsnl
@@ -707,7 +707,7 @@ for dir = subDirectories
             var = ensureCorrectDimensions(var, lat, lon, NaN);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'SNOWHLND', 3);
+            overwrite_nc_variable(finalFile, 'SNOWHLND', var, 'SNOWHLND', 3);
             
         end
     end

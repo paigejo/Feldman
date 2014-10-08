@@ -4,7 +4,8 @@
 %generate files with the prefix 'final' for each combined file in the
 %corresponding subdirectories.  Variables will be in form (time, lev, lat,
 %lon), (time, lat, lon), or (lat, lon).  The input files should have only 1
-%time coordinate.
+%time coordinate.  If a required input file doesn't exist, a
+%globally-uniform fill value is chosen (most often 0).
 
 %correcting variable formatting:
 %get_nc_variable -> ensure3D (or ensure2D) -> ensureCorrectDimensions -> unit conversion
@@ -22,10 +23,9 @@
 %RadInput
 
 function format_nc_files(dirPath, subDirectories)
-variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'clwvi', 'cli', ...
+variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'cli', ...
     'clw', 'n2o', 'tro3', 'hus', 'hur', 'ta', 'sic', 'sftlf', 'ps', ...
-    'sndLImon', 'sndOImon', 'rlus', 'rlut', 'ts', 'tauu', 'tauv', ...
-    'tas', 'sfcWind', 'sim', 'lwsnl', 'snw'};
+    'ts', 'tauu', 'tauv', 'tas', 'sfcWind', 'snw'};
 
 egLat = [-88.9277353522959, -87.5387052130272, -86.1414721015279, ...
     -84.7423855907142, -83.3425960440704, -81.9424662991732, ...
@@ -195,13 +195,16 @@ for dir = subDirectories
     finalFile = ['format', file(breaks(1):end)];
     system(['cp ', file, ' ', finalFile]);
     
-    %make sure every variable is in correct format:
-    
-    %%%get lon, lat, lev dimensions (and ilev?)
+    %get lon, lat, lev dimensions (and ilev?)
     lon = get_nc_variable(finalFile, 'lon');
     lat = get_nc_variable(finalFile, 'lat');
     lev = get_nc_variable(finalFile, 'lev');
+    
+    %get plev and variables for converting from plev
     plev = get_nc_variable(finalFile, 'plev');
+    ap = get_nc_variable(finalFile, 'ap');
+    b = get_nc_variable(finalFile, 'b');
+    ps = get_nc_variable(finalFile, 'ps');
     
     for v = variableList
         varName = v{1};
@@ -213,8 +216,14 @@ for dir = subDirectories
                 varName = 'cfc11global';
             end
             
-            %get cfc11 data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC11/molMassAir);
@@ -235,8 +244,14 @@ for dir = subDirectories
                 varName = 'cfc12global';
             end
             
-            %get cfc12 data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC12/molMassAir);
@@ -257,8 +272,14 @@ for dir = subDirectories
                 varName = 'ch4global';
             end
             
-            %get ch4 data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassCH4/molMassAir);
@@ -273,8 +294,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'CH4', 4);
             
         elseif strcmp(varName, 'cl')
-            %get cl data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %do units need to be converted from pct to frac???
             
@@ -286,12 +313,17 @@ for dir = subDirectories
             
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'CLOUD', 4);
-        
-        %elseif strcmp(varName, 'clwvi')
             
-        elseif strcmp(varName, 'snw')
-            %get clwvi data from combined file:
-            var = get_nc_variable(finalFile, varName);
+        elseif strcmp(varName, 'clwvi')
+            
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %convert from kg/m2 to g/m2
             var = var/1000;
@@ -306,8 +338,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'ICLDLWP', 4);
             
         elseif strcmp(varName, 'cli')
-            %get cli data from combined file:
-            cli = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %no need to convert units since already in fraction unit????
             
@@ -321,8 +359,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, cli, 'CLDICE', 4);
             
         elseif strcmp(varName, 'clw')
-            %get clwvi data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %no need to convert units since already in fraction unit????
             
@@ -352,8 +396,14 @@ for dir = subDirectories
                 varName = 'n2oglobal';
             end
             
-            %get n2o data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassN2O/molMassAir);
@@ -368,25 +418,39 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'N2O', 4);
             
         elseif strcmp(varName, 'tro3')
-            %NOT SURE IF THIS SHOULD BE A VMR!!!!
-            %get tro3 data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
-            %convert units from molar fraction to volume mixing ratio
-            %don't have to do anything for unit conversion, right???????
+            %molar fraction is volume mixing ratio so no need for
+            %conversion
             
             %make tro3 3d (4d including time)
             var = ensure3D(var);
+            
+            %convert from plev to lev
+            var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %overwrite variable
-            overwrite_nc_variable(finalFile, varName, var, 'O3VMR', 4); %NOT FINAL!!!!
+            overwrite_nc_variable(finalFile, varName, var, 'O3VMR', 4);
             
         elseif strcmp(varName, 'hus')
-            %get his data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %if necessary, convert units from g/kg to kg/kg
             if(max(var) < 1)
@@ -396,6 +460,9 @@ for dir = subDirectories
             %make his 3d (4d including time)
             var = ensure3D(var);
             
+            %convert from plev to lev
+            var = plev2lev(ap, b, ps, var, plev, lev);
+            
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
@@ -403,14 +470,23 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'Q', 4);
             
         elseif strcmp(varName, 'hur')
-            %get hur data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %no unit conversion necessary, since already in percentage
             %units?????
             
             %make hur 3d (4d including time)
             var = ensure3D(var);
+            
+            %convert from plev to lev
+            var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
@@ -419,13 +495,22 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'RELHUM', 4);
             
         elseif strcmp(varName, 'ta')
-            %get ta data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 287; %fill value is average global surface temperature in Kelvin
+                
+            end
             
             %no unit conversion necessary, since already in K
             
             %make ta 3d (4d including time)
             var = ensure3D(var);
+            
+            %convert from plev to lev
+            var = plev2lev(ap, b, ps, var, plev, lev);
             
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
@@ -433,20 +518,27 @@ for dir = subDirectories
             %overwrite variable
             overwrite_nc_variable(finalFile, varName, var, 'T', 4);
             
-            %also create effective cloud temperature variable
-            %IS THIS ACTUALLY NECESSARY OR DOES FILE AUTOMATICALLY USE TA
-            %AS CLOUD EFFECTIVE TEMPERATURE????
-            create_nc_variable(file, 't_cld', var, 4);
             
             
             
             
-            
-            
+            %%%%%%%%%%%
             %Switching to 2D variables (3D including time):
+            %%%%%%%%%%%
+            
+            
+            
+            
+            
         elseif strcmp(varName, 'sic')
-            %get hur data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %no unit conversion necessary, since already in fraction
             %units?????
@@ -461,8 +553,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'ICEFRAC', 3);
             
         elseif strcmp(varName, 'sftlf')
-            %get sftlf data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %do units need to be converted from pct to frac?
             
@@ -476,8 +574,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'LANDFRAC', 2);
             
         elseif strcmp(varName, 'ps')
-            %get ps data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 101325; %this is the mean sea-level pressure in Pa
+                
+            end
             
             %Units don't need to be converted from Pascals, right????
             
@@ -490,39 +594,15 @@ for dir = subDirectories
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'PS', 3);
             
-        elseif strcmp(varName, 'sndLImon')
-            %get snd data from combined file:
-            sndLImon = get_nc_variable(finalFile, varName);
-            
-            %make sndLImon 2d (3d including time)
-            var = ensure2D(var);
-            
-            %Use interpolation to make it exactly correct size
-            sndLImon = ensureCorrectDimensions(sndLImon, lat, lon, lev, egLat, egLon, egLev);
-            
-        elseif strcmp(varName, 'sndOImon')
-            %get snd data from combined file:
-            var = get_nc_variable(finalFile, varName);
-            
-            %make sndOImon 2d (3d including time)
-            var = ensure2D(var);
-            
-            %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
-            
-            %calculate snow height (or snow depth if underwater)
-            var = var + sndLImon;
-            
-            %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'SNOWHLND', 3); %Is this only over land????
-            
-        elseif strcmp(varName, 'rlus')
-            
-        elseif strcmp(varName, 'rlut')
-            
         elseif strcmp(varName, 'ts')
-            %get ts data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 287; %fill value is average global surface temperature in Kelvin
+                
+            end
             
             %units don't need to be converted from K
             
@@ -536,8 +616,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'TS', 3);
             
         elseif strcmp(varName, 'tauu')
-            %get tauu data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %units don't need to be converted from Pa
             
@@ -551,8 +637,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'TAUX', 3);
             
         elseif strcmp(varName, 'tauv')
-            %get tauv data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
             %units don't need to be converted from Pa
             
@@ -566,8 +658,14 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, varName, var, 'TAUY', 3);
             
         elseif strcmp(varName, 'tas')
-            %get tas data from combined file:
-            var = get_nc_variable(finalFile, varName);
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 287; %fill value is average global surface temperature in Kelvin
+                
+            end
             
             %units don't need to be converted from Pa
             
@@ -580,20 +678,31 @@ for dir = subDirectories
             %Write variable:
             overwrite_nc_variable(finalFile, varName, var, 'TREFHT', 3);
             
-        elseif strcmp(varName, 'sfcWind')
-            %get sfcWind data from combined file:
-            var = get_nc_variable(finalFile, varName);
+        elseif strcmp(varName, 'snw')
+            %if snw doesn't exist, try to use lwsnl
+            if ~nc_variable_exists(finalFile, varName)
+                varName = 'lwsnl';
+            end
             
-            %units don't need to be converted from Pa
+            %get data from combined file if it exists, else use fill value
+            if nc_variable_exists(finalFile, varName)
+                var = get_nc_variable(finalFile, varName);
+                
+            else
+                var = 0;
+                
+            end
             
-            %make sfcWind 2d (3d including time)
+            %units should already be in kg/m^2, so no need for conversion
+            
+            %make snw 2d (3d including time)
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
             var = ensureCorrectDimensions(var, lat, lon, lev, egLat, egLon, egLev);
             
             %Write variable:
-            overwrite_nc_variable(finalFile, varName, var, 'SFCWIND', 3); %Doesn't exist in b30 file!!!!
+            overwrite_nc_variable(finalFile, varName, var, 'SNOWHLND', 3);
             
         end
     end

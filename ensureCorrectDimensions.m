@@ -108,7 +108,7 @@ latScale = curLat(2)-curLat(1);
 minLat = min(curLat);
 lonScale = curLon(2)-curLon(1);
 minLon = min(curLon);
-if ~isnan(goalLev) && ~isnan(curLev)
+if ~isnan(curLev)
     levScale = curLev(2)-curLev(1);
     minLev = min(curLev);
 end
@@ -117,7 +117,7 @@ end
     end
 
 %do interpolation:
-if isnan(goalLev) || isnan(curLev)
+if isnan(curLev) && ndims(variable) == 2
     %%%if variable doesn't use levels:
     
     [ILon, ILat] = meshgrid(...
@@ -125,6 +125,17 @@ if isnan(goalLev) || isnan(curLev)
         coordTransform(goalLat, minLat, latScale));
     
     interpVar = interp2(variable, ILat, ILon);
+    
+elseif isnan(curlev) && ndims(variable) == 3
+    %In this case, do not interpolate across lev, only interpolate across
+    %other dimensions
+    
+    [ILon, ILat, ILev] = meshgrid(...
+        coordTransform(goalLon, minLon, lonScale), ...
+        coordTransform(goalLat, minLat, latScale), ...
+        1:length(curLev));
+    
+    interpVar = interp3(variable, ILon, ILat, ILev);
     
 else
     %%%if variable does use levels:

@@ -526,7 +526,7 @@ for dir = subDirectories
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, lev);
+                var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
             
             %overwrite variable
@@ -563,7 +563,7 @@ for dir = subDirectories
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, lev);
+                var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
             
             %overwrite variable
@@ -598,7 +598,7 @@ for dir = subDirectories
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, lev);
+                var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
             
             %overwrite variable
@@ -632,7 +632,7 @@ for dir = subDirectories
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, lev);
+                var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
             
             %overwrite variable

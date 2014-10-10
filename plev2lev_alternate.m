@@ -24,10 +24,10 @@ lev = lev + min(egLev);
 'gridding current values'
 [curLon, curLat, curLev] = ndgrid(1:size(plevVar, 1), 1:size(plevVar, 2), lev);
 'reshaping current value grid'
-curLonVec = reshape(curLon, numel(curLon), 1, 1);
-curLatVec = reshape(curLat, numel(curLat), 1, 1);
-curLevVec = reshape(curLev, numel(curLev), 1, 1);
-plevVarVec = reshape(plevVar, numel(plevVar), 1, 1);
+curLonVec = reshape(curLon, numel(curLon), 1);
+curLatVec = reshape(curLat, numel(curLat), 1);
+curLevVec = reshape(curLev, numel(curLev), 1);
+plevVarVec = reshape(plevVar, numel(plevVar), 1);
 
 %get rid of nans in current function values
 varNan = isnan(plevVarVec);
@@ -42,17 +42,17 @@ F = scatteredInterpolant([curLonVec, curLatVec, curLevVec], plevVarVec, 'linear'
 
 %determine points at which we want plevVar interpolation values
 'gridding interpolation points'
-[lon, lat, ~] = ndgrid(1:size(plevVar, 1), 1:size(plevVar, 2), 1:size(goalPressure, 3));
+[lon, lat, egLevGrid] = ndgrid(1:size(plevVar, 1), 1:size(plevVar, 2), egLev);
 'reshaping interpolation points'
-lonVec = reshape(lon, numel(lon), 1, 1);
-latVec = reshape(lat, numel(lat), 1, 1);
-goalPressureVec = reshape(goalPressure, numel(goalPressure), 1, 1);
+lonVec = reshape(lon, numel(lon), 1);
+latVec = reshape(lat, numel(lat), 1);
+egLevVec = reshape(egLevGrid, numel(egLevGrid), 1);
 
 %determine function values at interpolation points
 'interpolating'
-interpVar = F([lonVec, latVec, goalPressureVec]);
+interpVar = F([lonVec, latVec, egLevVec]);
 
 %reshape computed values into the output variable
 'reshaping interpolated variable'
-levVar = reshape(interpVar, size(plevVar, 1), size(plevVar, 2), length(goalLev));
+levVar = reshape(interpVar, size(plevVar, 1), size(plevVar, 2), length(egLev));
 end

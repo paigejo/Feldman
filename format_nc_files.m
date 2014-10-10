@@ -504,7 +504,7 @@ for dir = subDirectories
             
             %convert from plev to lev
             'converting from plev to lev coordinates'
-            var = plev2lev(ap, b, ps, var, plev, lev);
+            var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
             'ensuring dimensions correct size'
@@ -539,7 +539,7 @@ for dir = subDirectories
             
             %convert from plev to lev
             'converting from plev to lev coordinates'
-            var = plev2lev(ap, b, ps, var, plev, lev);
+            var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
             'ensuring dimensions correct size'
@@ -572,7 +572,7 @@ for dir = subDirectories
             
             %convert from plev to lev
             'converting from plev to lev coordinates'
-            var = plev2lev(ap, b, ps, var, plev, lev);
+            var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
             'ensuring dimensions correct size'
@@ -604,7 +604,7 @@ for dir = subDirectories
             
             %convert from plev to lev
             'converting from plev to lev coordinates'
-            var = plev2lev(ap, b, ps, var, plev, lev);
+            var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
             'ensuring dimensions correct size'

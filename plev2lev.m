@@ -21,9 +21,9 @@ curLonVec = curLonVec(~varNan, :);
 curLatVec = curLatVec(~varNan, :);
 curPlevVec = curPlevVec(~varNan, :);
 
-%generate interpolant using Delaunay triangulation, natural interpolation,
+%generate interpolant using Delaunay triangulation, linear interpolation,
 %linear extrapolation
-F = scatteredInterpolant([curLonVec, curLatVec, curPlevVec], plevVarVec, 'natural',  'linear');
+F = scatteredInterpolant([curLonVec, curLatVec, curPlevVec], plevVarVec, 'linear',  'linear');
 
 %determine points at which we want plevVar interpolation values
 [lon, lat, ~] = ndgrid(1:size(ps, 1), 1:size(ps, 2), 1:size(goalPressure, 3));

@@ -2,10 +2,13 @@
 %correct order, but the variable isn't the correct size and must be
 %interpolated.  Thus, the variable has a time, lon, lat, and lev dimension
 %if required and in the correct order, but not necessarily the correct
-%number of coordinates in each dimension.
+%number of coordinates in each dimension.  This function computes
+%interpolator after having taken out NaNs so as to not produce strange
+%results.
 
-%Note: the interpolation is linear assuming lon, lat, lev are equivalent to
-%Euclidean x, y, x dimensions.  This may cause some problems at the poles.
+%Note: the interpolation is linear assuming lon, lat, lev are locally
+%equivalent to Euclidean x, y, x dimensions.  This may cause some problems
+%at the poles.
 
 function interpVar = ensureCorrectDimensions(variable, curLat, curLon, curLev)
 
@@ -93,51 +96,77 @@ goalLev = [3.54463800000001, 7.38881350000001, 13.967214, 23.944625, ...
     510.455255000002, 600.524200000003, 696.796290000003, 787.702060000003, ...
     867.160760000001, 929.648875000002, 970.554830000001, 992.5561];
 
-%{
-  %commented out because having the same dimensions is not the same as having the same coords  
-%if dimensions are already correct, return variable
-if length(curLat) == length(goalLat) && length(curLon) == length(goalLon)
-    
-    if isnan(curLev) || length(curLev) == length(goalLev)
-        interpVar = variable;
-        return
-    end
-    
-end
-    
-%}
-
-%make functions for interpolation
-latScale = curLat(2)-curLat(1);
-minLat = min(curLat);
-lonScale = curLon(2)-curLon(1);
-minLon = min(curLon);
-if ~isnan(curLev)
-    levScale = curLev(1)-curLev(2); %(1) - (2) since lev in reverse order
-    minLev = min(curLev);
-end
-
 %do interpolation:
 if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     %%%if variable doesn't use levels:
     
-    [ILon, ILat] = ndgrid(goalLon, goalLat);
+    %compute interpolant training coordinates
+    [lonGrid latGrid varGrid] = ndgrid(curLon, curLat, variable);
+    lonVec = reshape(lonGrid, numel(lonGrid), 1);
+    latVec = reshape(latGrid, numel(latGrid), 1);
+    varVec = reshape(varGrid, numel(varGrid), 1);
     
-    interpVar = interpn(curLon, curLat, variable, ILon, ILat);
+    %get rid of NaNs
+    varNan = isnan(varVec);
+    lonVec = lonVec(~varNan);
+    latVec = latVec(~varNan);
+    varVec = verVec(~varNan);
+    
+    %compute interpolant
+    F = scatteredInterpolant([lonVec, latVec], varVec, 'linear', 'linear');
+    
+    %interpolate variable
+    [ILon, ILat] = ndgrid(goalLon, goalLat);
+    interpVar = F(ILon, ILat);
     
 elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
     %In this case, do not interpolate across lev, only interpolate across
     %other dimensions
     
-    [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, 1:size(variable, 3));
+    %compute interpolant training coordinates
+    [lonGrid latGrid varGrid levGrid] = ndgrid(curLon, curLat, 1:size(variable, 3), variable);
+    lonVec = reshape(lonGrid, numel(lonGrid), 1);
+    latVec = reshape(latGrid, numel(latGrid), 1);
+    levVec = reshape(levGrid, numel(levGrid), 1);
+    varVec = reshape(varGrid, numel(varGrid), 1);
     
-    interpVar = interpn(curLon, curLat, ILev, variable, ILon, ILat, ILev);
+    %get rid of NaNs
+    varNan = isnan(varVec);
+    lonVec = lonVec(~varNan);
+    latVec = latVec(~varNan);
+    levVec = levVec(~varNan);
+    varVec = verVec(~varNan);
+    
+    %compute interpolant
+    F = scatteredInterpolant([lonVec, latVec, levVec], varVec, 'linear', 'linear');
+    
+    %interpolate variable
+    [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, 1:size(variable, 3));
+    interpVar = F(ILon, ILat, ILev);
     
 else
-    %%%if variable does use levels:
-    [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, goalLev);
+    %if variable requires all 3 dimensions (lon, lat, lev) interpolated
     
-    interpVar = interpn(curLon, curLat, curLev, variable, ILon, ILat, ILev);
+    %compute interpolant training coordinates
+    [lonGrid latGrid varGrid levGrid] = ndgrid(curLon, curLat, curLev, variable);
+    lonVec = reshape(lonGrid, numel(lonGrid), 1);
+    latVec = reshape(latGrid, numel(latGrid), 1);
+    levVec = reshape(levGrid, numel(levGrid), 1);
+    varVec = reshape(varGrid, numel(varGrid), 1);
+    
+    %get rid of NaNs
+    varNan = isnan(varVec);
+    lonVec = lonVec(~varNan);
+    latVec = latVec(~varNan);
+    levVec = levVec(~varNan);
+    varVec = verVec(~varNan);
+    
+    %compute interpolant
+    F = scatteredInterpolant([lonVec, latVec, levVec], varVec, 'linear', 'linear');
+    
+    %interpolate variable
+    [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, goalLev);
+    interpVar = F(ILon, ILat, ILev);
 end
 
 end

@@ -23,7 +23,7 @@
 %RadInput
 
 function format_nc_files(dirPath, subDirectories)
-variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'cli', ...
+variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'clwvi', 'cli', ...
     'clw', 'n2o', 'tro3', 'hus', 'hur', 'ta', 'sic', 'sftlf', 'ps', ...
     'ts', 'tauu', 'tauv', 'tas', 'sfcWind', 'snw'};
 
@@ -209,6 +209,11 @@ for dir = subDirectories
     lon = get_nc_variable(combinedFile, 'lon');
     lat = get_nc_variable(combinedFile, 'lat');
     lev = get_nc_variable(combinedFile, 'lev');
+    
+    %convert lev to be on 0-1000 scale instead of 0-1 scale
+    if max(lev) < 1
+        lev = lev*1000;
+    end
     
     %get plev and variables for converting from plev
     plev = get_nc_variable(combinedFile, 'plev');

@@ -149,10 +149,9 @@ exampleFilePath = '~/Desktop/cmip5/b30-empty.nc';
             error('variable input to ensure3D is a vector, which should not happen');
             
         elseif dims == 2
+            %lev dimension must be missing
             
-            %add lev dimension as last dimension, then copy
-            %values along lev dimension
-            variable = dimshift(variable, -1);
+            %copy values along lev dimension
             variable = repmat(variable, [1, 1, goalLev]);
             
         elseif dims > 3

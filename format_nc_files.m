@@ -223,9 +223,10 @@ for dir = subDirectories
     for v = variableList
         varName = v{1};
         
-        'formatting 3D variables'
-        
         if strcmp(varName, 'cfc11')
+            
+            'formatting 3D variables'
+            
             %if cfc11 doesn't exist, cfc11global should exist.  In that
             %case, use that variable
             if ~nc_variable_exists(combinedFile, varName)
@@ -246,6 +247,10 @@ for dir = subDirectories
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC11/molMassAir);
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             'ensuring 3D'
             %make cfc11 3d (4d including time)
@@ -283,6 +288,10 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC12/molMassAir);
             
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
+            
             %make cfc12 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -319,6 +328,10 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassCH4/molMassAir);
             
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
+            
             %make ch4 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -347,7 +360,14 @@ for dir = subDirectories
                 
             end
             
-            %do units need to be converted from pct to frac???
+            %convert from pct to frac if necessary
+            if max(var(:)) > 2
+                var = var/100;
+            end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %make cl 3d (4d including time)
             'ensuring 3D'
@@ -377,8 +397,13 @@ for dir = subDirectories
                 
             end
             
-            %convert from kg/m2 to g/m2
-            var = var/1000;
+            %convert from kg/m2 to g/m2 if necessary
+            if max(var(:)) < 25
+                var = var*1000;
+            end
+            
+            %ensure greater than 0
+            var(var < 0) = 0;
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
@@ -408,7 +433,14 @@ for dir = subDirectories
                 
             end
             
-            %no need to convert units since already in fraction unit????
+            %make sure in kg/kg not g/kg
+            if max(var(:)) > .005
+                var = var/1000;
+            end
+            
+            %ensure between 0 and 1
+            var(var < 0) = 0;
+            var(var > 1) = 1;
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
@@ -438,7 +470,14 @@ for dir = subDirectories
                 
             end
             
-            %no need to convert units since already in fraction unit????
+            %make sure in kg/kg not g/kg
+            if max(var(:)) > .05
+                var = var/1000;
+            end
+            
+            %ensure between 0 and 1
+            var(var < 0) = 0;
+            var(var > 1) = 1;
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
@@ -457,10 +496,16 @@ for dir = subDirectories
             %calculate variable we want (cloud ice fraction)
             'calculating cloud ice fraction'
             var = cli./(cli + var);
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %if cli + var close to 0, may take NaN values.  In that case,
             %set to 0
             var(isnan(var)) = 0;
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -487,6 +532,10 @@ for dir = subDirectories
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassN2O/molMassAir);
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %make n2o 3d (4d including time)
             'ensuring 3D'
@@ -516,8 +565,14 @@ for dir = subDirectories
                 
             end
             
-            %molar fraction is volume mixing ratio so no need for
-            %conversion
+            %make sure in fraction units not pct
+            if max(var(:)) > .0005
+                var = var/100;
+            end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %make tro3 3d (4d including time)
             'ensuring 3D'
@@ -535,7 +590,7 @@ for dir = subDirectories
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'O3VMR', var, 'O3VMR', 4);
+            overwrite_nc_variable(finalFile, 'O3', var, 'O3', 4);
             
         elseif strcmp(varName, 'hus')
             
@@ -552,9 +607,13 @@ for dir = subDirectories
             end
             
             %if necessary, convert units from g/kg to kg/kg
-            if(max(var) > 1)
+            if(max(var(:)) > 1)
                 var = var / 1000;
             end
+            
+            %ensure values between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %make his 3d (4d including time)
             'ensuring 3D'
@@ -588,8 +647,14 @@ for dir = subDirectories
                 
             end
             
-            %no unit conversion necessary, since already in percentage
-            %units?????
+            %convert to percentage if necessary
+            if max(var(:)) < 2
+                var = var * 100;
+            end
+            
+            %make sure var between 0 and 100
+            var(var < 0) = 0;
+            var(var > 100) = 100;
             
             %make hur 3d (4d including time)
             'ensuring 3D'
@@ -669,8 +734,14 @@ for dir = subDirectories
                 
             end
             
-            %no unit conversion necessary, since already in fraction
-            %units?????
+            %make sure in fraction units not pct
+            if max(var(:)) > 2
+                var = var/100;
+            end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %make sic 2d (3d including time)
             'ensuring 2D'
@@ -700,7 +771,14 @@ for dir = subDirectories
                 
             end
             
-            %do units need to be converted from pct to frac?
+            %convert from pct to frac if necessary
+            if max(var(:)) > 2
+                var = var/100;
+            end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %make sftlf 2d
             'ensuring 2D'
@@ -730,7 +808,7 @@ for dir = subDirectories
                 
             end
             
-            %Units don't need to be converted from Pascals, right????
+            %Units don't need to be converted from Pascals, theoretically
             
             %make ps 2d (3d including time)
             'ensuring 2D'
@@ -885,6 +963,9 @@ for dir = subDirectories
             end
             
             %units should already be in kg/m^2, so no need for conversion
+            
+            %ensure bigger than 0
+            var(var < 0) = 0;
             
             %make snw 2d (3d including time)
             'ensuring 2D'

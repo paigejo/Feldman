@@ -113,42 +113,31 @@ minLat = min(curLat);
 lonScale = curLon(2)-curLon(1);
 minLon = min(curLon);
 if ~isnan(curLev)
-    levScale = curLev(2)-curLev(1);
+    levScale = curLev(1)-curLev(2); %(1) - (2) since lev in reverse order
     minLev = min(curLev);
 end
-    function goalVals = coordTransform(coords, curMin, curScale)
-        goalVals = (coords - curMin)/curScale;
-    end
 
 %do interpolation:
 if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     %%%if variable doesn't use levels:
     
-    [ILon, ILat] = ndgrid(...
-        coordTransform(goalLon, minLon, lonScale), ...
-        coordTransform(goalLat, minLat, latScale));
+    [ILon, ILat] = ndgrid(goalLon, goalLat);
     
-    interpVar = interpn(variable, ILon, ILat);
+    interpVar = interpn(curLon, curLat, variable, ILon, ILat);
     
 elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
     %In this case, do not interpolate across lev, only interpolate across
     %other dimensions
     
-    [ILon, ILat, ILev] = ndgrid(...
-        coordTransform(goalLon, minLon, lonScale), ...
-        coordTransform(goalLat, minLat, latScale), ...
-        1:length(curLev));
+    [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, 1:size(variable, 3));
     
-    interpVar = interpn(variable, ILon, ILat, ILev);
+    interpVar = interpn(curLon, curLat, ILev, variable, ILon, ILat, ILev);
     
 else
     %%%if variable does use levels:
-    [ILon, ILat, ILev] = ndgrid(...
-        coordTransform(goalLon, minLon, lonScale), ...
-        coordTransform(goalLat, minLat, latScale), ...
-        coordTransform(goalLev, minLev, levScale));
+    [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, goalLev);
     
-    interpVar = interpn(variable, ILon, ILat, ILev);
+    interpVar = interpn(curLon, curLat, curLev, variable, ILon, ILat, ILev);
 end
 
 end

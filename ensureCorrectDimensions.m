@@ -110,7 +110,7 @@ if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     varNan = isnan(varVec);
     lonVec = lonVec(~varNan);
     latVec = latVec(~varNan);
-    varVec = verVec(~varNan);
+    varVec = varVec(~varNan);
     
     %compute interpolant
     F = scatteredInterpolant([lonVec, latVec], varVec, 'linear', 'linear');
@@ -135,7 +135,7 @@ elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
     lonVec = lonVec(~varNan);
     latVec = latVec(~varNan);
     levVec = levVec(~varNan);
-    varVec = verVec(~varNan);
+    varVec = varVec(~varNan);
     
     %compute interpolant
     F = scatteredInterpolant([lonVec, latVec, levVec], varVec, 'linear', 'linear');
@@ -159,7 +159,7 @@ else
     lonVec = lonVec(~varNan);
     latVec = latVec(~varNan);
     levVec = levVec(~varNan);
-    varVec = verVec(~varNan);
+    varVec = varVec(~varNan);
     
     %compute interpolant
     F = scatteredInterpolant([lonVec, latVec, levVec], varVec, 'linear', 'linear');

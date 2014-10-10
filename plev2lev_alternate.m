@@ -22,7 +22,7 @@ lev = lev + min(egLev);
 
 %determine scatter points at which we have plevVar values
 'gridding current values'
-[curLon, curLat, curLev] = ndgrid(1:size(ps, 1), 1:size(ps, 2), lev);
+[curLon, curLat, curLev] = ndgrid(1:size(plevVar, 1), 1:size(plevVar, 2), lev);
 'reshaping current value grid'
 curLonVec = reshape(curLon, numel(curLon), 1, 1);
 curLatVec = reshape(curLat, numel(curLat), 1, 1);
@@ -42,7 +42,7 @@ F = scatteredInterpolant([curLonVec, curLatVec, curLevVec], plevVarVec, 'linear'
 
 %determine points at which we want plevVar interpolation values
 'gridding interpolation points'
-[lon, lat, ~] = ndgrid(1:size(ps, 1), 1:size(ps, 2), 1:size(goalPressure, 3));
+[lon, lat, ~] = ndgrid(1:size(plevVar, 1), 1:size(plevVar, 2), 1:size(goalPressure, 3));
 'reshaping interpolation points'
 lonVec = reshape(lon, numel(lon), 1, 1);
 latVec = reshape(lat, numel(lat), 1, 1);

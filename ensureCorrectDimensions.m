@@ -101,10 +101,10 @@ if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     %%%if variable doesn't use levels:
     
     %compute interpolant training coordinates
-    [lonGrid latGrid varGrid] = ndgrid(curLon, curLat, variable);
+    [lonGrid latGrid] = ndgrid(curLon, curLat);
     lonVec = reshape(lonGrid, numel(lonGrid), 1);
     latVec = reshape(latGrid, numel(latGrid), 1);
-    varVec = reshape(varGrid, numel(varGrid), 1);
+    varVec = reshape(variable, numel(variable), 1);
     
     %get rid of NaNs
     varNan = isnan(varVec);
@@ -124,11 +124,11 @@ elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
     %other dimensions
     
     %compute interpolant training coordinates
-    [lonGrid latGrid varGrid levGrid] = ndgrid(curLon, curLat, 1:size(variable, 3), variable);
+    [lonGrid latGrid levGrid] = ndgrid(curLon, curLat, 1:size(variable, 3));
     lonVec = reshape(lonGrid, numel(lonGrid), 1);
     latVec = reshape(latGrid, numel(latGrid), 1);
     levVec = reshape(levGrid, numel(levGrid), 1);
-    varVec = reshape(varGrid, numel(varGrid), 1);
+    varVec = reshape(variable, numel(variable), 1);
     
     %get rid of NaNs
     varNan = isnan(varVec);
@@ -148,11 +148,11 @@ else
     %if variable requires all 3 dimensions (lon, lat, lev) interpolated
     
     %compute interpolant training coordinates
-    [lonGrid latGrid varGrid levGrid] = ndgrid(curLon, curLat, curLev, variable);
+    [lonGrid latGrid levGrid] = ndgrid(curLon, curLat, curLev);
     lonVec = reshape(lonGrid, numel(lonGrid), 1);
     latVec = reshape(latGrid, numel(latGrid), 1);
     levVec = reshape(levGrid, numel(levGrid), 1);
-    varVec = reshape(varGrid, numel(varGrid), 1);
+    varVec = reshape(variable, numel(variable), 1);
     
     %get rid of NaNs
     varNan = isnan(varVec);

@@ -247,9 +247,11 @@ for dir = subDirectories
             %make cfc11 3d (4d including time)
             var = ensure3D(var);
             
-            'ensuring dimensions correct size'
             %Use interpolation to make it exactly correct size
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             'writing to output file'
             %overwrite variable
@@ -282,8 +284,10 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing to output file'
@@ -316,8 +320,10 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -344,8 +350,10 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -373,8 +381,10 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -401,8 +411,10 @@ for dir = subDirectories
             cli = ensure3D(cli);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            cli = ensureCorrectDimensions(cli, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                cli = ensureCorrectDimensions(cli, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -429,8 +441,10 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -475,8 +489,10 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writting data'
@@ -508,8 +524,10 @@ for dir = subDirectories
             var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -543,8 +561,10 @@ for dir = subDirectories
             var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -576,8 +596,10 @@ for dir = subDirectories
             var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -608,8 +630,10 @@ for dir = subDirectories
             var = plev2lev_alternate(var, plev);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, lev);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, lev);
+            end
             
             %overwrite variable
             'writing data'
@@ -649,8 +673,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %overwrite variable
             'writing data'
@@ -677,8 +703,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writting data'
@@ -705,8 +733,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writing data'
@@ -733,8 +763,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writing data'
@@ -761,8 +793,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writing data'
@@ -789,8 +823,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writing data'
@@ -817,8 +853,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writing data'
@@ -849,8 +887,10 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            'ensuring dimensions correct size'
-            var = ensureCorrectDimensions(var, lat, lon, NaN);
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                var = ensureCorrectDimensions(var, lat, lon, NaN);
+            end
             
             %Write variable:
             'writing data'

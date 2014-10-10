@@ -248,10 +248,6 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC11/molMassAir);
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             'ensuring 3D'
             %make cfc11 3d (4d including time)
             var = ensure3D(var);
@@ -261,6 +257,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             'writing to output file'
             %overwrite variable
@@ -288,10 +288,6 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC12/molMassAir);
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make cfc12 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -301,6 +297,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing to output file'
@@ -328,10 +328,6 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassCH4/molMassAir);
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make ch4 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -341,6 +337,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -365,10 +365,6 @@ for dir = subDirectories
                 var = var/100;
             end
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make cl 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -378,6 +374,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -402,9 +402,6 @@ for dir = subDirectories
                 var = var*1000;
             end
             
-            %ensure greater than 0
-            var(var < 0) = 0;
-            
             %make clwvi 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -414,6 +411,9 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
+            
+            %ensure greater than 0
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -438,10 +438,6 @@ for dir = subDirectories
                 var = var/1000;
             end
             
-            %ensure between 0 and 1
-            var(var < 0) = 0;
-            var(var > 1) = 1;
-            
             %make clwvi 3d (4d including time)
             'ensuring 3D'
             cli = ensure3D(cli);
@@ -451,6 +447,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 cli = ensureCorrectDimensions(cli, lat, lon, lev);
             end
+            
+            %ensure between 0 and 1
+            var(var < 0) = 0;
+            var(var > 1) = 1;
             
             %overwrite variable
             'writing data'
@@ -475,10 +475,6 @@ for dir = subDirectories
                 var = var/1000;
             end
             
-            %ensure between 0 and 1
-            var(var < 0) = 0;
-            var(var > 1) = 1;
-            
             %make clwvi 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -489,6 +485,10 @@ for dir = subDirectories
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
             
+            %ensure between 0 and 1
+            var(var < 0) = 0;
+            var(var > 1) = 1;
+            
             %overwrite variable
             'writing data'
             overwrite_nc_variable(finalFile, 'CLDLIQ', var, 'CLDLIQ', 4);
@@ -496,8 +496,6 @@ for dir = subDirectories
             %calculate variable we want (cloud ice fraction)
             'calculating cloud ice fraction'
             var = cli./(cli + var);
-            var(var > 1) = 1;
-            var(var < 0) = 0;
             
             %if cli + var close to 0, may take NaN values.  In that case,
             %set to 0
@@ -533,10 +531,6 @@ for dir = subDirectories
             %convert units from molar fraction to kg/kg
             var = var * (molMassN2O/molMassAir);
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make n2o 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -546,6 +540,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writting data'
@@ -570,10 +568,6 @@ for dir = subDirectories
                 var = var/100;
             end
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make tro3 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -587,6 +581,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -611,10 +609,6 @@ for dir = subDirectories
                 var = var / 1000;
             end
             
-            %ensure values between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make his 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -628,6 +622,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
+            
+            %ensure values between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -652,10 +650,6 @@ for dir = subDirectories
                 var = var * 100;
             end
             
-            %make sure var between 0 and 100
-            var(var < 0) = 0;
-            var(var > 100) = 100;
-            
             %make hur 3d (4d including time)
             'ensuring 3D'
             var = ensure3D(var);
@@ -669,6 +663,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
+            
+            %make sure var between 0 and 100
+            var(var < 0) = 0;
+            var(var > 100) = 100;
             
             %overwrite variable
             'writing data'
@@ -739,10 +737,6 @@ for dir = subDirectories
                 var = var/100;
             end
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make sic 2d (3d including time)
             'ensuring 2D'
             var = ensure2D(var);
@@ -752,6 +746,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %overwrite variable
             'writing data'
@@ -776,10 +774,6 @@ for dir = subDirectories
                 var = var/100;
             end
             
-            %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
-            
             %make sftlf 2d
             'ensuring 2D'
             var = ensure2D(var);
@@ -789,6 +783,10 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
+            
+            %ensure between 0 and 1
+            var(var > 1) = 1;
+            var(var < 0) = 0;
             
             %Write variable:
             'writting data'
@@ -964,9 +962,6 @@ for dir = subDirectories
             
             %units should already be in kg/m^2, so no need for conversion
             
-            %ensure bigger than 0
-            var(var < 0) = 0;
-            
             %make snw 2d (3d including time)
             'ensuring 2D'
             var = ensure2D(var);
@@ -976,6 +971,9 @@ for dir = subDirectories
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
+            
+            %ensure bigger than 0
+            var(var < 0) = 0;
             
             %Write variable:
             'writing data'

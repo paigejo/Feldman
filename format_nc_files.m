@@ -176,7 +176,7 @@ exampleFilePath = '~/Desktop/cmip5/b30.042a.cam2.h0.2010-12.nc';
         elseif numel(variable) == length(variable)
             error('variable input to ensure2D is a vector, which should not happen');
             
-        else
+        elseif dims > 2
             error('ensure2D is being called on a variable with more than 2 dimensions');
         end
         

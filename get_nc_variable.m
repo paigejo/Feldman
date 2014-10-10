@@ -20,7 +20,7 @@ varData = ncread(fileName, varName);
 
 if strcmp(varName, 'time') || strcmp(varName, 'lev') || ...
     strcmp(varName, 'ilev') || strcmp(varName, 'lat') || ...
-    strcmp(varName, 'lon')
+    strcmp(varName, 'lon') || strcmp(varName, 'plev')
     
     %then rearranging data dimensions is unnecessary
     return;
@@ -64,7 +64,7 @@ elseif nDims == 3
     permute(varData, inversePermute);
     
 elseif nDims == 4
-    %Then we have time, lev, lat, and lon (OR ILEV??????)
+    %Then we have time, lev (OR plev), lat, and lon
     
     %compute inverse permutation taking dim ordering back to normal
     [~, forwardPermute] = sort([-lonLoc, -latLoc, -levLoc, -timeLoc]);

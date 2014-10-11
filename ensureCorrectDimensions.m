@@ -6,6 +6,15 @@
 %interpolator after having taken out NaNs so as to not produce strange
 %results.
 
+%curLev input can be set to NaN if the user wants a 2D variable output that
+%is only interpolated on the lat and lon dimensions.  Additionally, if
+%curLev is set to a non-NaN single value, then it is treated as a fill
+%value, so NaN values in the input variable are set to curLev before
+%interpolation (used for interpolation of variables such as land fraction,
+%which do not require the lev dimension and where points where there is no
+%data, i.e. all values off of land, should be zero rather than extrapolated
+%from non-NaN values).  Usually, curLev would be set to zero.
+
 %Note: the interpolation is linear assuming lon, lat, lev are locally
 %equivalent to Euclidean x, y, x dimensions.  This may cause some problems
 %at the poles.
@@ -97,8 +106,9 @@ goalLev = [3.54463800000001, 7.38881350000001, 13.967214, 23.944625, ...
     867.160760000001, 929.648875000002, 970.554830000001, 992.5561];
 
 %do interpolation:
-if sum(isnan(curLev) >= 1) && ndims(variable) == 2
-    %%%if variable doesn't use levels:
+if ndims(variable) == 2 && (length(curLev) == 1) && isnan(curLev)
+    %variable doesn't use levels and missing values should be
+    %interpolated/extrapolated from other values
     
     %compute interpolant training coordinates
     [lonGrid latGrid] = ndgrid(curLon, curLat);
@@ -119,7 +129,28 @@ if sum(isnan(curLev) >= 1) && ndims(variable) == 2
     [ILon, ILat] = ndgrid(goalLon, goalLat);
     interpVar = F(ILon, ILat);
     
-elseif sum(isnan(curLev) >= 1) && ndims(variable) == 3
+elseif ndims(variable) == 2 && length(curLev) == 1
+    %variable doesn't use levels and missing values should be filled in
+    %with fill value given by curLev
+    
+    %compute interpolant training coordinates
+    [lonGrid latGrid] = ndgrid(curLon, curLat);
+    lonVec = reshape(lonGrid, numel(lonGrid), 1);
+    latVec = reshape(latGrid, numel(latGrid), 1);
+    varVec = reshape(variable, numel(variable), 1);
+    
+    %fill in missing values (NaNs) with fill value given by curLev
+    varNan = isnan(varVec);
+    varVec(varNan) = curLev;
+    
+    %compute interpolant
+    F = scatteredInterpolant([lonVec, latVec], varVec, 'linear', 'linear');
+    
+    %interpolate variable
+    [ILon, ILat] = ndgrid(goalLon, goalLat);
+    interpVar = F(ILon, ILat);
+    
+elseif ndims(variable) == 3 && (length(curLev) == 1) && isnan(curLev)
     %In this case, do not interpolate across lev, only interpolate across
     %other dimensions
     

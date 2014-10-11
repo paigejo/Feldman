@@ -121,6 +121,7 @@ molMassCFC11 = 163.1268; %g/mol
 molMassCFC12 = 175.1375; %g/mol
 molMassCH4 = 16.04; %g/mol
 molMassN2O = 44.013; %g/mol
+snowDensity = 500; %kg/m^3
 
 %exampleFilePath is the file path to an empty (expect for dimensions) b30
 %example file, which will be copied and the reformatted variables generated
@@ -563,10 +564,8 @@ for dir = subDirectories
                 
             end
             
-            %make sure in fraction units not pct
-            if max(var(:)) > .0005
-                var = var/100;
-            end
+            %convert from ppb to molar fraction
+            var = var*10^(-9);
             
             %make tro3 3d (4d including time)
             'ensuring 3D'
@@ -778,10 +777,11 @@ for dir = subDirectories
             'ensuring 2D'
             var = ensure2D(var);
             
-            %Use interpolation to make it exactly correct size
+            %Use interpolation to make it exactly correct size, use 0 as
+            %fill-value so values over ocean are set to 0
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, NaN);
+                var = ensureCorrectDimensions(var, lat, lon, 0);
             end
             
             %ensure between 0 and 1
@@ -960,16 +960,20 @@ for dir = subDirectories
                 
             end
             
-            %units should already be in kg/m^2, so no need for conversion
+            %convert from kg/m^2 to m assuming snow density fo 500kg/m^3.
+            %This may be a problematic assumption, especially when using
+            %lwsnl variable instead of snw
+            var = var/snowDensity;
             
             %make snw 2d (3d including time)
             'ensuring 2D'
             var = ensure2D(var);
             
-            %Use interpolation to make it exactly correct size
+            %Use interpolation to make it exactly correct size, fill in
+            %missing data over oceans with zeros
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, NaN);
+                var = ensureCorrectDimensions(var, lat, lon, 0);
             end
             
             %ensure bigger than 0

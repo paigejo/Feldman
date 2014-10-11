@@ -450,8 +450,8 @@ for dir = subDirectories
             end
             
             %ensure between 0 and 1
-            var(var < 0) = 0;
-            var(var > 1) = 1;
+            cli(cli < 0) = 0;
+            cli(cli > 1) = 1;
             
             %overwrite variable
             'writing data'

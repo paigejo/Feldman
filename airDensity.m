@@ -14,6 +14,10 @@ density = [13.47 12.25 11.12 10.07 9.093 8.194 7.364 6.601 5.900 5.258 ...
     4.671 4.135 1.948 .8891 .4008 .1841 .03996 .01027 .003097 .0008283 .0001846];
 density = density'/10;
 
+%sort them so pressure coords are increasing:
+[pressure I] = sort(pressure);
+density = density(I);
+
 %construct interpolator
-F = scatteredInterpolant(pressure, density);
+F = griddedInterpolant(pressure, density);
 end

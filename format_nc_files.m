@@ -114,7 +114,6 @@ egLev = [3.54463800000001, 7.38881350000001, 13.967214, 23.944625, ...
 goalLat = 128;
 goalLon = 256;
 goalLev = 26;
-goalILev = 27; %Is this necessary?
 
 molMassAir = 28.97; %g/mol
 molMassCFC11 = 163.1268; %g/mol
@@ -441,21 +440,21 @@ for dir = subDirectories
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
-            cli = ensure3D(cli);
+            Icli = ensure3D(cli);
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                cli = ensureCorrectDimensions(cli, lat, lon, lev);
+                Icli = ensureCorrectDimensions(Icli, lat, lon, lev);
             end
             
             %ensure between 0 and 1
-            cli(cli < 0) = 0;
-            cli(cli > 1) = 1;
+            Icli(Icli < 0) = 0;
+            Icli(Icli > 1) = 1;
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'CLDICE', cli, 'CLDICE', 4);
+            overwrite_nc_variable(finalFile, 'CLDICE', Icli, 'CLDICE', 4);
             
         elseif strcmp(varName, 'clw')
             
@@ -478,37 +477,74 @@ for dir = subDirectories
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
-            var = ensure3D(var);
+            Ivar = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, lev);
+                Ivar = ensureCorrectDimensions(Ivar, lat, lon, lev);
             end
             
             %ensure between 0 and 1
-            var(var < 0) = 0;
-            var(var > 1) = 1;
+            Ivar(Ivar < 0) = 0;
+            Ivar(Ivar > 1) = 1;
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'CLDLIQ', var, 'CLDLIQ', 4);
+            overwrite_nc_variable(finalFile, 'CLDLIQ', Ivar, 'CLDLIQ', 4);
             
             %calculate variable we want (cloud ice fraction)
             'calculating cloud ice fraction'
-            var = cli./(cli + var);
+            FICE = Icli./(Icli + Ivar);
             
             %if cli + var close to 0, may take NaN values.  In that case,
             %set to 0
-            var(isnan(var)) = 0;
+            FICE(isnan(FICE)) = 0;
             
             %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
+            FICE(FICE > 1) = 1;
+            FICE(FICE < 0) = 0;
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'FICE', var, 'FICE', 4);
+            overwrite_nc_variable(finalFile, 'FICE', FICE, 'FICE', 4);
+            
+            %now compute ICLDWP:
+            'formatting ICLDWP'
+            
+            %determine layer thickness as function of lon, lat, lev
+            'Determining Layer Thickness'
+            ap_bnds = ncread(combinedFile, 'ap_bnds');
+            b_bnds = ncread(combinedFile, 'b_bnds');
+            layerThickness = computeLayerThickness(ap_bnds, b_bnds, ps);
+            
+            %compute air densities
+            'computing air densities'
+            F = airDensity();
+            pressure = hybridSigma2Pressure(ap, b, ps);
+            pressureVec = reshape(pressure, numel(pressure), 1);
+            densityVec = F(pressureVec);
+            density = reshape(densityVec, size(cli, 1), size(cli, 2), size(cli, 3));
+            
+            %calculate ICLDWP
+            ICLDWP = (clw + cli) .* density .* layerThickness;
+            
+            %make clwvi 3d (4d including time)
+            'ensuring 3D'
+            ICLDWP = ensure3D(ICLDWP);
+            
+            %Use interpolation to make it exactly correct size
+            if nc_variable_exists(combinedFile, varName)
+                'ensuring dimensions correct size'
+                ICLDWP = ensureCorrectDimensions(ICLDWP, lat, lon, lev);
+            end
+            
+            %ensure bigger than 0
+            ICLDWP(ICLDWP < 0) = 0;
+            
+            %overwrite variable
+            'writing data'
+            overwrite_nc_variable(finalFile, 'ICLDWP', ICLDWP, 'ICLDWP', 4);
             
         elseif strcmp(varName, 'n2o')
             %if n2o doesn't exist, n2oglobal should exist.  In that

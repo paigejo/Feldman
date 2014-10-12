@@ -15,5 +15,5 @@ density = [13.47 12.25 11.12 10.07 9.093 8.194 7.364 6.601 5.900 5.258 ...
 density = density'/10;
 
 %construct interpolator
-F = scatteredInterpolator(pressure, density);
+F = scatteredInterpolant(pressure, density);
 end

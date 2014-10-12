@@ -16,8 +16,8 @@ function thickness = computeLayerThickness(ap_bnds, b_bnds, ps)
 H = 7000; %7 km
 
 %get pressure values 
-topPressure = hybridSigma2Pressure(ap_bnds(:, 2), b_bnds(:, 2), ps);
-bottomPressure = hybridSigma2Pressure(ap_bnds(:, 1), b_bnds(:, 1), ps);
+topPressure = hybridSigma2Pressure(ap_bnds(2, :), b_bnds(2, :), ps);
+bottomPressure = hybridSigma2Pressure(ap_bnds(1, :), b_bnds(1, :), ps);
 pressureRatios = topPressure./bottomPressure;
 
 thickness = -H*log(pressureRatios);

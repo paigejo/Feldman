@@ -1,6 +1,7 @@
 %returns an interpolator based on US standard atmosphere air properties
 %table found at
 %http://www.engineeringtoolbox.com/standard-atmosphere-d_604.html.
+%function takes pressure in Pa and returns air density in kg/m^3
 
 function F = airDensity()
 

@@ -487,7 +487,7 @@ for dir = subDirectories
             F = airDensity();
             pressure = hybridSigma2Pressure(ap, b, ps);
             pressureVec = reshape(pressure, numel(pressure), 1);
-            densityVec = F(pressureVec);
+            densityVec = F(pressureVec)*1000; %convert from kg/m3 to g/m3
             density = reshape(densityVec, size(cli, 1), size(cli, 2), size(cli, 3));
             
             %calculate ICLDWP

@@ -23,9 +23,9 @@
 %RadInput
 
 function format_nc_files(dirPath, subDirectories)
-variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'clwvi', 'cli', ...
-    'clw', 'n2o', 'tro3', 'hus', 'hur', 'ta', 'sic', 'sftlf', 'ps', ...
-    'ts', 'tauu', 'tauv', 'tas', 'sfcWind', 'snw'};
+variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'cli', 'clw', 'n2o', ...
+    'tro3', 'hus', 'hur', 'ta', 'sic', 'sftlf', 'ps', 'ts', 'tauu', ...
+    'tauv', 'tas', 'sfcWind', 'snw'};
 
 egLat = [-88.9277353522959, -87.5387052130272, -86.1414721015279, ...
     -84.7423855907142, -83.3425960440704, -81.9424662991732, ...
@@ -383,42 +383,6 @@ for dir = subDirectories
             'writing data'
             overwrite_nc_variable(finalFile, 'CLOUD', var, 'CLOUD', 4);
             
-        elseif strcmp(varName, 'clwvi')
-            
-            ['formatting ', varName]
-            
-            %get data from combined file if it exists, else use fill value
-            'reading data'
-            if nc_variable_exists(combinedFile, varName)
-                var = get_nc_variable(combinedFile, varName);
-                
-            else
-                var = 0;
-                
-            end
-            
-            %convert from kg/m2 to g/m2 if necessary
-            if max(var(:)) < 25
-                var = var*1000;
-            end
-            
-            %make clwvi 3d (4d including time)
-            'ensuring 3D'
-            var = ensure3D(var);
-            
-            %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
-                'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, lev);
-            end
-            
-            %ensure greater than 0
-            var(var < 0) = 0;
-            
-            %overwrite variable
-            'writing data'
-            overwrite_nc_variable(finalFile, 'ICLDLWP', var, 'ICLDLWP', 4);
-            
         elseif strcmp(varName, 'cli')
             
             ['formatting ', varName]
@@ -528,6 +492,11 @@ for dir = subDirectories
             
             %calculate ICLDWP
             ICLDWP = (clw + cli) .* density .* layerThickness;
+            
+            %convert from kg/m2 to g/m2 if necessary
+            if max(var(:)) < 25
+                var = var*1000;
+            end
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'

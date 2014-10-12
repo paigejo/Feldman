@@ -398,8 +398,8 @@ for dir = subDirectories
             end
             
             %make sure in kg/kg not g/kg
-            if max(var(:)) > .005
-                var = var/1000;
+            if max(cli(:)) > .005
+                cli = cli/1000;
             end
             
             %make clwvi 3d (4d including time)

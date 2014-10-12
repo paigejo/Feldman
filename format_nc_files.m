@@ -474,7 +474,7 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, 'FICE', FICE, 'FICE', 4);
             
             %now compute ICLDWP:
-            'formatting ICLDWP'
+            'formatting ICLDLWP'
             
             %determine layer thickness as function of lon, lat, lev
             'Determining Layer Thickness'
@@ -490,8 +490,8 @@ for dir = subDirectories
             densityVec = F(pressureVec)*1000; %convert from kg/m3 to g/m3
             density = reshape(densityVec, size(cli, 1), size(cli, 2), size(cli, 3));
             
-            %calculate ICLDWP
-            ICLDWP = (clw + cli) .* density .* layerThickness;
+            %calculate ICLDLWP
+            ICLDLWP = (clw + cli) .* density .* layerThickness;
             
             %convert from kg/m2 to g/m2 if necessary
             if max(var(:)) < 25
@@ -500,20 +500,20 @@ for dir = subDirectories
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
-            ICLDWP = ensure3D(ICLDWP);
+            ICLDLWP = ensure3D(ICLDLWP);
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                ICLDWP = ensureCorrectDimensions(ICLDWP, lat, lon, lev);
+                ICLDLWP = ensureCorrectDimensions(ICLDLWP, lat, lon, lev);
             end
             
             %ensure bigger than 0
-            ICLDWP(ICLDWP < 0) = 0;
+            ICLDLWP(ICLDLWP < 0) = 0;
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'ICLDWP', ICLDWP, 'ICLDWP', 4);
+            overwrite_nc_variable(finalFile, 'ICLDLWP', ICLDLWP, 'ICLDLWP', 4);
             
         elseif strcmp(varName, 'n2o')
             %if n2o doesn't exist, n2oglobal should exist.  In that

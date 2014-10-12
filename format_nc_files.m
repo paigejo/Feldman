@@ -463,41 +463,41 @@ for dir = subDirectories
             %get data from combined file if it exists, else use fill value
             'reading data'
             if nc_variable_exists(combinedFile, varName)
-                var = get_nc_variable(combinedFile, varName);
+                clw = get_nc_variable(combinedFile, varName);
                 
             else
-                var = 0;
+                clw = 0;
                 
             end
             
             %make sure in kg/kg not g/kg
-            if max(var(:)) > .05
-                var = var/1000;
+            if max(clw(:)) > .05
+                clw = clw/1000;
             end
             
             %make clwvi 3d (4d including time)
             'ensuring 3D'
-            Ivar = ensure3D(var);
+            Iclw = ensure3D(clw);
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                Ivar = ensureCorrectDimensions(Ivar, lat, lon, lev);
+                Iclw = ensureCorrectDimensions(Iclw, lat, lon, lev);
             end
             
             %ensure between 0 and 1
-            Ivar(Ivar < 0) = 0;
-            Ivar(Ivar > 1) = 1;
+            Iclw(Iclw < 0) = 0;
+            Iclw(Iclw > 1) = 1;
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'CLDLIQ', Ivar, 'CLDLIQ', 4);
+            overwrite_nc_variable(finalFile, 'CLDLIQ', Iclw, 'CLDLIQ', 4);
             
             %calculate variable we want (cloud ice fraction)
             'calculating cloud ice fraction'
-            FICE = Icli./(Icli + Ivar);
+            FICE = Icli./(Icli + Iclw);
             
-            %if cli + var close to 0, may take NaN values.  In that case,
+            %if cli + clw close to 0, may take NaN values.  In that case,
             %set to 0
             FICE(isnan(FICE)) = 0;
             

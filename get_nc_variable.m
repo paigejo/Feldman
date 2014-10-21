@@ -14,15 +14,18 @@
 %dimension in the matlab ordering (reverse ordering) of the variable is a
 %singleton one, it will be ignored.
 
+%NOTE4: if the variable requested is either a vector variable or has
+%unrecognized dimensions, it will not be permuted.  In this case, the order
+%of the dimensions will be the reverse of the nco ordering.
+
 function [varData, nDims] = get_nc_variable(fileName, varName)
 
+%get unpermuted variable
 varData = ncread(fileName, varName);
 
-if strcmp(varName, 'time') || strcmp(varName, 'lev') || ...
-    strcmp(varName, 'ilev') || strcmp(varName, 'lat') || ...
-    strcmp(varName, 'lon') || strcmp(varName, 'plev')
+%if variable is vector, don't permute it
+if numel(varData) == length(varData)
     
-    %then rearranging data dimensions is unnecessary
     return;
 end
 
@@ -46,14 +49,14 @@ latLoc = strfind(dimString, 'lat');
 lonLoc = strfind(dimString, 'lon');
 
 %permute dimensions into correct order:
-if nDims == 2 && (numel(varData) ~= length(varData))
+if nDims == 2 && (numel(varData) ~= length(varData)) && ~isempty(latLoc) && ~isempty(lonLoc)
     %then only lat and lon will be included
     
     if lonLoc < latLoc
         permute(varData, [2 1]);
     end
     
-elseif nDims == 3
+elseif nDims == 3 && ~isempty(timeLoc) && ~isempty(latLoc) && ~isempty(lonLoc)
     %Then only time, lat, and lon will be included?????????
     
     %compute inverse permutation taking dim ordering back to normal
@@ -63,7 +66,7 @@ elseif nDims == 3
     %permute dimensions to necessary order
     permute(varData, inversePermute);
     
-elseif nDims == 4
+elseif nDims == 4 && ~isempty(timeLoc) && ~isempty(levLoc) && ~isempty(latLoc) && ~isempty(lonLoc)
     %Then we have time, lev (OR plev), lat, and lon
     
     %compute inverse permutation taking dim ordering back to normal
@@ -72,6 +75,11 @@ elseif nDims == 4
     
     %permute dimensions to necessary order
     permute(varData, inversePermute);
+    
+else
+    %Variable dimensions aren't all recognized
+    
+    %in this case, do nothing, do not permute
 end
 
 end

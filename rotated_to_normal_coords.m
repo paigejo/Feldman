@@ -18,7 +18,7 @@
 
 %NOTE: sometimes the longitude in the rotated lat/lon file is shifted to a
 %different range than [0, 360].  In this case you should shift the lon
-%variable before calling this function.
+%variable before or after calling this function.
 
 function rotated_to_normal_coords(fileName, varName)
 

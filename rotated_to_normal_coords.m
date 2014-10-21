@@ -149,6 +149,6 @@ overwrite_nc_variable(outFile, 'lat', egLat, 'lat');
 overwrite_nc_variable(outFile, 'lon', egLon, 'lon');
 overwrite_nc_variable(outFile, newVarName, var, newVarName);
 
-varsToDelete = 'rlat,rlon,lat_vertices,lon_vertices,rlat_vertices,rlon_vertices,lat_bnds,lon_bnds,rlat_bnds,rlon_bnds';
+varsToDelete = 'i,j,i_vertices,j_vertices,i_bnds,j_bnds,rlat,rlon,lat_vertices,lon_vertices,rlat_vertices,rlon_vertices,lat_bnds,lon_bnds,rlat_bnds,rlon_bnds';
 delete_nc_variable(outFile, varsToDelete);
 end

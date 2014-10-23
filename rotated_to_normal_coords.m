@@ -107,7 +107,7 @@ rvar = get_nc_variable(fileName, varName);
 %convert lat and lon to vector data
 latVec = reshape(lat, numel(lat), 1);
 lonVec = reshape(lon, numel(lon), 1);
-coordVec = double([latVec, lonVec]);
+coordVec = double([lonVec, latVec]);
 varVec = reshape(rvar, numel(rvar), 1);
 
 %get rid of nans
@@ -121,10 +121,10 @@ coordVec = coordVec(~inputNans, :);
 F = scatteredInterpolant(coordVec, varVec(~inputNans), 'linear',  'nearest'); %or maybe nearest instead of none
 
 %create vector of interpolation coordinates
-[egLatGrid, egLonGrid] = ndgrid(egLat, egLon);
+[egLonGrid, egLatGrid] = ndgrid(egLon, egLat);
 
 %interpolate at the interpolation coordinates
-var = single(F(egLatGrid, egLonGrid));
+var = single(F(egLonGrid, egLatGrid));
 
 %make sure variable values are within maximum and minimum of data
 varMin = single(min(varVec(~varNan)));
@@ -132,10 +132,9 @@ varMax = single(max(varVec(~varNan)));
 var(var > varMax) = varMax;
 var(var < varMin) = varMin;
 
-%convert variable data to 3D matrix with (time, lat, lon) coords, singleton
+%convert variable data to 2D matrix with (lon, lat) coords, singleton
 %time dimension
-var = reshape(var, length(egLat), length(egLon));
-var = shiftdim(var, -1);
+var = reshape(var, length(egLon), length(egLat));
 
 %compute output file name
 breaks = strfind(fileName, '_');

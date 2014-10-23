@@ -9,6 +9,9 @@
 %sic file, or if there are multiple sic files, this function may produce
 %unwanted results.
 
+%NOTE: This function assumes the subdirectories contain files with the ts
+%variable that are not in rotated lat/lon coordinates.
+
 function unrotate_nc_files(dirPath, subDirectories)
 
 cd(dirPath);
@@ -19,12 +22,20 @@ for dir = subDirectories
     cd(dirStr);
     
     %get the sic file in this subdirectory
-    [~, files] = system('ls sic*');
-    file = strsplit(files, sprintf('\n'));
-    file = files;
+    [~, sicFile] = system('ls sic_*');
+    sicFile = strsplit(sicFile, sprintf('\n'));
+    
+    %get a file with correct lat/lon coordinates file in this subdirectory
+    %(such as ts)
+    [~, tsFile] = system('ls ts_*');
+    tsFile = strsplit(tsFile, sprintf('\n'));
+    
+    %get sample lat/lon data
+    egLat = get_nc_variable(tsFile, 'lat');
+    egLon = get_nc_variable(tsFile, 'lon');
     
     %unrotate sic variable
-    rotated_to_normal_coords(file, 'sic');
+    rotated_to_normal_coords(sicFile, 'sic', egLat, egLon);
     
     %cd back to parent folder
     cd(dirPath);

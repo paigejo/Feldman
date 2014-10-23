@@ -24,11 +24,13 @@ for dir = subDirectories
     %get the sic file in this subdirectory
     [~, sicFile] = system('ls sic_*');
     sicFile = strsplit(sicFile, sprintf('\n'));
+    sicFile = sicFile{1};
     
     %get a file with correct lat/lon coordinates file in this subdirectory
     %(such as ts)
     [~, tsFile] = system('ls ts_*');
     tsFile = strsplit(tsFile, sprintf('\n'));
+    tsFile = tsFile{1};
     
     %get sample lat/lon data
     egLat = get_nc_variable(tsFile, 'lat');

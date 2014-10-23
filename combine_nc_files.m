@@ -61,6 +61,7 @@ for dir = subDirectories
         end
         
         %combine file
+        ['adding ' f, ' to combined file']
         system(['/opt/local/bin/ncks -A ', f, ' ', combinedFName]);
     end
     

@@ -20,6 +20,9 @@
 %file exchange and may be different from the one built in to the current
 %version of MATLAB.
 
+%NOTE3: fixed variables (not dependent on time) are copied to each
+%subdirectory created.
+
 function timeDirectories = split_nc_files(dirPath)
 cd(dirPath);
 

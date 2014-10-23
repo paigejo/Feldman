@@ -5,15 +5,14 @@
 %Takes in the number of dimensions of the variable in case a singleton
 %time dimension has been removed.
 
-%NOTE1: the new data for the given variable will be double-precision.
+%NOTE1: assumes that the dimensions of the variable will either be (time),
+%(lat, lon), (time, lat, lon), or (time, lev, lat, lon) if the number of
+%dimensions of newData are respectively: vector, 2, 3, or 4.  If newData is
+%single element, no dimensions are used. The number of dimensions is
+%specified by dims, which can also be in the for {'dimName1', dimSize1,
+%'dimName2', dimSize2, ...} for custom dimensions.
 
-%NOTE2: assumes that the dimensions of the variable will either be in the
-%reverse order of (time), (lat, lon), (time, lat, lon), or (time, lev, lat,
-%lon) if the number of dimensions of newData are respectively: vector, 2,
-%3, or 4, since matlab operates in reverse order compared to nco.  If
-%newData is single element, no dimensions are used.
-
-%NOTE3: if variable already exists in file, nccreate returns error, and
+%NOTE2: if variable already exists in file, nccreate returns error, and
 %this function also returns an error.
 
 function create_nc_variable(fName, varName, varData, dims)
@@ -24,6 +23,9 @@ if numel(varData) == 1
     nccreate(fName, varName, 'Datatype', 'single', 'Format', 'classic');
     ncwrite(fName, varName, varData);
     return;
+    
+elseif iscell(dims)
+    dimCell = dims;
     
 elseif sum(strcmp(varName, {'lat', 'lon', 'lev', 'time'})) > 0
     dimCell = {varName, length(varData)};

@@ -1,6 +1,10 @@
 %This script takes the user through converting from many CMIP5 output
 %formats (so far, guaranteed to work for CanESM2) to the format required by
-%the satellite spectroscopic simulator.
+%the satellite spectroscopic simulator.  In order for the nco operators to
+%work within the MATLAB environment, you might need to add the 
+%line setenv('DYLD_LIBRARY_PATH',''); to your statup.m file in MATLAB's
+%startup folder.  If this file does not already exist, you should create
+%it.
 
 %STEP 1: put all the variables for a given model and time period in a
 %single directory.  Adjust the directory below to be your own directory.

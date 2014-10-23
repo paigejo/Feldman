@@ -11,9 +11,11 @@
 %NOTE2: assumes that the dimensions of the variable will either be (time),
 %(lat, lon), (time, lat, lon), or (time, lev, lat, lon) if the number of
 %dimensions of newData are respectively: vector, 2, 3, or 4.  If newData is
-%single element, no dimensions are used.
+%single element, no dimensions are used. The number of dimensions is
+%specified by dims, which can also be in the for {'dimName1', dimSize1,
+%'dimName2', dimSize2, ...} for custom dimensions.
 
-%NOTE3: I think MATLAB orders dimensions in reverse order from ncdump
+%NOTE3: MATLAB orders dimensions in reverse order from ncdump
 
 function overwrite_nc_variable(fName, varName, newData, newName, dims)
 

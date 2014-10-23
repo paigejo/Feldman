@@ -145,9 +145,9 @@ outFile = [varName, 'Unrotated', fileName(breaks(1):end)];
 system(['cp ', fileName, ' ', outFile]);
 newVarName = [varName, 'Unrotated'];
 delete_nc_variable(outFile, varName);
-overwrite_nc_variable(outFile, 'lat', egLat, 'lat');
-overwrite_nc_variable(outFile, 'lon', egLon, 'lon');
-overwrite_nc_variable(outFile, newVarName, var, newVarName);
+overwrite_nc_variable(outFile, 'lat', egLat, 'lat', 1);
+overwrite_nc_variable(outFile, 'lon', egLon, 'lon', 1);
+overwrite_nc_variable(outFile, newVarName, var, newVarName, 3);
 
 varsToDelete = 'i,j,i_vertices,j_vertices,i_bnds,j_bnds,rlat,rlon,lat_vertices,lon_vertices,rlat_vertices,rlon_vertices,lat_bnds,lon_bnds,rlat_bnds,rlon_bnds';
 delete_nc_variable(outFile, varsToDelete);

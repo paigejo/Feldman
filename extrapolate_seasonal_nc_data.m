@@ -35,7 +35,7 @@ for fid = 1:length(files)
             variable = repmat(variable, [length(time)/12, ones(ndims(variable) - 1, 1)]);
             
             %overwrite variable
-            overwrite_nc_variable(file, varName, variable, varName);
+            overwrite_nc_variable(file, varName, variable, varName, 4);
             
         elseif ndims(variable) == 2 && (length(variable) ~= numel(variable))
             
@@ -46,7 +46,7 @@ for fid = 1:length(files)
             variable = repmat(variable, [length(time), ones(ndims(variable) - 1, 1)]);
             
             %overwrite variable
-            overwrite_nc_variable(file, varName, variable, varName);
+            overwrite_nc_variable(file, varName, variable, varName, 4);
             
         elseif ndims(variable) == 3 && (size(variable, 1) == 1)
             
@@ -54,7 +54,7 @@ for fid = 1:length(files)
             variable = repmat(variable, [length(time), ones(ndims(variable) - 1, 1)]);
             
             %overwrite variable
-            overwrite_nc_variable(file, varName, variable, varName);
+            overwrite_nc_variable(file, varName, variable, varName, 4);
             
         end
     end

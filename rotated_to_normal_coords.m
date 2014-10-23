@@ -1,13 +1,12 @@
 %This function will convert the given variable named varName from rotated
 %latitude and longitude coordinates to normal latitude and longitude
-%coordinates using Delaunay triangularization (linear) interpolation and
-%nearest neighbor extrapolation.  This function assumes the data for the
-%given variable is already limited to a single time step.  Output nc file
-%has the same name as the original, but with [varName, 'Unrotated'] as the
-%file name prefix instead of just varName.  Variables egLat and egLon are
-%the latitude and longitude vectors the user wants interpolated variable
-%values at (interpolated coordinates will be cross-product of egLon with
-%egLat).
+%coordinates using Delaunay triangularization (linear) interpolation and no
+%extrapolation.  This function assumes the data for the given variable is
+%already limited to a single time step.  Output nc file has the same name
+%as the original, but with [varName, 'Unrotated'] as the file name prefix
+%instead of just varName.  Variables egLat and egLon are the latitude and
+%longitude vectors the user wants interpolated variable values at
+%(interpolated coordinates will be cross-product of egLon with egLat).
 
 %This function assumes the given variable is 2D (3D including time), and
 %only has data for 1 timestep in the given file
@@ -118,7 +117,7 @@ inputNans = latNan | lonNan | varNan;
 coordVec = coordVec(~inputNans, :);
 
 %generate interpolant using Delaunay triangularization
-F = scatteredInterpolant(coordVec, varVec(~inputNans), 'linear',  'nearest'); %or maybe nearest instead of none
+F = scatteredInterpolant(coordVec, varVec(~inputNans), 'linear',  'none'); %or maybe nearest instead of none
 
 %create vector of interpolation coordinates
 [egLonGrid, egLatGrid] = ndgrid(egLon, egLat);

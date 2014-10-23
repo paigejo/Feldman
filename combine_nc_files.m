@@ -34,16 +34,34 @@ for dir = subDirectories
     fileRoot = file(breaks(1):end);
     
     %find highest a variable with all necessary dimensions (e.g. clw variable)
-    isCLW = strncmp(files, 'clw', 3);
+    isCLW = strncmp(files, 'clw_', 4);
     clwFile = files{isCLW};
     
     %initialize combined file for this subdirectory
     combinedFName = ['combined', fileRoot];
     system(['cp ', clwFile, ' ', combinedFName]);
     
+    %check if sic data was unrotated (in which case the original sic file
+    %won't be added to the combined file, only the unrotated will be)
+    if sum(strncmp(files, 'sicUnrotated_', 13)) == 1
+        unrotated = 1;
+        
+    else
+        unrotated = 0;
+    end
+    
     %add information from all files to it:
     for file = files
-        system(['/opt/local/bin/ncks -A ', file{1}, ' ', combinedFName]);
+        f = file{1};
+        
+        %skip sic file if sicUnrotated file was generated
+        if strncmp(f, 'sic_', 4) && unrotated
+            continue;
+            
+        end
+        
+        %combine file
+        system(['/opt/local/bin/ncks -A ', f, ' ', combinedFName]);
     end
     
     %cd back to parent folder

@@ -20,6 +20,10 @@
 %different range than [0, 360].  In this case you should shift the lon
 %variable before or after calling this function.
 
+%NOTE: because interpolation and extrapolation is performed, there are
+%values over land that should be set to 0.  This is performed in
+%format_nc_files.
+
 function rotated_to_normal_coords(fileName, varName)
 
 %Here's the correct latitude and longitude coordinates to interpolate at

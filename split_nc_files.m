@@ -65,7 +65,13 @@ for fid = 1:length(files)
     
     %%%now do the splitting and putting in the correct folder:
     for T = times
-        system(['/opt/local/bin/ncks -d time,', T{1}, ',', T{1},' ', file, ' ', T{1}, '/', fileStrRoot, T{1}, '.nc']);
+        %if sftlf file, don't split, simply copy into the time directories
+        if strcmp(fileStrRoot, 'sftlf')
+            system(['cp ', file, ' ', T{1}]);
+            
+        else
+            system(['/opt/local/bin/ncks -d time,', T{1}, ',', T{1},' ', file, ' ', T{1}, '/', fileStrRoot, T{1}, '.nc']);
+        end
     end
 end
 

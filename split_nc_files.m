@@ -53,7 +53,7 @@ for fid = 1:length(files)
         
         %%%make folders:
         for t = 0:(length(times)-1)
-            system(['mkdir ', num2str(t)]);
+            system(['mkdir ', num2str(times{t+1})]);
         end
     end
     

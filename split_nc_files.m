@@ -68,7 +68,7 @@ for fid = 1:length(files)
         tStr = num2str(t);
         
         %if sftlf file, don't split, simply copy into the time directories
-        if strcmp(fileStrRoot, 'sftlf')
+        if strncmp(fileStrRoot, 'sftlf', 5)
             system(['cp ', file, ' ', tStr, '/']);
             
         else

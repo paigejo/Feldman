@@ -52,8 +52,8 @@ for fid = 1:length(files)
         times = strsplit(commaTimes, ', ');
         
         %%%make folders:
-        for TStr = times
-            system(['mkdir ', TStr{1}]);
+        for t = 0:(length(times)-1)
+            system(['mkdir ', t]);
         end
     end
     
@@ -64,13 +64,14 @@ for fid = 1:length(files)
     fileStrRoot = file(1:breaks(end));
     
     %%%now do the splitting and putting in the correct folder:
-    for T = times
+    for t = 0:(length(times)-1)
+        
         %if sftlf file, don't split, simply copy into the time directories
         if strcmp(fileStrRoot, 'sftlf')
-            system(['cp ', file, ' ', T{1}]);
+            system(['cp ', file, ' ', t, '/']);
             
         else
-            system(['/opt/local/bin/ncks -d time,', T{1}, ',', T{1},' ', file, ' ', T{1}, '/', fileStrRoot, T{1}, '.nc']);
+            system(['/opt/local/bin/ncks -d time,', t, ',', t,' ', file, ' ', t, '/', fileStrRoot, times{t}, '.nc']);
         end
     end
 end

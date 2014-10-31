@@ -37,9 +37,11 @@ overwrite_nc_variable(sicFile, 'lon', sicLon, 'lon', {'i', size(sicLon, 1), 'j',
 %dataDir directory is about to get very cluttered, with one directory for
 %each time step.  Run the split_nc_files.m function to create directories
 %for each timestep such that variables in a directory for a timestep only
-%contain data for that timestep
+%contain data for that timestep.  Save the timeDirectories variable in case
+%you have to quit and come back to this process later.
 
 timeDirectories = split_nc_files(dataDir);
+save('timeDirectories.mat', timeDirectories);
 
 %STEP 5: Rotate sic lat/lon coordinates, if necessary.  Before running this
 %operation check to make sure the lon/lat coordinates are actually rotated.

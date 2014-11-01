@@ -24,6 +24,8 @@ for dir = subDirectories
     
     cd(dirStr);
     
+    ['combining files in ', dirStr]
+    
     %get the files in this subdirectory
     [~, files] = system('ls');
     files = strsplit(files, sprintf('\n'));

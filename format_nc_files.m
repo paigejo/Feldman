@@ -152,7 +152,7 @@ exampleFilePath = '~/Desktop/cmip5/b30-empty.nc';
             %lev dimension must be missing
             
             %copy values along lev dimension
-            variable = repmat(variable, [1, 1, goalLev]);
+            variable = repmat(variable, [1, 1, lev]);
             
         elseif dims > 3
             error('ensure3D is being called on a variable with more than 3 dimensions');

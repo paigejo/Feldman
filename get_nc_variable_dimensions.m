@@ -12,6 +12,6 @@ startI = strfind(ncdump, [varName, '(']) + length(varName) + 1;
 endIs = strfind(ncdump(startI:end), ')');
 endI = endIs(1) - 2 + startI;
 dimString = lower(ncdump(startI:endI));
-dimNames = strsplit(dimString, ' ');
+dimNames = strsplit(dimString, ', ');
 
 end

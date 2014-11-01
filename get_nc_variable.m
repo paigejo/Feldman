@@ -39,7 +39,7 @@ startI = strfind(ncdump, [varName, '(']) + length(varName) + 1;
 endIs = strfind(ncdump(startI:end), ')');
 endI = endIs(1) - 2 + startI;
 dimString = lower(ncdump(startI:endI));
-dims = strsplit(dimString, ' ');
+dims = strsplit(dimString, ', ');
 nDims = numel(dims);
 
 %determine dimension ordering

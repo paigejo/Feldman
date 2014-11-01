@@ -17,6 +17,9 @@
 
 function create_nc_variable(fName, varName, varData, dims)
 
+%ensure varData is in single precision
+varData = single(varData);
+
 %determine number of dimensions that exists and thereby infer which
 %dimensions are which
 if numel(varData) == 1

@@ -4,6 +4,9 @@
 %lat/lon coordinates, i.e. they match with the lat/lon coordinates of ps.
 function levVar = plev2lev(ap, b, ps, plevVar, plev, goalLev)
 
+%ensure variable is in double precision
+plevVar = double(plevVar);
+
 %determine pressures values at which we want plevVar values.  Note:
 %goalPressure will be 3D in lon, lat, and lev
 goalPressure = hybridSigma2Pressure(ap, b, ps);

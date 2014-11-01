@@ -16,6 +16,9 @@ egLev = [3.54463800000001, 7.38881350000001, 13.967214, 23.944625, ...
     510.455255000002, 600.524200000003, 696.796290000003, 787.702060000003, ...
     867.160760000001, 929.648875000002, 970.554830000001, 992.5561];
 
+%convert to double for interpolation
+plevVar = double(plevVar);
+
 %transform coordinates to hybrid sigma coordiantes corresponding to egLev
 lev = plev*(max(egLev) - min(egLev))/(max(plev) - min(plev));
 lev = lev + min(egLev);

@@ -219,7 +219,4 @@ else
     interpVar = F(ILon, ILat, ILev);
 end
 
-%convert data back to single point precision
-interpVar = single(interpVar);
-
 end

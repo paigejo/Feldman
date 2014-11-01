@@ -843,7 +843,7 @@ for dir = subDirectories
             overwrite_nc_variable(finalFile, 'LANDFRAC', var, 'LANDFRAC', 2);
             
             %set ICEFRAC so that is only has values over ocean
-            sic(var == 1) = 0;
+            sic(var > .9) = 0;
             
             %write sic
             overwrite_nc_variable(finalFile, 'ICEFRAC', sic, 'ICEFRAC', 3);

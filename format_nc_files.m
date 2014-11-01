@@ -216,10 +216,20 @@ for dir = subDirectories
     
     %get plev and variables for converting from plev
     plev = get_nc_variable(combinedFile, 'plev');
-    ap = get_nc_variable(combinedFile, 'ap');
+    
+    if nc_variable_exists(combinedFile, 'ap')
+        ap = get_nc_variable(combinedFile, 'ap');
+        
+    else
+        a = get_nc_variable(combinedFile, 'a');
+        p0 = get_nc_variable(combinedFile, 'p0');
+        ap = a*p0;
+    end
+    
     b = get_nc_variable(combinedFile, 'b');
     ps = get_nc_variable(combinedFile, 'ps');
     
+    %begin formatting for each variable in the combined file
     for v = variableList
         varName = v{1};
         

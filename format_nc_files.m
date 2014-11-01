@@ -24,8 +24,8 @@
 
 function format_nc_files(dirPath, subDirectories)
 variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'cli', 'clw', 'n2o', ...
-    'tro3', 'hus', 'hur', 'ta', 'sic', 'sftlf', 'ps', 'ts', 'tauu', ...
-    'tauv', 'tas', 'sfcWind', 'snw'};
+    'tro3', 'hus', 'hur', 'ta', 'sicUnrotated', 'sftlf', 'ps', 'ts', ...
+    'tauu', 'tauv', 'tas', 'sfcWind', 'snw'};
 
 egLat = [-88.9277353522959, -87.5387052130272, -86.1414721015279, ...
     -84.7423855907142, -83.3425960440704, -81.9424662991732, ...
@@ -760,12 +760,19 @@ for dir = subDirectories
             
             
             
-        elseif strcmp(varName, 'sic')
-            
-            ['formatting ', varName]
+        elseif strcmp(varName, 'sicUnrotated')
             
             %get data from combined file if it exists, else use fill value
             'reading data'
+            
+            %if sicUnrotated doesn't exist, sic should exist.  In that
+            %case, use that variable
+            if ~nc_variable_exists(combinedFile, varName)
+                varName = 'sic';
+            end
+            
+            ['formatting ', varName]
+            
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
                 

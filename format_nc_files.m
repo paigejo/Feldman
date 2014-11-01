@@ -581,9 +581,11 @@ for dir = subDirectories
             'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
+                convert = 1; %convert from plev to lev
                 
             else
                 var = 0;
+                convert = 0;
                 
             end
             
@@ -594,9 +596,13 @@ for dir = subDirectories
             'ensuring 3D'
             var = ensure3D(var);
             
-            %convert from plev to lev
-            'converting from plev to lev coordinates'
-            var = plev2lev_alternate(var, plev);
+            %convert from plev to lev if necessary
+            usesPLev = sum(strcmp(get_nc_variable_dimensions(combinedFile, varName), 'plev')) == 1;
+            if convert && usesPLev
+                'converting from plev to lev coordinates'
+                var = plev2lev_alternate(var, plev);
+                
+            end
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
@@ -620,9 +626,11 @@ for dir = subDirectories
             'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
+                convert = 1; %convert from plev to lev
                 
             else
                 var = 0;
+                convert = 0;
                 
             end
             
@@ -635,9 +643,13 @@ for dir = subDirectories
             'ensuring 3D'
             var = ensure3D(var);
             
-            %convert from plev to lev
-            'converting from plev to lev coordinates'
-            var = plev2lev_alternate(var, plev);
+            %convert from plev to lev if necessary
+            usesPLev = sum(strcmp(get_nc_variable_dimensions(combinedFile, varName), 'plev')) == 1;
+            if convert && usesPLev
+                'converting from plev to lev coordinates'
+                var = plev2lev_alternate(var, plev);
+                
+            end
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
@@ -661,9 +673,11 @@ for dir = subDirectories
             'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
+                convert = 1; %convert from plev to lev
                 
             else
                 var = 0;
+                convert = 0;
                 
             end
             
@@ -676,9 +690,13 @@ for dir = subDirectories
             'ensuring 3D'
             var = ensure3D(var);
             
-            %convert from plev to lev
-            'converting from plev to lev coordinates'
-            var = plev2lev_alternate(var, plev);
+            %convert from plev to lev if necessary
+            usesPLev = sum(strcmp(get_nc_variable_dimensions(combinedFile, varName), 'plev')) == 1;
+            if convert && usesPLev
+                'converting from plev to lev coordinates'
+                var = plev2lev_alternate(var, plev);
+                
+            end
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
@@ -702,9 +720,11 @@ for dir = subDirectories
             'reading data'
             if nc_variable_exists(combinedFile, varName)
                 var = get_nc_variable(combinedFile, varName);
+                convert = 1; %convert from plev to lev
                 
             else
                 var = 287; %fill value is average global surface temperature in Kelvin
+                convert = 0;
                 
             end
             
@@ -714,9 +734,13 @@ for dir = subDirectories
             'ensuring 3D'
             var = ensure3D(var);
             
-            %convert from plev to lev
-            'converting from plev to lev coordinates'
-            var = plev2lev_alternate(var, plev);
+            %convert from plev to lev if necessary
+            usesPLev = sum(strcmp(get_nc_variable_dimensions(combinedFile, varName), 'plev')) == 1;
+            if convert && usesPLev
+                'converting from plev to lev coordinates'
+                var = plev2lev_alternate(var, plev);
+                
+            end
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)

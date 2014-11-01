@@ -63,7 +63,7 @@ combine_nc_files(dataDir, timeDirectories);
 %specified subdirectories, such as unit conversion, interpolation,
 %dimension permutation, calculating variables based on other variables, and
 %more.  The output file has the prefix 'formatted' instead of a normal
-%variable name as a prefix.
+%variable name as a prefix.  Note: this step can take overnight to run.
 
 format_nc_files(dataDir, timeDirectories);
 

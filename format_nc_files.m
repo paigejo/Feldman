@@ -185,7 +185,7 @@ exampleFilePath = '~/Desktop/cmip5/b30-empty.nc';
 
 for dir = subDirectories
     dirName = dir{1};
-    ['opening ' dirName]
+    ['formatting files in ', dirName, ' directory']
     
     %open subdirectory
     cd(dirPath);

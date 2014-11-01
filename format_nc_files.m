@@ -774,35 +774,35 @@ for dir = subDirectories
             ['formatting ', varName]
             
             if nc_variable_exists(combinedFile, varName)
-                var = get_nc_variable(combinedFile, varName);
+                sic = get_nc_variable(combinedFile, varName);
                 
             else
-                var = 0;
+                sic = 0;
                 
             end
             
             %make sure in fraction units not pct
-            if max(var(:)) > 2
-                var = var/100;
+            if max(sic(:)) > 2
+                sic = sic/100;
             end
             
             %make sic 2d (3d including time)
             'ensuring 2D'
-            var = ensure2D(var);
+            sic = ensure2D(sic);
             
             %Use interpolation to make it exactly correct size
             if nc_variable_exists(combinedFile, varName)
                 'ensuring dimensions correct size'
-                var = ensureCorrectDimensions(var, lat, lon, NaN);
+                sic = ensureCorrectDimensions(sic, lat, lon, NaN);
             end
             
             %ensure between 0 and 1
-            var(var > 1) = 1;
-            var(var < 0) = 0;
+            sic(sic > 1) = 1;
+            sic(sic < 0) = 0;
             
             %overwrite variable
             'writing data'
-            overwrite_nc_variable(finalFile, 'ICEFRAC', var, 'ICEFRAC', 3);
+            
             
         elseif strcmp(varName, 'sftlf')
             
@@ -841,6 +841,12 @@ for dir = subDirectories
             %Write variable:
             'writting data'
             overwrite_nc_variable(finalFile, 'LANDFRAC', var, 'LANDFRAC', 2);
+            
+            %set ICEFRAC so that is only has values over ocean
+            sic(var == 0) = 0;
+            
+            %write sic
+            overwrite_nc_variable(finalFile, 'ICEFRAC', sic, 'ICEFRAC', 3);
             
         elseif strcmp(varName, 'ps')
             

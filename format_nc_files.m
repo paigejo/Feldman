@@ -488,7 +488,15 @@ for dir = subDirectories
             
             %determine layer thickness as function of lon, lat, lev
             'Determining Layer Thickness'
-            ap_bnds = ncread(combinedFile, 'ap_bnds');
+            if nc_variable_exists(combinedFile, 'ap_bnds')
+                ap_bnds = ncread(combinedFile, 'ap_bnds');
+                
+            else
+                a_bnds = ncread(combinedFile, 'a_bnds');
+                ap_bnds = a_bnds*p0;
+                
+            end
+            
             b_bnds = ncread(combinedFile, 'b_bnds');
             layerThickness = computeLayerThickness(ap_bnds, b_bnds, ps);
             

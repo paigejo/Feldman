@@ -105,6 +105,9 @@ goalLev = [3.54463800000001, 7.38881350000001, 13.967214, 23.944625, ...
     510.455255000002, 600.524200000003, 696.796290000003, 787.702060000003, ...
     867.160760000001, 929.648875000002, 970.554830000001, 992.5561];
 
+%convert variable to double for interpolation
+variable = double(variable);
+
 %do interpolation:
 if ndims(variable) == 2 && (length(curLev) == 1) && isnan(curLev)
     %variable doesn't use levels and missing values should be
@@ -184,7 +187,6 @@ elseif size(variable, 1) ~= length(curLon) || size(variable, 2) ~= length(curLat
         %been filled in already
         
         interpVar = variable;
-        return;
         
     else
         error('dimensions don''t match combined file dimensions or goal dimensions, unable to interpolate');
@@ -216,5 +218,8 @@ else
     [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, goalLev);
     interpVar = F(ILon, ILat, ILev);
 end
+
+%convert data back to single point precision
+interpVar = single(interpVar);
 
 end

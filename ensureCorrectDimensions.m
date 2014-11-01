@@ -175,8 +175,25 @@ elseif ndims(variable) == 3 && (length(curLev) == 1) && isnan(curLev)
     [ILon, ILat, ILev] = ndgrid(goalLon, goalLat, 1:size(variable, 3));
     interpVar = F(ILon, ILat, ILev);
     
+elseif size(variable, 1) ~= length(curLon) || size(variable, 2) ~= length(curLat) || size(variable, 3) ~= length(curLev)
+    %all of the variable dimensions should be filled in to the goal
+    %dimensions
+    
+    if size(variable, 1) == length(goalLon) && size(variable, 2) == length(goalLat) && size(variable, 3) == length(goalLev)
+        %in this case, no interpolation necessary, since all values have
+        %been filled in already
+        
+        interpVar = variable;
+        return;
+        
+    else
+        error('dimensions don''t match combined file dimensions or goal dimensions, unable to interpolate');
+    
+    end
+    
 else
     %if variable requires all 3 dimensions (lon, lat, lev) interpolated
+    %from combined file dimensions to goal dimensions
     
     %compute interpolant training coordinates
     [lonGrid latGrid levGrid] = ndgrid(curLon, curLat, curLev);

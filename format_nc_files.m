@@ -561,6 +561,9 @@ for dir = subDirectories
                 
             end
             
+            %convert from ppb to molar fraction
+            var = var/10^9;
+            
             %convert units from molar fraction to kg/kg
             var = var * (molMassN2O/molMassAir);
             

@@ -7,8 +7,8 @@
 %time coordinate.  If a required input file doesn't exist, a
 %globally-uniform fill value is chosen (most often 0).
 
-%correcting variable formatting:
-%get_nc_variable -> ensure3D (or ensure2D) -> ensureCorrectDimensions -> unit conversion
+%correcting variable formatting: get_nc_variable -> ensure3D (or ensure2D)
+%-> ensureCorrectDimensions -> unit conversion
 
 %get_nc_variable: makes sure whatever dimensions exist are in correct order
 
@@ -192,19 +192,19 @@ for dir = subDirectories
     cd(dirName);
     
     %get combined file name:
-    ['finding combined file']
     [~, fileRaw] = system('find . -maxdepth 1 -name combined_\*');
     files = strsplit(fileRaw, '/');
     combinedFile = files{end};
     
     %copy combined file, calling it 'format' file
-    ['creating output file']
     breaks = strfind(combinedFile, '_');
     finalFile = ['formatted', combinedFile(breaks(1):end)];
     system(['cp ', exampleFilePath, ' ', finalFile]);
     
+    %determine the climate model the data is from
+    model = combinedFile((breaks(2)+1):(breaks(3)-1));
+    
     %get lon, lat, lev dimensions (and ilev?)
-    ['reading in dimension data']
     lon = get_nc_variable(combinedFile, 'lon');
     lat = get_nc_variable(combinedFile, 'lat');
     lev = get_nc_variable(combinedFile, 'lev');
@@ -255,6 +255,9 @@ for dir = subDirectories
                 
             end
             
+            %convert from ppb to molar fraction
+            var = var/10^9;
+            
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC11/molMassAir);
             
@@ -295,6 +298,9 @@ for dir = subDirectories
                 
             end
             
+            %convert from ppb to molar fraction
+            var = var/10^9;
+            
             %convert units from molar fraction to kg/kg
             var = var * (molMassCFC12/molMassAir);
             
@@ -334,6 +340,9 @@ for dir = subDirectories
                 var = 0;
                 
             end
+            
+            %convert from ppb to molar fraction
+            var = var/10^9;
             
             %convert units from molar fraction to kg/kg
             var = var * (molMassCH4/molMassAir);
@@ -590,7 +599,7 @@ for dir = subDirectories
             end
             
             %convert from ppb to molar fraction
-            var = var*10^(-9);
+            var = var/10^9;
             
             %make tro3 3d (4d including time)
             'ensuring 3D'

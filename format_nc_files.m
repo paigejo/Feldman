@@ -3,16 +3,15 @@
 %format (i.e. correct number of dimensions and units).  The variables input
 %is a logical vector specifying which of the variables in variableList
 %should be used to generate the formatted file.  Note that cli and clw must
-%always be used together.  Same with sic and sftlf.  Also, some of the
-%variables are required and ignoring them will cause an error that may seem
-%unrelated.  The variables input could be set to all ones, for example, to
-%use all the variables. Otherwise, if others are deemed unnecessary, they
-%can be ignored using the variables input to save time. In this case, the
+%always be used together.  Same with sic and sftlf.  Also, note that ps,
+%sftlf, sic, clw, and cli are required, so ignoring them will produce an
+%error.  The variables input could be set to all ones, for example, to use
+%all the variables. Otherwise, if others are deemed unnecessary, they can
+%be ignored using the variables input to save time. In this case, the
 %variables input could be set to: variables = ones(1, 20); variables(1:3) =
-%0; This would use all variables but cfc11, cfc12,
-%and ch4.
+%0; This would use all variables but cfc11, cfc12, and ch4.
 
-%This function will generate files with the prefix 'final' for each
+%This function will generate files with the prefix 'formatted' for each
 %combined file in the corresponding subdirectories.  nc data will be in
 %form (time, lev, lat, lon), (time, lat, lon), or (lat, lon) according to
 %NCO ordering (which is the reverse of MATLAB ordering).  The input files
@@ -41,7 +40,10 @@ variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'cli', 'clw', 'n2o', ...
 
 %filter variableList for the variables the user requests
 variables = logical(variables);
-variableList = variableList(variables);
+
+if sum(variables([5, 6, 12, 13, 14])) < 5
+    error('cli, clw, sic, sftlf, and ps variables are required and cannot be ignored using the variables input');
+end
 
 egLat = [-88.9277353522959, -87.5387052130272, -86.1414721015279, ...
     -84.7423855907142, -83.3425960440704, -81.9424662991732, ...
@@ -246,8 +248,9 @@ for dir = subDirectories
     ps = get_nc_variable(combinedFile, 'ps');
     
     %begin formatting for each variable in the combined file
-    for v = variableList
-        varName = v{1};
+    for v = 1:length(variableList)
+        varName = variableList(v);
+        considerVar = variables(v);
         
         if strcmp(varName, 'cfc11')
             
@@ -263,7 +266,7 @@ for dir = subDirectories
             
             'reading data'
             %get data from combined file if it exists, else use fill value
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -282,7 +285,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
@@ -306,7 +309,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -325,7 +328,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
@@ -349,7 +352,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -368,7 +371,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
@@ -387,7 +390,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -405,7 +408,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
@@ -513,7 +516,7 @@ for dir = subDirectories
             
             %determine layer thickness as function of lon, lat, lev
             'Determining Layer Thickness'
-            if nc_variable_exists(combinedFile, 'ap_bnds')
+            if nc_variable_exists(combinedFile, 'ap_bnds') && considerVar
                 ap_bnds = ncread(combinedFile, 'ap_bnds');
                 
             else
@@ -569,7 +572,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -588,7 +591,7 @@ for dir = subDirectories
             var = ensure3D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, lev);
             end
@@ -607,7 +610,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 exists = 1; %convert from plev to lev
                 
@@ -632,7 +635,7 @@ for dir = subDirectories
             end
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
@@ -651,7 +654,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 exists = 1; %convert from plev to lev
                 
@@ -678,7 +681,7 @@ for dir = subDirectories
             end
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
@@ -697,7 +700,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 exists = 1; %convert from plev to lev
                 
@@ -724,7 +727,7 @@ for dir = subDirectories
             end
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
@@ -743,7 +746,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 exists = 1; %convert from plev to lev
                 
@@ -767,7 +770,7 @@ for dir = subDirectories
             end
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, egLev);
             end
@@ -912,7 +915,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -927,7 +930,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
@@ -942,7 +945,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -957,7 +960,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
@@ -972,7 +975,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -987,7 +990,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
@@ -1002,7 +1005,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -1017,7 +1020,7 @@ for dir = subDirectories
             var = ensure2D(var);
             
             %Use interpolation to make it exactly correct size
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, NaN);
             end
@@ -1036,7 +1039,7 @@ for dir = subDirectories
             
             %get data from combined file if it exists, else use fill value
             'reading data'
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 var = get_nc_variable(combinedFile, varName);
                 
             else
@@ -1055,7 +1058,7 @@ for dir = subDirectories
             
             %Use interpolation to make it exactly correct size, fill in
             %missing data over oceans with zeros
-            if nc_variable_exists(combinedFile, varName)
+            if nc_variable_exists(combinedFile, varName) && considerVar
                 'ensuring dimensions correct size'
                 var = ensureCorrectDimensions(var, lat, lon, 0);
             end

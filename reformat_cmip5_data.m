@@ -59,13 +59,20 @@ unrotate_nc_files(dataDir, timeDirectories)
 combine_nc_files(dataDir, timeDirectories);
 
 %STEP 7: Complete the formatting process by calling the format_nc_files.m
-%function.  This function performs the final formatting steps on all the
-%specified subdirectories, such as unit conversion, interpolation,
-%dimension permutation, calculating variables based on other variables, and
-%more.  The output file has the prefix 'formatted' instead of a normal
-%variable name as a prefix.  Note: this step can take overnight to run.
+%function.  The second line below can be uncommented to ignore the cfc11,
+%cfc12, ch4, n2o, tro3, tauu, tauv, and sfcWind variables to improve
+%performance, since these variables do not have very significant impact on
+%spectroscopic observations. The format_nc_files function performs the
+%final formatting steps on all the specified subdirectories, such as unit
+%conversion, interpolation, dimension permutation, calculating variables
+%based on other variables, and more.  The output file has the prefix
+%'formatted' instead of a normal variable name as a prefix.  Note: this
+%step can take a long time.  I recommend you try it using only one of the
+%elements of timeDirectories first and seeing how long it takes.
 
-format_nc_files(dataDir, timeDirectories);
+variables = ones(1, 20);
+%variables([1:3, 7:8, 16:17, 19]) = 0;
+format_nc_files(dataDir, timeDirectories, variables);
 
 %STEP 8: Use ncview to check to make sure everything is correct!
 

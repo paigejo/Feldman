@@ -1,11 +1,23 @@
 %This function converts all files generated from the split_nc_files,
 %combined_nc_files sequence to nc files with variables in the correct
-%format (i.e. correct number of dimensions and units).  This function will
-%generate files with the prefix 'final' for each combined file in the
-%corresponding subdirectories.  Variables will be in form (time, lev, lat,
-%lon), (time, lat, lon), or (lat, lon).  The input files should have only 1
-%time coordinate.  If a required input file doesn't exist, a
-%globally-uniform fill value is chosen (most often 0).
+%format (i.e. correct number of dimensions and units).  The variables input
+%is a logical vector specifying which of the variables in variableList
+%should be used to generate the formatted file.  Note that cli and clw must
+%always be used together.  Same with sic and sftlf.  The variables input
+%could be set to all ones, for example, to use all the variables.
+%Otherwise, if others are deemed unnecessary, they can be ignored using the
+%variables input to save time.  In this case, the variables input could be
+%set to:
+%variables = ones(1, 20);
+%variables(1:3) = 0;
+%This would use all variables but cfc11, cfc12, and ch4.
+
+%This function will generate files with the prefix 'final' for each
+%combined file in the corresponding subdirectories.  nc data will be in
+%form (time, lev, lat, lon), (time, lat, lon), or (lat, lon) according to
+%NCO ordering (which is the reverse of MATLAB ordering).  The input files
+%should have only 1 time coordinate.  If a required input file doesn't
+%exist, a globally-uniform fill value is chosen (most often 0).
 
 %correcting variable formatting: get_nc_variable -> ensure3D (or ensure2D)
 %-> ensureCorrectDimensions -> unit conversion
@@ -22,10 +34,14 @@
 %unit conversion: converts all units to correct units as required by
 %RadInput
 
-function format_nc_files(dirPath, subDirectories)
+function format_nc_files(dirPath, subDirectories, variables)
 variableList = {'cfc11', 'cfc12', 'ch4', 'cl', 'cli', 'clw', 'n2o', ...
     'tro3', 'hus', 'hur', 'ta', 'sicUnrotated', 'sftlf', 'ps', 'ts', ...
     'tauu', 'tauv', 'tas', 'sfcWind', 'snw'};
+
+%filter variableList for the variables the user requests
+variables = logical(variables);
+variableList = variableList(variables);
 
 egLat = [-88.9277353522959, -87.5387052130272, -86.1414721015279, ...
     -84.7423855907142, -83.3425960440704, -81.9424662991732, ...

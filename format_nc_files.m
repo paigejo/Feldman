@@ -219,9 +219,6 @@ for dir = subDirectories
     finalFile = ['formatted', combinedFile(breaks(1):end)];
     system(['cp ', exampleFilePath, ' ', finalFile]);
     
-    %determine the climate model the data is from
-    model = combinedFile((breaks(2)+1):(breaks(3)-1));
-    
     %get lon, lat, lev dimensions (and ilev?)
     lon = get_nc_variable(combinedFile, 'lon');
     lat = get_nc_variable(combinedFile, 'lat');
@@ -249,7 +246,7 @@ for dir = subDirectories
     
     %begin formatting for each variable in the combined file
     for v = 1:length(variableList)
-        varName = variableList(v);
+        varName = variableList{v};
         considerVar = variables(v);
         
         if strcmp(varName, 'cfc11')

@@ -16,7 +16,7 @@ dataDir = '/Users/johnpaige/Desktop/cmip5/CanESM2/simvars/testDir';
 %STEP 2: Make sure the variables that require time dimension have values
 %for every time step (and not just a single value or values for each
 %season).  The extrapolate_seasonal_nc_data.m function is meant to be used
-%for this.
+%for this, although this step is often not necessary
 
 %extrapolate_seasonal_nc_data(dataDir);
 
@@ -41,7 +41,7 @@ overwrite_nc_variable(sicFile, 'lon', sicLon, 'lon', {'i', size(sicLon, 1), 'j',
 %you have to quit and come back to this process later.
 
 timeDirectories = split_nc_files(dataDir);
-save('timeDirectories.mat', timeDirectories);
+save('timeDirectories.mat', 'timeDirectories');
 
 %STEP 5: Rotate sic lat/lon coordinates, if necessary.  Before running this
 %operation check to make sure the lon/lat coordinates are actually rotated.
@@ -68,7 +68,10 @@ combine_nc_files(dataDir, timeDirectories);
 %based on other variables, and more.  The output file has the prefix
 %'formatted' instead of a normal variable name as a prefix.  Note: this
 %step can take a long time.  I recommend you try it using only one of the
-%elements of timeDirectories first and seeing how long it takes.
+%elements of timeDirectories first and seeing how long it takes.  Also note
+%that if this process is cut of midway through, as long as you can create a
+%cell array with the folder names that haven't finished being formatted,
+%you can set timeDirectories to be that cell array and run the lines below.
 
 variables = ones(1, 20);
 %variables([1:3, 7:8, 16:17, 19]) = 0;

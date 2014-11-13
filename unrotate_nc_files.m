@@ -21,6 +21,8 @@ for dir = subDirectories
     
     cd(dirStr);
     
+    ['unrotating sic file in ', dirStr, ' directory']
+    
     %get the sic file in this subdirectory
     [~, sicFile] = system('ls sic_*');
     sicFile = strsplit(sicFile, sprintf('\n'));

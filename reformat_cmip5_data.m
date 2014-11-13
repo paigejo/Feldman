@@ -1,10 +1,10 @@
 %This script takes the user through converting from many CMIP5 output
-%formats (so far, guaranteed to work for CanESM2) to the format required by
-%the satellite spectroscopic simulator.  In order for the nco operators to
-%work within the MATLAB environment, you might need to add the 
-%line setenv('DYLD_LIBRARY_PATH',''); to your statup.m file in MATLAB's
-%startup folder.  If this file does not already exist, you should create
-%it.
+%formats (so far, guaranteed to work for CanESM2, NorESM1-M, bcc-csm1-1) to
+%the format required by the satellite spectroscopic simulator.  In order
+%for the nco operators to work within the MATLAB environment, you might
+%need to add the line setenv('DYLD_LIBRARY_PATH',''); to your statup.m file
+%in MATLAB's startup folder.  If this file does not already exist, you
+%should create it.
 
 %STEP 1: put all the variables for a given model and time period in a
 %single directory.  Adjust the directory below to be your own directory.
@@ -16,20 +16,27 @@ dataDir = '/Users/johnpaige/Desktop/cmip5/CanESM2/simvars/testDir';
 %STEP 2: Make sure the variables that require time dimension have values
 %for every time step (and not just a single value or values for each
 %season).  The extrapolate_seasonal_nc_data.m function is meant to be used
-%for this, although this step is often not necessary
+%for this, although this step is not necessary for any of the models this
+%program is guaranteed to work for, and the function has not yet been
+%tested on models that require it.
 
 %extrapolate_seasonal_nc_data(dataDir);
 
 %STEP 3: Make sure lon coordinates in sic are shifted to the correct range
 %(i.e. [0, 360]).  The sic variable typically uses rotated lat/lon
-%coordinates and sometimes uses strange lon ranges.
+%coordinates and sometimes uses strange lon ranges.  the bcc model requires
+%a shift from [-280, 80] to [0, 360].  'rlon' and 'rlat' may need to be
+%switched respectively with 'j' and 'i' (in the reverse order of what is
+%listed in the ncdump of the sic file).  Be sure to check the shift was
+%correct using ncview and ncdump
 
 %{
 cd(dataDir);
-sicFile = 'sic_OImon_CanESM2_rcp85_r1i1p1_200601-210012.nc';
+sicFile = 'sic_OImon_bcc-csm1-1_rcp85_r1i1p1_200601-209912.nc';
 sicLon = get_nc_variable(sicFile, 'lon');
-sicLon = sicLon + 280; %substitute shift for 280 here.
-overwrite_nc_variable(sicFile, 'lon', sicLon, 'lon', {'i', size(sicLon, 1), 'j', sizeSicLon(, 2)});
+neg = sicLon < 0;
+sicLon(neg) = sicLon(neg) + 360;
+overwrite_nc_variable(sicFile, 'lon', sicLon, 'lon', {'rlon', size(sicLon, 1), 'rlat', size(sicLon, 2)});
 %}
 
 %STEP 4: Before beginning this step, make sure the dataDir is clear of
@@ -46,8 +53,8 @@ save('timeDirectories.mat', 'timeDirectories');
 %STEP 5: Rotate sic lat/lon coordinates, if necessary.  Before running this
 %operation check to make sure the lon/lat coordinates are actually rotated.
 % The unrotated data will be put in a new file with 'sicUnrotated' as the
-% file prefix.  Use ncview to make sure the created file is correct, then
-% you may remove the original sic file if you like.
+% file prefix.  Use ncview to make sure the created file in any of the
+% folders is correct.
 
 unrotate_nc_files(dataDir, timeDirectories)
 

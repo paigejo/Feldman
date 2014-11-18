@@ -69,16 +69,12 @@ waveNumHiLW = waveNumHiLW(1:(end-lwBuffer));
 waveLHiLW = 1/(waveNumHiLW * 1e4);
 
 %generate data matrix:
-times = ones(length(swFiles), 1);
 for fid = 1:length(swFiles)
     swFile = swFiles{fid};
     lwFile = lwFiles{fid};
     
-    %get time value for this timestep
-    cd(swPath)
-    times(fid) = ncread(swFile, 'time');
-    
     %Shortwave:
+    cd(swPath)
     
     %convert to radiance in meters and nanometers from radiance in centimeters
     rad_low_SW_CLR = ncread(swFile, 'RADIANCE_HRES_CLR');
@@ -115,6 +111,7 @@ ZScoreMat = dataMat;
 
 %normalize data matrix so the average value in each column is zero and
 %remove any linear trend in the columns
+times = 1:length(swFiles);
 for col = 1:size(dataMat, 2)
     linCoeffs = polyfit(times, dataMat(:, col), 1);
     trendCol = polyval(linCoeffs, times);

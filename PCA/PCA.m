@@ -36,7 +36,9 @@ swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
 lwPath = '/global/scratch2/sd/jpaige/PCA/osse_lw/';
 savePath = '/global/scratch2/sd/jpaige/PCA/';
 
-% get files
+% get files (for some reason copying and pasting these lines and running
+% them all at once doesn't work.  Must perform strsplit operations
+% separately)
 cd(swPath);
 [~, swFiles] = system('ls');
 swFiles = strsplit(swFiles, sprintf('\n'));
@@ -46,16 +48,27 @@ lwFiles = strsplit(lwFiles, sprintf('\n'));
 
 %Shortwave:
 
+%data at final several wavelength indices should be thrown out
+swBuffer = 9;
+
 %get wavenumber dimension, convert to wavelength in nanometers
+cd(swPath);
 waveNumLowSW = ncread(swFiles{1}, 'WAVELENGTH_LRES');
+waveNumLowSW = waveNumLowSW(1:(end-swBuffer));
 waveLLowSW = 1/(waveNumLowSW * 1e7);
 
 %Longwave:
 
+%data at final several wavelength indices should be thrown out
+lwBuffer = 4;
+
 %get wavenumber dimension, convert to wavelength in micrometers
+cd(lwPath);
 waveNumHiLW = ncread(lwFiles{1}, 'WAVELENGTH_HRES');
+waveNumHiLW = waveNumHiLW(1:(end-lwBuffer));
 waveLHiLW = 1/(waveNumHiLW * 1e4);
 
+%generate data matrix:
 times = ones(length(swFiles), 1);
 for fid = 1:length(swFiles)
     swFile = swFiles{fid};

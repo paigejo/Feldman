@@ -75,6 +75,7 @@ for fid = 1:length(swFiles)
     lwFile = lwFiles{fid};
     
     %get time value for this timestep
+    cd(swPath)
     times(fid) = ncread(swFile, 'time');
     
     %Shortwave:
@@ -89,6 +90,7 @@ for fid = 1:length(swFiles)
     data_SW = data_SW(:).';
     
     %Longwave:
+    cd(lwPath);
     
     %convert to radiance in meters and micrometers from radiance in centimeters
     rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');

@@ -74,10 +74,10 @@ for fid = 1:length(swFiles)
     lwFile = lwFiles{fid};
     
     %Shortwave:
-    cd(swPath)
+    cd(swPath);
     
     %convert to radiance in meters and nanometers from radiance in centimeters
-    rad_low_SW_CLR = ncread(swFile, 'RADIANCE_HRES_CLR');
+    rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
     rad_low_SW_CLR = rad_low_SW_CLR*1e7./repmat(waveNumLowSW.^2, [1, 1, size(rad_low_SW_CLR, 3), size(rad_low_SW_CLR, 4)]);
     
     %convert radiance to reflectance

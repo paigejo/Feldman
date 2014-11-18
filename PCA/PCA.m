@@ -78,10 +78,12 @@ for fid = 1:length(swFiles)
     
     %convert to radiance in meters and nanometers from radiance in centimeters
     rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
+    rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW)); %remove junk data at high wave numbers
     rad_low_SW_CLR = rad_low_SW_CLR*1e7./repmat(waveNumLowSW.^2, [1, 1, size(rad_low_SW_CLR, 3), size(rad_low_SW_CLR, 4)]);
     
     %convert radiance to reflectance
     solarFlux = ncread(swFile, 'SOLAR_FLUX');
+    solarFlux = solarFlux(:, :, 1:length(waveNumLowSW)); %remove junk data at high wave numbers
     data_SW = rad_low_SW_CLR*pi./solarFlux;
     data_SW = data_SW(:).';
     
@@ -90,12 +92,9 @@ for fid = 1:length(swFiles)
     
     %convert to radiance in meters and micrometers from radiance in centimeters
     rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
+    rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW)); %remove junk data at high wave numbers
     rad_hi_LW_CLR = rad_hi_LW_CLR*1e4./repmat(waveNumHiLW.^2, [1, 1, size(rad_hi_LW_CLR, 3), size(rad_hi_LW_CLR, 4)]);
-    
-    %convert radiance to reflectance
-    solarFlux = ncread(lwFile, 'SOLAR_FLUX');
-    data_LW = rad_hi_LW_CLR*pi./solarFlux;
-    data_LW = data_LW(:).';
+    data_LW = rad_hi_LW_CLR(:).';
     
     %allocate non-temporary variables, if necessary
     if fid == 1

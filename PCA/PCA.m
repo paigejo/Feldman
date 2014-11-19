@@ -20,6 +20,8 @@ RADIANCE_HRES_ALL (W/cm^2/sr/cm^-1)
 
 conversion to W/m^2/sr/um ? multiply by 10^4 to get W/m^2/sr/cm^-1 and then multiply by 1e4/wavenumber^2
 
+OR: multiply by 10^4 to get W/m^2/sr/cm^-1 and then multiply by 1/(1e4*wavenumber^2)?
+
 For the shortwave, use
 
 WAVELENGTH_LRES (nm)
@@ -51,55 +53,64 @@ lwFiles = strsplit(lwFiles, sprintf('\n'));
 %data at final several wavelength indices should be thrown out
 swBuffer = 9;
 
-%get wavenumber dimension, convert to wavelength in nanometers
+%get wavenumber dimension, remove junk data at high wave numbers
 cd(swPath);
 waveNumLowSW = ncread(swFiles{1}, 'WAVELENGTH_LRES');
 waveNumLowSW = waveNumLowSW(1:(end-swBuffer));
-waveLLowSW = 1/(waveNumLowSW * 1e7);
 
 %Longwave:
 
 %data at final several wavelength indices should be thrown out
 lwBuffer = 4;
 
-%get wavenumber dimension, convert to wavelength in micrometers
+%get wavenumber dimension, remove junk data at high wave numbers
 cd(lwPath);
 waveNumHiLW = ncread(lwFiles{1}, 'WAVELENGTH_HRES');
 waveNumHiLW = waveNumHiLW(1:(end-lwBuffer));
-waveLHiLW = 1/(waveNumHiLW * 1e4);
 
 %generate data matrix:
 for fid = 1:length(swFiles)
     swFile = swFiles{fid};
     lwFile = lwFiles{fid};
     
-    %Shortwave:
+    %get shortwave data, remove junk data at high wavenumbers
     cd(swPath);
-    
-    %convert to radiance in meters and nanometers from radiance in centimeters
     rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
-    rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW)); %remove junk data at high wave numbers
-    rad_low_SW_CLR = rad_low_SW_CLR*1e7./repmat(waveNumLowSW.^2, [1, 1, size(rad_low_SW_CLR, 3), size(rad_low_SW_CLR, 4)]);
-    
-    %convert radiance to reflectance
+    rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
     solarFlux = ncread(swFile, 'SOLAR_FLUX');
-    solarFlux = solarFlux(:, :, 1:length(waveNumLowSW)); %remove junk data at high wave numbers
-    data_SW = rad_low_SW_CLR*pi./solarFlux;
-    data_SW = data_SW(:).';
+    solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
     
-    %Longwave:
+    %get longwave data, remove junk data at high wavenumbers
     cd(lwPath);
-    
-    %convert to radiance in meters and micrometers from radiance in centimeters
     rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
-    rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW)); %remove junk data at high wave numbers
-    rad_hi_LW_CLR = rad_hi_LW_CLR*1e4./repmat(waveNumHiLW.^2, [1, 1, size(rad_hi_LW_CLR, 3), size(rad_hi_LW_CLR, 4)]);
-    data_LW = rad_hi_LW_CLR(:).';
+    rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW));
     
     %allocate non-temporary variables, if necessary
     if fid == 1
-        dataMat = ones(length(swFiles), numel(data_SW) + numel(data_LW));
+        dataMat = ones(length(swFiles), numel(rad_low_SW_CLR) + numel(rad_hi_LW_CLR));
+        
+        %modify wave number dimensions to match radiance variables
+        waveNumLowSW = shiftdim(waveNumLowSW, -3);
+        waveNumHiLW = shiftdim(waveNumHiLW, -3);
+        
+        waveNumLowSWSq = repmat(waveNumLowSW.^2, [size(rad_low_SW_CLR, 1), size(rad_low_SW_CLR, 2), 1]);
+        waveNumHiLWSq = repmat(waveNumHiLW.^2, [size(rad_hi_LW_CLR, 1), size(rad_hi_LW_CLR, 2), 1]);
     end
+    
+    %shortwave:
+    
+    %convert to radiance in meters and nanometers from radiance in centimeters
+    rad_low_SW_CLR = rad_low_SW_CLR*1e-7./waveNumLowSWSq;
+    
+    %convert radiance to reflectance
+    data_SW = rad_low_SW_CLR*pi./solarFlux;
+    data_SW = data_SW(:).';
+    
+    %longwave:
+    
+    %convert to radiance in meters and micrometers from radiance in centimeters
+    rad_hi_LW_CLR = rad_hi_LW_CLR*1e-4./waveNumHiLWSq;
+    data_LW = rad_hi_LW_CLR(:).';
     
     %update data matrix
     dataMat(fid, :) = [data_SW, data_LW];

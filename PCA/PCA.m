@@ -29,8 +29,9 @@ RADIANCE_LRES_CLR (W/cm^2/sr/nm)
 RADIANCE_LRES_ALL (W/cm^2/sr/nm)
 SOLAR_FLUX 
 
-
 To get to reflectance = pi*radiance/solar flux
+
+NOTE: MATLAB ordering of radiance dimensions: lon, lat, wavelength
 %}
 
 %directories with spectroscopoy files from $GRCRATCH
@@ -87,61 +88,81 @@ for fid = 1:length(swFiles)
     
     %allocate non-temporary variables, if necessary
     if fid == 1
-        dataMat = ones(length(swFiles), numel(rad_low_SW_CLR) + numel(rad_hi_LW_CLR));
+        nrows = length(swFiles)*size(rad_low_SW_CLR, 1)*size(rad_low_SW_CLR, 2);
+        ncols = size(rad_low_SW_CLR, 3) + size(rad_hi_LW_CLR, 3);
+        dataMat = ones(nrows, ncols);
         
         %modify wave number dimensions to match radiance variables
-        waveNumLowSW = shiftdim(waveNumLowSW, -3);
-        waveNumHiLW = shiftdim(waveNumHiLW, -3);
-        
-        waveNumLowSWSq = repmat(waveNumLowSW.^2, [size(rad_low_SW_CLR, 1), size(rad_low_SW_CLR, 2), 1]);
-        waveNumHiLWSq = repmat(waveNumHiLW.^2, [size(rad_hi_LW_CLR, 1), size(rad_hi_LW_CLR, 2), 1]);
+        waveNumLowSWSq = shiftdim(waveNumLowSW, -3);
+        waveNumHiLWSq = shiftdim(waveNumHiLW, -3);
+        waveNumLowSWSq = waveNumLowSWSq.^2;
+        waveNumHiLWSq = waveNumHiLWSq.^2;
     end
     
     %shortwave:
     
     %convert to radiance in meters and nanometers from radiance in centimeters
-    rad_low_SW_CLR = rad_low_SW_CLR*1e-7./waveNumLowSWSq;
+    rad_low_SW_CLR = bsxfun(@rdivide, rad_low_SW_CLR*1e-7, waveNumLowSWSq);
     
     %convert radiance to reflectance
     data_SW = rad_low_SW_CLR*pi./solarFlux;
-    data_SW = data_SW(:).';
+    
+    %reshape SW matrix so each row represents spectrum channels for a given
+    %timestep and a given lat and lon
+    data_SW = reshape(data_SW, [size(data_SW, 1)*size(data_SW, 2), size(data_SW, 3)]);
     
     %longwave:
     
     %convert to radiance in meters and micrometers from radiance in centimeters
-    rad_hi_LW_CLR = rad_hi_LW_CLR*1e-4./waveNumHiLWSq;
-    data_LW = rad_hi_LW_CLR(:).';
+    rad_hi_LW_CLR = bsxfun(@rdivide, rad_hi_LW_CLR*1e-4, waveNumHiLWSq);
+    
+    %reshape LW matrix so each row represents spectrum channels for a given
+    %timestep and a given lat and lon
+    data_LW = reshape(rad_hi_LW_CLR, [size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3)]);
     
     %update data matrix
-    dataMat(fid, :) = [data_SW, data_LW];
+    numRows = size(data_LW, 2);
+    startRow = (fid - 1)*numRows + 1;
+    endRow = startRow + numRows - 1;
+    dataMat(startRow:endRow, :) = [data_SW, data_LW];
 end
 
 %compute zscore matrix of detrended data matrix:
 ZScoreMat = dataMat;
 
+%compute time column
+numTimesteps = length(swFiles);
+row = 1:size(dataMat, 2);
+times = ceil(row/numTimesteps);
+
 %normalize data matrix so the average value in each column is zero and
 %remove any linear trend in the columns
-times = 1:length(swFiles);
 for col = 1:size(dataMat, 2)
     linCoeffs = polyfit(times, dataMat(:, col), 1);
     trendCol = polyval(linCoeffs, times);
     ZScoreMat(:, col) = ZScoreMat(:, col) - trendCol;
 end
 
-%divide by column standard deviations
+%divide each column by its standard deviation
 ZScoreMat = bsxfun(@rdivide, ZScoreMat, std(ZScoreMat, 0, 1));
 
 %do PCA
-numComponents = 15;
+numComponents = 6;
 [U, S, V] = svds(ZScoreMat, numComponents);
 scoreMat = U*eye(S);
+
+% reshape score matrix to include lon, lat, time, and PC as dimensions (in that order)
+cd(swPath);
+lon = ncread(swFiles{1}, 'lon');
+lat = ncread(swFiles{1}, 'lat');
+lonLatScores = reshape(scoreMat, [length(lon), length(lat), length(swFiles), size(scoreMat, 2)]);
 
 %Calculate proportion variance explained by each component
 totalVar = norm(ZScoreMat, 'fro')^2;
 varianceExplained = S/totalVar;
 
 cd(savePath);
-save('PCA_results.mat', 'scoreMat', 'varianceExplained');
+save('PCA_results.mat', 'lon', 'lat', 'lonLatScores', 'varianceExplained');
 
 
 

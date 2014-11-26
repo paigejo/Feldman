@@ -40,7 +40,9 @@ lwPath = '/global/scratch2/sd/jpaige/PCA/osse_lw/';
 savePath = '/global/scratch2/sd/jpaige/PCA/';
 
 %add string functions to path
-addpath(genpath('/global/u1/j/jpaige/git/Feldman/cmip5_formatter/strings/'));
+if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman/cmip5_formatter/strings;'))
+    addpath(genpath('/global/u1/j/jpaige/git/Feldman/cmip5_formatter/strings/'));
+end
 
 % get files (for some reason copying and pasting these lines and running
 % them all at once doesn't work.  Must perform strsplit operations

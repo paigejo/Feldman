@@ -124,7 +124,7 @@ for fid = 1:length(swFiles)
     data_LW = reshape(rad_hi_LW_CLR, [size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3)]);
     
     %update data matrix
-    numRows = size(data_LW, 2);
+    numRows = size(data_LW, 1);
     startRow = (fid - 1)*numRows + 1;
     endRow = startRow + numRows - 1;
     dataMat(startRow:endRow, :) = single([data_SW, data_LW]);

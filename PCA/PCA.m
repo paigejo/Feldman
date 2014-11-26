@@ -96,8 +96,8 @@ for fid = 1:length(swFiles)
         dataMat = ones(nrows, ncols, 'single');
         
         %modify wave number dimensions to match radiance variables
-        waveNumLowSWSq = shiftdim(waveNumLowSW, -3);
-        waveNumHiLWSq = shiftdim(waveNumHiLW, -3);
+        waveNumLowSWSq = shiftdim(waveNumLowSW, -2);
+        waveNumHiLWSq = shiftdim(waveNumHiLW, -2);
         waveNumLowSWSq = waveNumLowSWSq.^2;
         waveNumHiLWSq = waveNumHiLWSq.^2;
     end

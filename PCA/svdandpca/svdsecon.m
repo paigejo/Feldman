@@ -20,6 +20,9 @@ assert(k <= m && k <= n, 'k needs to be smaller than size(X,1) and size(X,2)');
 
 if  m <= n
     C = X*X';
+    if ~isa(C, 'double')
+        C = double(C);
+    end
     [U,D] = eigs(C,k);
     clear C;
     if nargout > 2

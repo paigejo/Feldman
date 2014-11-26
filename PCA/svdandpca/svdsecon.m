@@ -32,7 +32,10 @@ if  m <= n
         S = diag(s);
     end
 else
-    C = X'*X; 
+    C = X'*X;
+    if ~isa(C, 'double')
+        C = double(C);
+    end
     [V,D] = eigs(C,k);
     clear C;
     U = X*V; % convert evecs from X'*X to X*X'. the evals are the same.

@@ -1,20 +1,18 @@
 function [t_detect,t_detect_series] = return_detection_time_two_timeseries2(x_1,x_2,t,var_m)
-%This function will use Betsy Weatherhead's approach to determine detection time to detection of change for a time-series
-%This will contain adaptive slope estimation
+%This function will use Betsy Weatherhead's approach to determine detection
+%time to detection of change for a time-series This will contain adaptive
+%slope estimation
 %
-% x_1: first time-series (e.g. predictions by model or 0 vector)
-% x_2: second time-series (e.g. measurements or 0 vector)
-% t : temporal coordinate
-% var_m: measurement uncertainty (use zero assuming perfect data)
+% x_1: first time-series (e.g. predictions by model or 0 vector) x_2:
+% second time-series (e.g. measurements or 0 vector) t : temporal
+% coordinate var_m: measurement uncertainty (use zero assuming perfect
+% data)
 %
-% Output:
-% phi = ar(1) autocorrelation parameter
-% sigma = white noise parameter
-% t_detect_min: n* from Weatherhead (central estimate for amount of time
-% required)
-% t_detect_robust: n* at a point where parameters and t_detect are stable
-% and record length is at least M
-% t_detect_series: time series of n* as a function of record length, n*(M)
+% Output: phi = ar(1) autocorrelation parameter sigma = white noise
+% parameter t_detect_min: n* from Weatherhead (central estimate for amount
+% of time required) t_detect_robust: n* at a point where parameters and
+% t_detect are stable and record length is at least M t_detect_series: time
+% series of n* as a function of record length, n*(M)
 
 %check length
 if length(x_1)~=length(x_2)

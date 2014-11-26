@@ -39,6 +39,9 @@ swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
 lwPath = '/global/scratch2/sd/jpaige/PCA/osse_lw/';
 savePath = '/global/scratch2/sd/jpaige/PCA/';
 
+%add string functions to path
+addpath(genpath('/global/u1/j/jpaige/git/Feldman/cmip5_formatter/strings/'));
+
 % get files (for some reason copying and pasting these lines and running
 % them all at once doesn't work.  Must perform strsplit operations
 % separately)
@@ -90,7 +93,7 @@ for fid = 1:length(swFiles)
     if fid == 1
         nrows = length(swFiles)*size(rad_low_SW_CLR, 1)*size(rad_low_SW_CLR, 2);
         ncols = size(rad_low_SW_CLR, 3) + size(rad_hi_LW_CLR, 3);
-        dataMat = ones(nrows, ncols);
+        dataMat = ones(nrows, ncols, 'single');
         
         %modify wave number dimensions to match radiance variables
         waveNumLowSWSq = shiftdim(waveNumLowSW, -3);
@@ -124,11 +127,13 @@ for fid = 1:length(swFiles)
     numRows = size(data_LW, 2);
     startRow = (fid - 1)*numRows + 1;
     endRow = startRow + numRows - 1;
-    dataMat(startRow:endRow, :) = [data_SW, data_LW];
+    dataMat(startRow:endRow, :) = single([data_SW, data_LW]);
 end
 
+%clear memory except dataMat, savePath, and swFiles
+clearvars -except dataMat savePath swFiles
+
 %compute zscore matrix of detrended data matrix:
-ZScoreMat = dataMat;
 
 %compute time column
 numTimesteps = length(swFiles);
@@ -140,15 +145,15 @@ times = ceil(row/numTimesteps);
 for col = 1:size(dataMat, 2)
     linCoeffs = polyfit(times, dataMat(:, col), 1);
     trendCol = polyval(linCoeffs, times);
-    ZScoreMat(:, col) = ZScoreMat(:, col) - trendCol;
+    dataMat(:, col) = dataMat(:, col) - trendCol;
 end
 
 %divide each column by its standard deviation
-ZScoreMat = bsxfun(@rdivide, ZScoreMat, std(ZScoreMat, 0, 1));
+dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
 
 %do PCA
 numComponents = 6;
-[U, S, V] = svds(ZScoreMat, numComponents);
+[U, S, V] = svds(dataMat, numComponents);
 scoreMat = U*eye(S);
 
 % reshape score matrix to include lon, lat, time, and PC as dimensions (in that order)
@@ -158,7 +163,7 @@ lat = ncread(swFiles{1}, 'lat');
 lonLatScores = reshape(scoreMat, [length(lon), length(lat), length(swFiles), size(scoreMat, 2)]);
 
 %Calculate proportion variance explained by each component
-totalVar = norm(ZScoreMat, 'fro')^2;
+totalVar = norm(dataMat, 'fro')^2;
 varianceExplained = S/totalVar;
 
 cd(savePath);

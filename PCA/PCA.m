@@ -139,7 +139,7 @@ clearvars -except dataMat savePath swFiles
 
 %compute time column
 numTimesteps = length(swFiles);
-row = 1:size(dataMat, 2);
+row = 1:size(dataMat, 1);
 times = ceil(row/numTimesteps);
 
 %normalize data matrix so the average value in each column is zero and

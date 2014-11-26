@@ -39,9 +39,9 @@ swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
 lwPath = '/global/scratch2/sd/jpaige/PCA/osse_lw/';
 savePath = '/global/scratch2/sd/jpaige/PCA/';
 
-%add string functions to path
-if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman/cmip5_formatter/strings;'))
-    addpath(genpath('/global/u1/j/jpaige/git/Feldman/cmip5_formatter/strings/'));
+%add string and svdsecon functions to path
+if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman;'))
+    addpath(genpath('/global/u1/j/jpaige/git/Feldman/'));
 end
 
 % get files (for some reason copying and pasting these lines and running
@@ -155,7 +155,7 @@ dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
 
 %do PCA
 numComponents = 6;
-[U, S, V] = svds(dataMat, numComponents);
+[U, S, V] = svdsecon(dataMat, numComponents);
 scoreMat = U*eye(S);
 
 % reshape score matrix to include lon, lat, time, and PC as dimensions (in that order)

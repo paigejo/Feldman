@@ -95,7 +95,7 @@ for fid = 1:length(swFiles)
     if fid == 1
         nrows = length(swFiles)*size(rad_low_SW_CLR, 1)*size(rad_low_SW_CLR, 2);
         ncols = size(rad_low_SW_CLR, 3) + size(rad_hi_LW_CLR, 3);
-        dataMat = ones(nrows, ncols, 'single');
+        dataMat = ones(nrows, ncols);
         
         %modify wave number dimensions to match radiance variables
         waveNumLowSWSq = shiftdim(waveNumLowSW, -2);
@@ -129,7 +129,7 @@ for fid = 1:length(swFiles)
     numRows = size(data_LW, 1);
     startRow = (fid - 1)*numRows + 1;
     endRow = startRow + numRows - 1;
-    dataMat(startRow:endRow, :) = single([data_SW, data_LW]);
+    dataMat(startRow:endRow, :) = [data_SW, data_LW];
 end
 
 %clear memory except dataMat, savePath, and swFiles

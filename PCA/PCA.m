@@ -145,7 +145,7 @@ times = ceil(row/numTimesteps);
 %normalize data matrix so the average value in each column is zero and
 %remove any linear trend in the columns
 for col = 1:size(dataMat, 2)
-    linCoeffs = polyfit(times, dataMat(:, col), 1);
+    linCoeffs = polyfit(times, dataMat(:, col).', 1);
     trendCol = polyval(linCoeffs, times);
     dataMat(:, col) = dataMat(:, col) - trendCol;
 end

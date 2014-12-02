@@ -158,6 +158,7 @@ dataMat(nextRow:end, :) = [];
 numTimesteps = length(swFiles);
 row = 1:length(goodRows);
 time = ceil(row/numTimesteps).';
+goodRows = logical(goodRows);
 time = time(goodRows);
 
 %normalize data matrix so the average value in each column is zero and

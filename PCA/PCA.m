@@ -60,7 +60,7 @@ lwFiles = strsplit(lwFiles, sprintf('\n'));
 %Shortwave:
 
 %data at final several wavelength indices should be thrown out
-swBuffer = 9;
+swBuffer = 10;
 
 %get wavenumber dimension, remove junk data at high wave numbers
 cd(swPath);

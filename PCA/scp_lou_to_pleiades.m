@@ -13,7 +13,7 @@ for f = 1:length(files)
     file = files{f};
     
     %print progress
-    disp(['sending file ', file, ' (', num2string(f), '/', num2string(length(files)), ')']);
+    disp(['sending file ', file, ' (', num2str(f), '/', num2str(length(files)), ')']);
     
     %get file data from tape and send to pleiades via scp
     system(['dmget ', file]);

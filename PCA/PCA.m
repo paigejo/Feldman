@@ -1,11 +1,14 @@
 %This script performs PCA using .nc files for a all timesteps in sw and lw
 %paths focusing on the WAVELENGTH_HRES and RADIANCE_HRES_CLR variables for
 %the longwave, and the WAVELENGTH_LRES, RADIANCE_LRES_CLR,
-%RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the shortwave.  Only the
-%15 most dominant principle components are considered. PCA is performed on
-%the Z-score matrix of the detrended data matrix (assuming a linear trend).
-%The score matrix and the proportion of variance explained by the principle
-%components are then saved to 'PCA_results.mat' in the savePath.
+%RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the shortwave.  Only the 6
+%most dominant principle components are considered. PCA is performed on the
+%Z-score matrix of the detrended data matrix (assuming a linear trend). The
+%component scores, the proportion of variance explained by the principle
+%components, and the latitude and longitude data are then saved to
+%'PCA_results.mat' in the savePath.  Note that the component scores are
+%stored in a 4-dimensional matrix with dimensions [lon lat time component].
+%Also, this 4-dimensional matrix may contain NaNs.
 
 %variables:
 %{
@@ -75,6 +78,7 @@ waveNumHiLW = ncread(lwFiles{1}, 'WAVELENGTH_HRES');
 waveNumHiLW = waveNumHiLW(1:(end-lwBuffer));
 
 %generate data matrix:
+nextRow = 1;
 for fid = 1:length(swFiles)
     swFile = swFiles{fid};
     lwFile = lwFiles{fid};
@@ -96,6 +100,7 @@ for fid = 1:length(swFiles)
         nrows = length(swFiles)*size(rad_low_SW_CLR, 1)*size(rad_low_SW_CLR, 2);
         ncols = size(rad_low_SW_CLR, 3) + size(rad_hi_LW_CLR, 3);
         dataMat = ones(nrows, ncols);
+        goodRows = ones(nrows, 1);
         
         %modify wave number dimensions to match radiance variables
         waveNumLowSWSq = shiftdim(waveNumLowSW, -2);
@@ -125,51 +130,69 @@ for fid = 1:length(swFiles)
     %timestep and a given lat and lon
     data_LW = reshape(rad_hi_LW_CLR, [size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3)]);
     
-    %update data matrix
+    %remove non-finite data
+    matChunk = [data_SW, data_LW];
+    goodRowChunk = sum(~isfinite(matChunk), 2) == 0;
+    matChunk = matChunk(goodRowChunk, :);
+    
+    %update data
     numRows = size(data_LW, 1);
     startRow = (fid - 1)*numRows + 1;
     endRow = startRow + numRows - 1;
-    dataMat(startRow:endRow, :) = [data_SW, data_LW];
+    goodRows(startRow:endRow) = goodRowChunk;
+    numGoodRows = size(matChunk, 1);
+    dataMat(nextRow:(nextRow + numGoodRows - 1), :) = matChunk;
+    
+    nextRow = nextRow + numGoodRows;
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat savePath swFiles
+clearvars -except dataMat savePath swFiles finiteRows
+
+%trim unused rows at end of dataMat
+dataMat(nextRow:end, :) = [];
 
 %compute zscore matrix of detrended data matrix:
 
 %compute time column
 numTimesteps = length(swFiles);
-row = 1:size(dataMat, 1);
-times = ceil(row/numTimesteps).';
+row = 1:length(goodRows);
+time = ceil(row/numTimesteps).';
+time = time(goodRows);
 
 %normalize data matrix so the average value in each column is zero and
 %remove any linear trend in the columns
 for col = 1:size(dataMat, 2)
-    linCoeffs = polyfit(times, dataMat(:, col), 1);
-    trendCol = polyval(linCoeffs, times);
+    linCoeffs = polyfit(time, dataMat(:, col), 1);
+    trendCol = polyval(linCoeffs, time);
     dataMat(:, col) = dataMat(:, col) - trendCol;
 end
 
 %divide each column by its standard deviation
 dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
 
-%do PCA
+%do PCA, find 6 principle components
 numComponents = 6;
 [U, S, V] = svdsecon(dataMat, numComponents);
 scoreMat = U*eye(S);
 
-% reshape score matrix to include lon, lat, time, and PC as dimensions (in that order)
+%get lon lat data
 cd(swPath);
 lon = ncread(swFiles{1}, 'lon');
 lat = ncread(swFiles{1}, 'lat');
-lonLatScores = reshape(scoreMat, [length(lon), length(lat), length(swFiles), size(scoreMat, 2)]);
 
 %Calculate proportion variance explained by each component
 totalVar = norm(dataMat, 'fro')^2;
 varianceExplained = S/totalVar;
 
+%fill in holes in scoreMat with NaNs
+lonLatScoreMat = NaN*ones(length(goodRows), size(scoreMat, 2));
+lonLatScoreMat(goodRows) = scoreMat;
+lonLatScoreMat = reshape(lonLatScoreMat, [length(lon), length(lat), length(swFiles), size(lonLatScoreMat, 2)]);
+
+%save results
 cd(savePath);
-save('PCA_results.mat', 'lon', 'lat', 'lonLatScores', 'varianceExplained');
+save('PCA_results.mat', 'lon', 'lat', 'lonLatScoreMat', 'varianceExplained');
 
 
 

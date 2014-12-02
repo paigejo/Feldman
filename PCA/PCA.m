@@ -4,11 +4,11 @@
 %RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the shortwave.  Only the 6
 %most dominant principle components are considered. PCA is performed on the
 %Z-score matrix of the detrended data matrix (assuming a linear trend). The
-%component scores, the proportion of variance explained by the principle
-%components, and the latitude and longitude data are then saved to
-%'PCA_results.mat' in the savePath.  Note that the component scores are
-%stored in a 4-dimensional matrix with dimensions [lon lat time component].
-%Also, this 4-dimensional matrix may contain NaNs.
+%component scores and the proportion of variance explained by the principle
+%components  are then saved to 'PCA_results.mat' in the savePath.  Note
+%that the component scores are stored in a 4-dimensional matrix with
+%dimensions [lon lat time componentNumber]. Also, this 4-dimensional matrix
+%may contain NaNs.
 
 %variables:
 %{
@@ -147,7 +147,7 @@ for fid = 1:length(swFiles)
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat savePath swFiles goodRows nextRow
+clearvars -except dataMat swPath savePath swFiles goodRows nextRow
 
 %trim unused rows at end of dataMat
 dataMat(nextRow:end, :) = [];
@@ -172,28 +172,30 @@ end
 %divide each column by its standard deviation
 dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
 
-%do PCA, find 6 principle components
+%do PCA, find 6 principle components, note that S is the singular values
+%matrix, but contains singular values themselves not their squares
 numComponents = 6;
 [U, S, V] = svdsecon(dataMat, numComponents);
-scoreMat = U*eye(S);
+scoreMat = U*S;
 
-%get lon lat data
+%get number of lon and lat values
 cd(swPath);
-lon = ncread(swFiles{1}, 'lon');
-lat = ncread(swFiles{1}, 'lat');
+tmp = ncread(swFiles{1}, 'FLNS');
+nLon = size(tmp, 1);
+nLat = size(tmp, 2);
 
 %Calculate proportion variance explained by each component
 totalVar = norm(dataMat, 'fro')^2;
-varianceExplained = S/totalVar;
+varianceExplained = diag(S).^2/totalVar;
 
 %fill in holes in scoreMat with NaNs
 lonLatScoreMat = NaN*ones(length(goodRows), size(scoreMat, 2));
-lonLatScoreMat(goodRows) = scoreMat;
-lonLatScoreMat = reshape(lonLatScoreMat, [length(lon), length(lat), length(swFiles), size(lonLatScoreMat, 2)]);
+lonLatScoreMat(goodRows, :) = scoreMat;
+lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles), size(lonLatScoreMat, 2)]);
 
 %save results
 cd(savePath);
-save('PCA_results.mat', 'lon', 'lat', 'lonLatScoreMat', 'varianceExplained');
+save('PCA_results.mat', 'lonLatScoreMat', 'varianceExplained');
 
 
 

@@ -4,9 +4,10 @@
 %RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the shortwave.  Only the 6
 %most dominant principle components are considered. PCA is performed on the
 %Z-score matrix of the detrended data matrix (assuming a linear trend). The
-%component scores and the proportion of variance explained by the principle
-%components are then saved to a file called saveName in the savePath, which
-%is /global/scratch2/sd/jpaige/PCA/.  Note that the component scores are
+%component scores, the proportion of variance explained by the principle
+%components, and the principle component matrix (each column is a component
+%vector) are then saved to a file called saveName in the savePath, which is
+%/global/scratch2/sd/jpaige/PCA/.  Note that the component scores are
 %stored in a 4-dimensional matrix with dimensions [lon lat time
 %componentNumber]. Also, this 4-dimensional matrix may contain NaNs.
 
@@ -179,7 +180,7 @@ for fid = 1:length(swFiles)
     matChunk = matChunk(goodRowChunk, :);
     
     %update data
-    numRows = size(matChunk, 1);
+    numRows = size(goodRowChunk, 1);
     startRow = (fid - 1)*numRows + 1;
     endRow = startRow + numRows - 1;
     goodRows(startRow:endRow) = goodRowChunk;
@@ -220,7 +221,7 @@ dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
 %matrix, but contains singular values themselves not their squares
 disp('perform PCA')
 numComponents = 6;
-[U, S, ~] = svdsecon(dataMat, numComponents);
+[U, S, V] = svdsecon(dataMat, numComponents);
 scoreMat = U*S;
 
 %Calculate proportion variance explained by each component
@@ -247,7 +248,7 @@ lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles), size(lonL
 %save results
 disp('saving results')
 cd(savePath);
-save(saveName, 'lonLatScoreMat', 'varianceExplained');
+save(saveName, 'lonLatScoreMat', 'varianceExplained', 'V');
 
 end
 

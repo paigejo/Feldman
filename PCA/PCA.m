@@ -191,7 +191,7 @@ for fid = 1:length(swFiles)
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat swPath lwPath savePath saveName swFiles lwFiles goodRows nextRow
+clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles goodRows nextRow
 
 %trim unused rows at end of dataMat
 dataMat(nextRow:end, :) = [];

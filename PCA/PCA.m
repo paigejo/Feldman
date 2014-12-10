@@ -107,7 +107,7 @@ for fid = 1:length(swFiles)
         cd(swPath);
         rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
         rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
-        solarFlux = ncread(swFile, 'SOLAR_FLUX');
+        solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
         solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
     end
     

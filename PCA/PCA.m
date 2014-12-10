@@ -99,6 +99,7 @@ disp('generating data matrix')
 
 nextRow = 1;
 for fid = 1:length(swFiles)
+    disp(['Timestep ', num2str(fid), '/', num2str(length(swFiles))])
     swFile = swFiles{fid};
     lwFile = lwFiles{fid};
     
@@ -136,10 +137,6 @@ for fid = 1:length(swFiles)
         data_LW = [];
         
         %modify wave number dimensions to match radiance variables
-        if useSW
-            waveNumLowSWSq = shiftdim(waveNumLowSW, -2);
-            waveNumLowSWSq = waveNumLowSWSq.^2;
-        end
         if useLW
             waveNumHiLWSq = shiftdim(waveNumHiLW, -2);
             waveNumHiLWSq = waveNumHiLWSq.^2;
@@ -149,15 +146,16 @@ for fid = 1:length(swFiles)
     %shortwave:
     
     if useSW
-        %convert to radiance in meters and nanometers from radiance in centimeters
-        rad_low_SW_CLR = bsxfun(@rdivide, rad_low_SW_CLR*1e-7, waveNumLowSWSq);
-        
         %convert radiance to reflectance
-        data_SW = rad_low_SW_CLR*pi./solarFlux;
+        data_SW = rad_low_SW_CLR*pi*10^-6./solarFlux;
         
         %reshape SW matrix so each row represents spectrum channels for a given
         %timestep and a given lat and lon
         data_SW = reshape(data_SW, [size(data_SW, 1)*size(data_SW, 2), size(data_SW, 3)]);
+        
+        %remove data outside of 0-1 range
+        data_SW(data_SW > 1) = NaN;
+        data_SW(data_SW < 0) = NaN;
         
     end
     
@@ -166,7 +164,7 @@ for fid = 1:length(swFiles)
     if useLW
         
         %convert to radiance in meters and micrometers from radiance in centimeters
-        rad_hi_LW_CLR = bsxfun(@rdivide, rad_hi_LW_CLR*1e-4, waveNumHiLWSq);
+        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: fix this
         
         %reshape LW matrix so each row represents spectrum channels for a given
         %timestep and a given lat and lon

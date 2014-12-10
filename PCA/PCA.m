@@ -100,12 +100,12 @@ disp('generating data matrix')
 nextRow = 1;
 for fid = 1:length(swFiles)
     disp(['Timestep ', num2str(fid), '/', num2str(length(swFiles))])
-    swFile = swFiles{fid};
-    lwFile = lwFiles{fid};
     
     %get shortwave data, remove junk data at high wavenumbers
     if useSW
         cd(swPath);
+        swFile = swFiles{fid};
+        
         rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
         rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
         solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
@@ -115,6 +115,8 @@ for fid = 1:length(swFiles)
     %get longwave data, remove junk data at high wavenumbers
     if useLW
         cd(lwPath);
+        lwFile = lwFiles{fid};
+        
         rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
         rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW));
     end

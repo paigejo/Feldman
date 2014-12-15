@@ -202,7 +202,7 @@ disp('computing zscore/detrended matrix')
 %compute time column
 numTimesteps = length(swFiles);
 row = 1:length(goodRows);
-time = ceil(row/numTimesteps).';
+time = ceil(120*row./max(row)).';
 goodRows = logical(goodRows);
 time = time(goodRows);
 

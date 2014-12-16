@@ -11,6 +11,10 @@
 %stored in a 4-dimensional matrix with dimensions [lon lat time
 %componentNumber]. Also, this 4-dimensional matrix may contain NaNs.
 
+%NOTE: the difference between this function and PCA.m is that a 1 year
+%moving average trend is subtracted instead of a linear regression.  Hence,
+%the first year of data is not used
+
 %variables:
 %{
 for the long wave files, use
@@ -38,7 +42,7 @@ To get to reflectance = pi*radiance/solar flux
 NOTE: MATLAB ordering of radiance dimensions: lon, lat, wavelength
 %}
 
-function PCA(useSW, useLW, saveName, swPath, lwPath)
+function PCA_moving_avg(useSW, useLW, saveName, swPath, lwPath)
 useSW = logical(useSW);
 useLW = logical(useLW);
 
@@ -204,28 +208,33 @@ numTimesteps = length(swFiles);
 row = 1:length(goodRows);
 time = ceil(120*row./max(row)).';
 goodRows = logical(goodRows);
+MAtime = time >  12;
 time = time(goodRows);
+MAgoodRows = goodRows(MAtime);
 
 %normalize data matrix so the average value in each column is zero and
-%remove any linear trend in the columns
+%remove any trend (1 year moving average) in the columns
+MAmat = dataMat(MAgoodTime, :);
 for col = 1:size(dataMat, 2)
-    linCoeffs = polyfit(time, dataMat(:, col), 1);
-    trendCol = polyval(linCoeffs, time);
-    dataMat(:, col) = dataMat(:, col) - trendCol;
+    cSum = cumsum(dataMat(:, col));
+    first = cSum(1:(end-12));
+    last = cSum(13:end);
+    movingAvg = (last-first)/12;
+    MAmat(:, col) = MAmat(:, col) - movingAvg;
 end
 
 %divide each column by its standard deviation
-dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
+MAmat = bsxfun(@rdivide, MAmat, std(MAmat, 0, 1));
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares
 disp('perform PCA')
 numComponents = 6;
-[U, S, V] = svdsecon(dataMat, numComponents);
+[U, S, V] = svdsecon(MAmat, numComponents);
 scoreMat = U*S;
 
 %Calculate proportion variance explained by each component
-totalVar = norm(dataMat, 'fro')^2;
+totalVar = norm(MAmat, 'fro')^2;
 varianceExplained = diag(S).^2/totalVar;
 
 %get number of lon and lat values using sample variable FLNS
@@ -241,12 +250,12 @@ nLon = size(tmp, 1);
 nLat = size(tmp, 2);
 
 %fill in holes in scoreMat with NaNs
-lonLatScoreMat = NaN*ones(length(goodRows), size(scoreMat, 2));
-lonLatScoreMat(goodRows, :) = scoreMat;
+lonLatScoreMat = NaN*ones(length(MAgoodRows), size(scoreMat, 2));
+lonLatScoreMat(MAgoodRows, :) = scoreMat;
 
 %reshape matrix so it has [lon lat time component] dimensions rather than
-%[lon*lat*time component] dimensions
-lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles), size(lonLatScoreMat, 2)]);
+%[lon*lat*time component] dimensions (12 since first year of data removed)
+lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles) - 12, size(lonLatScoreMat, 2)]);
 
 %save results
 disp('saving results')

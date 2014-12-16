@@ -209,32 +209,34 @@ row = 1:length(goodRows);
 time = ceil(120*row./max(row)).';
 goodRows = logical(goodRows);
 MAtime = time >  12;
-time = time(goodRows);
 MAgoodRows = goodRows(MAtime);
+MAtime = MAtime(goodRows);
 
 %normalize data matrix so the average value in each column is zero and
 %remove any trend (1 year moving average) in the columns
-MAmat = dataMat(MAgoodTime, :);
 for col = 1:size(dataMat, 2)
     cSum = cumsum(dataMat(:, col));
     first = cSum(1:(end-12));
     last = cSum(13:end);
     movingAvg = (last-first)/12;
-    MAmat(:, col) = MAmat(:, col) - movingAvg;
+    dataMat(MAtime, col) = dataMat(MAtime, col) - movingAvg;
 end
 
+%clear data from startup year
+dataMat = dataMat(MAtime, :);
+
 %divide each column by its standard deviation
-MAmat = bsxfun(@rdivide, MAmat, std(MAmat, 0, 1));
+dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares
 disp('perform PCA')
 numComponents = 6;
-[U, S, V] = svdsecon(MAmat, numComponents);
+[U, S, V] = svdsecon(dataMat, numComponents);
 scoreMat = U*S;
 
 %Calculate proportion variance explained by each component
-totalVar = norm(MAmat, 'fro')^2;
+totalVar = norm(dataMat, 'fro')^2;
 varianceExplained = diag(S).^2/totalVar;
 
 %get number of lon and lat values using sample variable FLNS

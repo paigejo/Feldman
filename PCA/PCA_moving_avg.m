@@ -3,13 +3,14 @@
 %for the longwave, and the WAVELENGTH_LRES, RADIANCE_LRES_CLR,
 %RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the shortwave.  Only the 6
 %most dominant principle components are considered. PCA is performed on the
-%Z-score matrix of the detrended data matrix (assuming a linear trend). The
-%component scores, the proportion of variance explained by the principle
-%components, and the principle component matrix (each column is a component
-%vector) are then saved to a file called saveName in the savePath, which is
-%/global/scratch2/sd/jpaige/PCA/.  Note that the component scores are
-%stored in a 4-dimensional matrix with dimensions [lon lat time
-%componentNumber]. Also, this 4-dimensional matrix may contain NaNs.
+%Z-score matrix of the detrended data matrix (assuming a moving average
+%trend). The component scores, the proportion of variance explained by the
+%principle components, and the principle component matrix (each column is a
+%component vector) are then saved to a file called saveName in the
+%savePath, which is /global/scratch2/sd/jpaige/PCA/.  Note that the
+%component scores are stored in a 4-dimensional matrix with dimensions [lon
+%lat time componentNumber]. Also, this 4-dimensional matrix may contain
+%NaNs.
 
 %NOTE: the difference between this function and PCA.m is that a 1 year
 %moving average trend is subtracted instead of a linear regression.  Hence,
@@ -56,18 +57,20 @@ if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman;'))
     addpath(genpath('/global/u1/j/jpaige/git/Feldman/'));
 end
 
-% get files (for some reason copying and pasting these lines and running
-% them all at once doesn't work.  Must perform strsplit operations
-% separately)
+% get files for each timestep (for some reason copying and pasting these
+% lines and running them all at once doesn't work.  Must perform strsplit
+% operations separately)
 if useSW
     cd(swPath);
     [~, swFiles] = system('ls');
     swFiles = strsplit(swFiles, sprintf('\n'));
+    nTime = length(swFiles);
 end
 if useLW
     cd(lwPath);
     [~, lwFiles] = system('ls');
     lwFiles = strsplit(lwFiles, sprintf('\n'));
+    nTime = length(lwFiles);
 end
 
 %Shortwave:
@@ -101,14 +104,13 @@ end
 %generate data matrix:
 disp('generating data matrix')
 
-nextRow = 1;
-for fid = 1:length(swFiles)
-    disp(['Timestep ', num2str(fid), '/', num2str(length(swFiles))])
+for time = 1:length(swFiles)
+    disp(['Timestep ', num2str(time), '/', num2str(length(swFiles))])
     
     %get shortwave data, remove junk data at high wavenumbers
     if useSW
         cd(swPath);
-        swFile = swFiles{fid};
+        swFile = swFiles{time};
         
         rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
         rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
@@ -119,28 +121,36 @@ for fid = 1:length(swFiles)
     %get longwave data, remove junk data at high wavenumbers
     if useLW
         cd(lwPath);
-        lwFile = lwFiles{fid};
+        lwFile = lwFiles{time};
         
         rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
         rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW));
     end
     
-    %allocate non-temporary variables, if necessary
-    if fid == 1
+    %allocate non-temporary variables and loop variables, if necessary.
+    %dataMat starts out 4-dimensional ([lon lat time, channel]) so that
+    %data for a single lat/lon grid cell is easily grouped (for trend
+    %removal, stdev calculations)
+    if time == 1
         ncols = 0;
-        if useSW
-            nrows = length(swFiles)*size(rad_low_SW_CLR, 1)*size(rad_low_SW_CLR, 2);
-            ncols = ncols + size(rad_low_SW_CLR, 3);
-        end
-        if useLW
-            nrows = length(swFiles)*size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2);
-            ncols = ncols + size(rad_hi_LW_CLR, 3);
-        end
-        
-        dataMat = ones(nrows, ncols);
-        goodRows = ones(nrows, 1);
         data_SW = [];
         data_LW = [];
+        
+        if useSW
+            ncols = ncols + size(rad_low_SW_CLR, 3);
+            nLon = size(rad_low_SW_CLR, 1);
+            nLat = size(rad_low_SW_CLR, 2);
+            data_SW = ones(size(rad_low_SW_CLR, 1), size(rad_low_SW_CLR, 2), size(rad_low_SW_CLR, 3));
+        end
+        if useLW
+            ncols = ncols + size(rad_hi_LW_CLR, 3);
+            nLon = size(rad_hi_LW_CLR, 1);
+            nLat = size(rad_hi_LW_CLR, 2);
+            data_LW = ones(size(rad_hi_LW_CLR, 1), size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3));
+        end
+        
+        dataMat = ones(nLon, nLat, nTime, ncols);
+        goodRows = ones(nrows, 1);
         
         %modify wave number dimensions to match radiance variables
         if useLW
@@ -155,14 +165,6 @@ for fid = 1:length(swFiles)
         %convert radiance to reflectance
         data_SW = rad_low_SW_CLR*pi*10^-6./solarFlux;
         
-        %reshape SW matrix so each row represents spectrum channels for a given
-        %timestep and a given lat and lon
-        data_SW = reshape(data_SW, [size(data_SW, 1)*size(data_SW, 2), size(data_SW, 3)]);
-        
-        %remove data outside of 0-1 range
-        data_SW(data_SW > 1) = NaN;
-        data_SW(data_SW < 0) = NaN;
-        
     end
     
     %longwave:
@@ -170,32 +172,20 @@ for fid = 1:length(swFiles)
     if useLW
         
         %convert to radiance in meters and micrometers from radiance in centimeters
-        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: fix this
-        
-        %reshape LW matrix so each row represents spectrum channels for a given
-        %timestep and a given lat and lon
-        data_LW = reshape(rad_hi_LW_CLR, [size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3)]);
+        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: FIX THIS
         
     end
     
-    %remove non-finite data
-    matChunk = [data_SW, data_LW];
-    goodRowChunk = sum(~isfinite(matChunk), 2) == 0;
-    matChunk = matChunk(goodRowChunk, :);
-    
-    %update data
-    numRows = size(goodRowChunk, 1);
-    startRow = (fid - 1)*numRows + 1;
-    endRow = startRow + numRows - 1;
-    goodRows(startRow:endRow) = goodRowChunk;
-    numGoodRows = size(matChunk, 1);
-    dataMat(nextRow:(nextRow + numGoodRows - 1), :) = matChunk;
-    
-    nextRow = nextRow + numGoodRows;
+    %update data (and add singleton dimension where time should be).  Time
+    %must be third dimension and channel must be fourth so that matrix can
+    %be reshaped to two-dimensional matrix with each column being a
+    %channel, and each row corresponding to lat/lon/time with rows grouped
+    %by timestep.
+    dataMat(:, :, time, :) = permute(cat(3, data_SW, data_LW), [1 2 4 3]);
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles goodRows nextRow
+clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles
 
 %trim unused rows at end of dataMat
 dataMat(nextRow:end, :) = [];
@@ -212,21 +202,31 @@ MAtime = time >  12;
 MAgoodRows = goodRows(MAtime);
 MAtime = MAtime(goodRows);
 
-%normalize data matrix so the average value in each column is zero and
-%remove any trend (1 year moving average) in the columns
-for col = 1:size(dataMat, 2)
-    cSum = cumsum(dataMat(:, col));
-    first = cSum(1:(end-12));
-    last = cSum(13:end);
-    movingAvg = (last-first)/12;
-    dataMat(MAtime, col) = dataMat(MAtime, col) - movingAvg;
+%normalize data matrix so the average value for each grid cell and channel
+%is zero and remove any trend (1 year moving average) in a grid cell
+%channel time series
+for lon = 1:size(dataMat, 1)
+    for lat = 1:size(dataMat, 2)
+        for channel = 1:size(dataMat, 4)
+            
+            %calculate and subtract 1 year moving average (note that
+            %dataMat(lon, lat, :, channel) is the time series for a given
+            %grid cell and channel
+            cSum = cumsum(dataMat(lon, lat, :, channel));
+            first = cSum(1:(end-12));
+            last = cSum(13:end);
+            movingAvg = (last-first)/12;
+            dataMat(lon, lat, 13:end, channel) = dataMat(lon, lat, 13:end, channel) - movingAvg;
+             
+        end
+    end
 end
 
 %clear data from startup year
-dataMat = dataMat(MAtime, :);
+dataMat = dataMat(:, :, 13:end, :);
 
-%divide each column by its standard deviation
-dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
+%normalize each grid cell channel time series by its standard deviation
+dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3));
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares

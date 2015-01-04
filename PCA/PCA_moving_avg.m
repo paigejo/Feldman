@@ -186,9 +186,6 @@ end
 %clear memory except dataMat, savePath, and swFiles
 clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles
 
-%trim unused rows at end of dataMat
-dataMat(nextRow:end, :) = [];
-
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
 

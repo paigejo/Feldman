@@ -191,13 +191,10 @@ for lon = 1:size(dataMat, 1)
     for lat = 1:size(dataMat, 2)
         for channel = 1:size(dataMat, 4)
             
-            %calculate and subtract linear trend (note that dataMat(lon,
-            %lat, :, channel) is the time series for a given grid cell and
-            %channel, and non-finite numbers are not taken account in the
-            %moving average)
-            timeSeries = dataMat(lon, lat, :, channel);
+            %get finite-valued time series for each grid cell and channel
+            timeSeries = squeeze(dataMat(lon, lat, :, channel));
             finite = isfinite(timeSeries);
-            time = 1:length(timeSeries);
+            time = (1:length(timeSeries)).';
             finiteTrend = timeSeries;
             finiteTrend(~finite) = [];
             finiteTime = time;

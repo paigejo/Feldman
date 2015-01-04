@@ -191,7 +191,7 @@ for lon = 1:size(dataMat, 1)
     for lat = 1:size(dataMat, 2)
         for channel = 1:size(dataMat, 4)
             
-            %get finite-valued time series for each grid cell and channel
+            %get finite-valued time series for this grid cell and channel
             timeSeries = squeeze(dataMat(lon, lat, :, channel));
             finite = isfinite(timeSeries);
             time = (1:length(timeSeries)).';
@@ -200,8 +200,11 @@ for lon = 1:size(dataMat, 1)
             finiteTime = time;
             finiteTime(~finite) = [];
             
+            %fit and subtract trend from data for this grid cell and
+            %channel
             linCoeffs = polyfit(finiteTime, finiteTrend, 1);
             trend = polyval(linCoeffs, finiteTime);
+            trend = shiftdim(trend, -2);
             dataMat(lon, lat, finite, channel) = dataMat(lon, lat, finite, channel) - trend;
             
         end

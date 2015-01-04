@@ -150,7 +150,6 @@ for time = 1:length(swFiles)
         end
         
         dataMat = ones(nLon, nLat, nTime, ncols);
-        goodRows = ones(nrows, 1);
         
         %modify wave number dimensions to match radiance variables
         if useLW
@@ -193,15 +192,6 @@ dataMat(nextRow:end, :) = [];
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
 
-%compute time column
-numTimesteps = length(swFiles);
-row = 1:length(goodRows);
-time = ceil(120*row./max(row)).';
-goodRows = logical(goodRows);
-MAtime = time >  12;
-MAgoodRows = goodRows(MAtime);
-MAtime = MAtime(goodRows);
-
 %normalize data matrix so the average value for each grid cell and channel
 %is zero and remove any trend (1 year moving average) in a grid cell
 %channel time series
@@ -226,11 +216,20 @@ end
 dataMat = dataMat(:, :, 13:end, :);
 
 %normalize each grid cell channel time series by its standard deviation
+disp('normalizing data matrix')
 dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3));
+
+%reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
+disp('reshaping and cleaning data matrix')
+dataMat = reshape(dataMat, [size(dataMat, 1)*size(dataMat, 2)*size(dataMat, 3), size(dataMat, 4)]);
+
+%find rows with non-finite values, remove them
+goodRows = sum(isfinite(dataMat), 2) == size(dataMat, 2);
+dataMat = dataMat(goodRows, :);
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares
-disp('perform PCA')
+disp('performing PCA')
 numComponents = 6;
 [U, S, V] = svdsecon(dataMat, numComponents);
 scoreMat = U*S;
@@ -252,8 +251,8 @@ nLon = size(tmp, 1);
 nLat = size(tmp, 2);
 
 %fill in holes in scoreMat with NaNs
-lonLatScoreMat = NaN*ones(length(MAgoodRows), size(scoreMat, 2));
-lonLatScoreMat(MAgoodRows, :) = scoreMat;
+lonLatScoreMat = NaN*ones(length(goodRows), size(scoreMat, 2));
+lonLatScoreMat(goodRows, :) = scoreMat;
 
 %reshape matrix so it has [lon lat time component] dimensions rather than
 %[lon*lat*time component] dimensions (12 since first year of data removed)

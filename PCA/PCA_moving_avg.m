@@ -189,8 +189,8 @@ clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lw
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
 
-%normalize data matrix so the average value for each grid cell and channel
-%is zero and remove any trend (1 year moving average) in a grid cell
+%modify data matrix so the average value for each grid cell and channel
+%is zero and remove any trend (1 year moving average) in grid cell
 %channel time series
 for lon = 1:size(dataMat, 1)
     for lat = 1:size(dataMat, 2)
@@ -198,11 +198,19 @@ for lon = 1:size(dataMat, 1)
             
             %calculate and subtract 1 year moving average (note that
             %dataMat(lon, lat, :, channel) is the time series for a given
-            %grid cell and channel
-            cSum = cumsum(dataMat(lon, lat, :, channel));
-            first = cSum(1:(end-12));
-            last = cSum(13:end);
-            movingAvg = (last-first)/12;
+            %grid cell and channel, and non-finite numbers are not taken
+            %account in the moving average)
+            trend = dataMat(lon, lat, :, channel);
+            finite = isfinite(trend);
+            finiteTrend = trend;
+            finiteTrend(~finite) = 0;
+            cSumVal = cumsum(finiteTrend);
+            cSumNum = cumsum(finite);
+            firstVal = cSumVal(1:(end-12));
+            lastVal = cSumVal(13:end);
+            firstNum = cSumNum(1:(end-12));
+            lastNum = cSumNum(13:end);
+            movingAvg = (lastVal - firstVal)./(lastNum - firstNum);
             dataMat(lon, lat, 13:end, channel) = dataMat(lon, lat, 13:end, channel) - movingAvg;
              
         end

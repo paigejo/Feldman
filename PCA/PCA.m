@@ -52,18 +52,20 @@ if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman;'))
     addpath(genpath('/global/u1/j/jpaige/git/Feldman/'));
 end
 
-% get files (for some reason copying and pasting these lines and running
-% them all at once doesn't work.  Must perform strsplit operations
-% separately)
+% get files for each timestep (for some reason copying and pasting these
+% lines and running them all at once doesn't work.  Must perform strsplit
+% operations separately)
 if useSW
     cd(swPath);
     [~, swFiles] = system('ls');
     swFiles = strsplit(swFiles, sprintf('\n'));
+    nTime = length(swFiles);
 end
 if useLW
     cd(lwPath);
     [~, lwFiles] = system('ls');
     lwFiles = strsplit(lwFiles, sprintf('\n'));
+    nTime = length(lwFiles);
 end
 
 %Shortwave:
@@ -97,14 +99,13 @@ end
 %generate data matrix:
 disp('generating data matrix')
 
-nextRow = 1;
-for fid = 1:length(swFiles)
-    disp(['Timestep ', num2str(fid), '/', num2str(length(swFiles))])
+for time = 1:length(swFiles)
+    disp(['Timestep ', num2str(time), '/', num2str(length(swFiles))])
     
     %get shortwave data, remove junk data at high wavenumbers
     if useSW
         cd(swPath);
-        swFile = swFiles{fid};
+        swFile = swFiles{time};
         
         rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
         rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
@@ -115,28 +116,35 @@ for fid = 1:length(swFiles)
     %get longwave data, remove junk data at high wavenumbers
     if useLW
         cd(lwPath);
-        lwFile = lwFiles{fid};
+        lwFile = lwFiles{time};
         
         rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
         rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW));
     end
     
-    %allocate non-temporary variables, if necessary
-    if fid == 1
+    %allocate non-temporary variables and loop variables, if necessary.
+    %dataMat starts out 4-dimensional ([lon lat time, channel]) so that
+    %data for a single lat/lon grid cell is easily grouped (for trend
+    %removal, stdev calculations)
+    if time == 1
         ncols = 0;
-        if useSW
-            nrows = length(swFiles)*size(rad_low_SW_CLR, 1)*size(rad_low_SW_CLR, 2);
-            ncols = ncols + size(rad_low_SW_CLR, 3);
-        end
-        if useLW
-            nrows = length(swFiles)*size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2);
-            ncols = ncols + size(rad_hi_LW_CLR, 3);
-        end
-        
-        dataMat = ones(nrows, ncols);
-        goodRows = ones(nrows, 1);
         data_SW = [];
         data_LW = [];
+        
+        if useSW
+            ncols = ncols + size(rad_low_SW_CLR, 3);
+            nLon = size(rad_low_SW_CLR, 1);
+            nLat = size(rad_low_SW_CLR, 2);
+            data_SW = ones(size(rad_low_SW_CLR, 1), size(rad_low_SW_CLR, 2), size(rad_low_SW_CLR, 3));
+        end
+        if useLW
+            ncols = ncols + size(rad_hi_LW_CLR, 3);
+            nLon = size(rad_hi_LW_CLR, 1);
+            nLat = size(rad_hi_LW_CLR, 2);
+            data_LW = ones(size(rad_hi_LW_CLR, 1), size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3));
+        end
+        
+        dataMat = ones(nLon, nLat, nTime, ncols);
         
         %modify wave number dimensions to match radiance variables
         if useLW
@@ -151,14 +159,6 @@ for fid = 1:length(swFiles)
         %convert radiance to reflectance
         data_SW = rad_low_SW_CLR*pi*10^-6./solarFlux;
         
-        %reshape SW matrix so each row represents spectrum channels for a given
-        %timestep and a given lat and lon
-        data_SW = reshape(data_SW, [size(data_SW, 1)*size(data_SW, 2), size(data_SW, 3)]);
-        
-        %remove data outside of 0-1 range
-        data_SW(data_SW > 1) = NaN;
-        data_SW(data_SW < 0) = NaN;
-        
     end
     
     %longwave:
@@ -166,60 +166,66 @@ for fid = 1:length(swFiles)
     if useLW
         
         %convert to radiance in meters and micrometers from radiance in centimeters
-        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: fix this
-        
-        %reshape LW matrix so each row represents spectrum channels for a given
-        %timestep and a given lat and lon
-        data_LW = reshape(rad_hi_LW_CLR, [size(rad_hi_LW_CLR, 1)*size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3)]);
+        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: FIX THIS
         
     end
     
-    %remove non-finite data
-    matChunk = [data_SW, data_LW];
-    goodRowChunk = sum(~isfinite(matChunk), 2) == 0;
-    matChunk = matChunk(goodRowChunk, :);
-    
-    %update data
-    numRows = size(goodRowChunk, 1);
-    startRow = (fid - 1)*numRows + 1;
-    endRow = startRow + numRows - 1;
-    goodRows(startRow:endRow) = goodRowChunk;
-    numGoodRows = size(matChunk, 1);
-    dataMat(nextRow:(nextRow + numGoodRows - 1), :) = matChunk;
-    
-    nextRow = nextRow + numGoodRows;
+    %update data (and add singleton dimension where time should be).  Time
+    %must be third dimension and channel must be fourth so that matrix can
+    %be reshaped to two-dimensional matrix with each column being a
+    %channel, and each row corresponding to lat/lon/time with rows grouped
+    %by timestep.
+    dataMat(:, :, time, :) = permute(cat(3, data_SW, data_LW), [1 2 4 3]);
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles goodRows nextRow
-
-%trim unused rows at end of dataMat
-dataMat(nextRow:end, :) = [];
+clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles
 
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
 
-%compute time column
-numTimesteps = length(swFiles);
-row = 1:length(goodRows);
-time = ceil(120*row./max(row)).';
-goodRows = logical(goodRows);
-time = time(goodRows);
-
-%normalize data matrix so the average value in each column is zero and
-%remove any linear trend in the columns
-for col = 1:size(dataMat, 2)
-    linCoeffs = polyfit(time, dataMat(:, col), 1);
-    trendCol = polyval(linCoeffs, time);
-    dataMat(:, col) = dataMat(:, col) - trendCol;
+%normalize data matrix so the average value for each grid cell and channel
+%is zero and remove any trend (1 year moving average) in a grid cell
+%channel time series
+for lon = 1:size(dataMat, 1)
+    for lat = 1:size(dataMat, 2)
+        for channel = 1:size(dataMat, 4)
+            
+            %calculate and subtract linear trend (note that dataMat(lon,
+            %lat, :, channel) is the time series for a given grid cell and
+            %channel, and non-finite numbers are not taken account in the
+            %moving average)
+            timeSeries = dataMat(lon, lat, :, channel);
+            finite = isfinite(timeSeries);
+            time = 1:length(timeSeries);
+            finiteTrend = timeSeries;
+            finiteTrend(~finite) = [];
+            finiteTime = time;
+            finiteTime(~finite) = [];
+            
+            linCoeffs = polyfit(finiteTime, finiteTrend, 1);
+            trend = polyval(linCoeffs, finiteTime);
+            dataMat(lon, lat, finite, channel) = dataMat(lon, lat, finite, channel) - trend;
+            
+        end
+    end
 end
 
-%divide each column by its standard deviation
-dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 1));
+%normalize each grid cell channel time series by its standard deviation
+disp('normalizing data matrix')
+dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3));
+
+%reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
+disp('reshaping and cleaning data matrix')
+dataMat = reshape(dataMat, [size(dataMat, 1)*size(dataMat, 2)*size(dataMat, 3), size(dataMat, 4)]);
+
+%find rows with non-finite values, remove them
+goodRows = sum(isfinite(dataMat), 2) == size(dataMat, 2);
+dataMat = dataMat(goodRows, :);
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares
-disp('perform PCA')
+disp('performing PCA')
 numComponents = 6;
 [U, S, V] = svdsecon(dataMat, numComponents);
 scoreMat = U*S;
@@ -245,7 +251,7 @@ lonLatScoreMat = NaN*ones(length(goodRows), size(scoreMat, 2));
 lonLatScoreMat(goodRows, :) = scoreMat;
 
 %reshape matrix so it has [lon lat time component] dimensions rather than
-%[lon*lat*time component] dimensions
+%[lon*lat*time component] dimensions (12 since first year of data removed)
 lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles), size(lonLatScoreMat, 2)]);
 
 %save results
@@ -258,3 +264,10 @@ end
 
 
 
+%normalize data matrix so the average value in each column is zero and
+%remove any linear trend in the columns
+for col = 1:size(dataMat, 2)
+    linCoeffs = polyfit(time, dataMat(:, col), 1);
+    trendCol = polyval(linCoeffs, time);
+    dataMat(:, col) = dataMat(:, col) - trendCol;
+end

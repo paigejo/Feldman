@@ -234,7 +234,26 @@ dataMat = dataMat(:, :, 13:end, :);
 
 %normalize each grid cell channel time series by its standard deviation
 disp('normalizing data matrix')
-dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3));
+%dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3)); %std requires too
+%much memory here.  Must instead use for loop
+for lon = 1:size(dataMat, 1)
+    disp(['Current lon is: ', num2str(lon)]);
+    
+    for lat = 1:size(dataMat, 2)
+        for channel = 1:size(dataMat, 4)
+            
+            %calculate and normalize by standard deviation
+            trend = dataMat(lon, lat, :, channel);
+            finite = isfinite(trend);
+            finiteTrend = trend;
+            finiteTrend(~finite) = [];
+            stdev = std(finiteTrend);
+            
+            dataMat(lon, lat, :, channel) = dataMat(lon, lat, :, channel)/stdev;
+            
+        end
+    end
+end
 
 %reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
 disp('reshaping and cleaning data matrix')

@@ -193,6 +193,8 @@ disp('computing zscore/detrended matrix')
 %is zero and remove any trend (1 year moving average) in grid cell
 %channel time series
 for lon = 1:size(dataMat, 1)
+    disp(['Current lon is: ', num2str(lon)]);
+    
     for lat = 1:size(dataMat, 2)
         for channel = 1:size(dataMat, 4)
             

@@ -60,12 +60,16 @@ end
 if useSW
     cd(swPath);
     [~, swFiles] = system(['ls ', searchStr]);
+    disp('Using the following shortwave files:')
+    disp(swFiles)
     swFiles = strsplit(swFiles, sprintf('\n'));
     nTime = length(swFiles);
 end
 if useLW
     cd(lwPath);
     [~, lwFiles] = system(['ls ', searchStr]);
+    disp('Using the following longwave files:')
+    disp(lwFiles)
     lwFiles = strsplit(lwFiles, sprintf('\n'));
     nTime = length(lwFiles);
 end

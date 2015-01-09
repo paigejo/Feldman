@@ -65,12 +65,16 @@ end
 if useSW
     cd(swPath);
     [~, swFiles] = system(['ls ', searchStr]);
+    disp('Using the following shortwave files:')
+    disp(swFiles)
     swFiles = strsplit(swFiles, sprintf('\n'));
     nTime = length(swFiles);
 end
 if useLW
     cd(lwPath);
     [~, lwFiles] = system(['ls ', searchStr]);
+    disp('Using the following longwave files:')
+    disp(lwFiles)
     lwFiles = strsplit(lwFiles, sprintf('\n'));
     nTime = length(lwFiles);
 end
@@ -199,6 +203,8 @@ disp('computing zscore/detrended matrix')
 %is zero and remove any trend (1 year moving average) in grid cell
 %channel time series
 for lon = 1:size(dataMat, 1)
+    disp(['Current lon is: ', num2str(lon)]);
+    
     for lat = 1:size(dataMat, 2)
         for channel = 1:size(dataMat, 4)
             

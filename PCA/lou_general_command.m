@@ -14,9 +14,12 @@
 
 function lou_general_command(searchStr, leftOfFile, rightOfFile)
 
-%get files
+%get file names
 [~, files] = system(['ls ', searchStr]);
 files = strsplit(files, sprintf('\n'));
+
+%get all files from tape
+system(['dmget ', searchStr]);
 
 %operate command on files one by one
 for f = 1:length(files)
@@ -25,7 +28,7 @@ for f = 1:length(files)
     %print progress
     disp(['operating on file ', num2str(f), ' out of ', num2str(length(files))]);
     
-    %get file data from tape and run command on it
+    %get file data from tape (in case it was put back on tape) and run command on it
     system(['dmget ', file]);
     system([leftOfFile, file, rightOfFile]);
 end

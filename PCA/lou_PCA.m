@@ -6,10 +6,12 @@
 %Z-score matrix of the detrended data matrix (assuming a linear trend). The
 %component scores, the proportion of variance explained by the principle
 %components, and the principle component matrix (each column is a component
-%vector) are then saved to a file called saveName in the savePath, which is
-%/global/scratch2/sd/jpaige/PCA/.  Note that the component scores are
-%stored in a 4-dimensional matrix with dimensions [lon lat time
-%componentNumber]. Also, this 4-dimensional matrix may contain NaNs.
+%vector) are then saved to a file called saveName in the savePath.  Note
+%that the component scores are stored in a 4-dimensional matrix with
+%dimensions [lon lat time componentNumber]. Also, this 4-dimensional matrix
+%may contain NaNs.  The searchStr input is the search string going into the
+%ls system function, and is used to determine which data files should be
+%used in the analysis.
 
 %variables:
 %{
@@ -38,14 +40,14 @@ To get to reflectance = pi*radiance/solar flux
 NOTE: MATLAB ordering of radiance dimensions: lon, lat, wavelength
 %}
 
-function lou_PCA(useSW, useLW, saveName, swPath, lwPath)
+function lou_PCA(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
 useSW = logical(useSW);
 useLW = logical(useLW);
 
 %directories with spectroscopy files from $GRCRATCH
 %swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
 %lwPath = '/global/scratch2/sd/jpaige/PCA/osse_lw/';
-savePath = '/global/scratch2/sd/jpaige/PCA/';
+%savePath = '/global/scratch2/sd/jpaige/PCA/';
 
 %add string and svdsecon functions to path if necessary
 if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman;'))
@@ -57,13 +59,13 @@ end
 % operations separately)
 if useSW
     cd(swPath);
-    [~, swFiles] = system('ls');
+    [~, swFiles] = system(['ls ', searchStr]);
     swFiles = strsplit(swFiles, sprintf('\n'));
     nTime = length(swFiles);
 end
 if useLW
     cd(lwPath);
-    [~, lwFiles] = system('ls');
+    [~, lwFiles] = system(['ls ', searchStr]);
     lwFiles = strsplit(lwFiles, sprintf('\n'));
     nTime = length(lwFiles);
 end

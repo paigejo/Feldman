@@ -12,25 +12,25 @@ for i = 0:9
     
     %decade data specification strings
     iStr = [num2str(i), '9'];
-    iPPStr = [num2str(i+1), '9'];
+    iMMStr = [num2str(i-1), '9'];
     
     %no data from 1999, so must modify strings for first decade
     if i == 0
-        iStr = '00';
+        iMMStr = '00';
     end
     
-    disp(['Running PCA code on 20', iStr, '-20', iPPStr, ' decade']);
+    disp(['Running PCA code on 20', iMMStr, '-20', iStr, ' decade']);
     
     %determine inputs for PCA function based on decade
-    savePath = ['/lou/s2j/jlpaige/osse_sw/b30.036a.cam2/20', iStr, '-20', iPPStr, '/'];
-    saveName = ['PCA_sw_MA_20', iStr, '-20', iPPStr, '.mat'];
+    savePath = ['/lou/s2j/jlpaige/osse_sw/b30.036a.cam2/20', iMMStr, '-20', iStr, '/'];
+    saveName = ['PCA_sw_MA_20', iMMStr, '-20', iStr, '.mat'];
     useSW = 1;
     useLW = 0;
     
     if i == 0
         searchStr = 'b30.042a.cam2.h0.200*.nc';
     else
-        searchStr = ['b30.042a.cam2.h0.20', iStr, '*.nc b30.042a.cam2.h0.20', iPPStr(1), '*.nc'];
+        searchStr = ['b30.042a.cam2.h0.20', iMMStr, '*.nc b30.042a.cam2.h0.20', iStr(1), '*.nc'];
     end
     
     %run PCA code

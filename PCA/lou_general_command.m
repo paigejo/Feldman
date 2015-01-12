@@ -7,10 +7,11 @@
 %used to ensure each file is retreived from the file system before
 %operations can be run on it.
 %
-%e.g. lou_general_command('*b30.036a.cam2*.nc', 'cp ', ' ~/osse_sw/b30.036a.cam2/')
+%e.g. lou_general_command('b30.042a.cam2.h0.2089*.nc b30.042a.cam2.h0.209*.nc', 'cp ', ' ~/osse_sw/b30.036a.cam2/')
 %The above line of code would copy all files in the current directory
-%matching the '*b30.036a.cam2*.nc' search string and copy them into the
-%~/osse_sw/b30.036a.cam2/ directory.
+%matching the 'b30.042a.cam2.h0.2089*.nc b30.042a.cam2.h0.209*.nc' search
+%string as input to ls and copy them into the ~/osse_sw/b30.036a.cam2/
+%directory.
 
 function lou_general_command(searchStr, leftOfFile, rightOfFile)
 

@@ -189,9 +189,9 @@ clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lw
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
 
-%modify data matrix so the average value for each grid cell and channel is
+%Modify data matrix so the average value for each grid cell and channel is
 %zero and remove any trend (1 year moving average) in grid cell channel
-%time series. note that if less than 95% of the data for this grid cell and
+%time series. Note that if less than 95% of the data for this grid cell and
 %channel is finite, than none of it is taken into account in the
 %calculations
 for lon = 1:size(dataMat, 1)

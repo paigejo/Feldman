@@ -184,9 +184,10 @@ clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lw
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
 
-%normalize data matrix so the average value for each grid cell and channel
-%is zero and remove any trend (1 year moving average) in a grid cell
-%channel time series
+%Normalize data matrix so the average value for each grid cell and channel
+%is zero and remove any linear trend in a grid cell channel time series.
+%Note that if less than 95% of the data for this grid cell and channel is
+%finite, than none of it is taken into account in the calculations
 for lon = 1:size(dataMat, 1)
     disp(['Current lon is: ', num2str(lon)]);
     
@@ -196,18 +197,29 @@ for lon = 1:size(dataMat, 1)
             %get finite-valued time series for this grid cell and channel
             timeSeries = squeeze(dataMat(lon, lat, :, channel));
             finite = isfinite(timeSeries);
-            time = (1:length(timeSeries)).';
-            finiteTrend = timeSeries;
-            finiteTrend(~finite) = [];
-            finiteTime = time;
-            finiteTime(~finite) = [];
             
-            %fit and subtract trend from data for this grid cell and
-            %channel
-            linCoeffs = polyfit(finiteTime, finiteTrend, 1);
-            trend = polyval(linCoeffs, finiteTime);
-            trend = shiftdim(trend, -2);
-            dataMat(lon, lat, finite, channel) = dataMat(lon, lat, finite, channel) - trend;
+            if sum(finite)/length(finite) < .95
+                
+                %if not enough data is finite, set to NaN
+                dataMat(lon, lat, finite, channel) = dataMat(lon, lat, finite, channel)*NaN;
+                
+            else
+                
+                %enough data is finite, so calculate and subtract linear trend
+                time = (1:length(timeSeries)).';
+                finiteTrend = timeSeries;
+                finiteTrend(~finite) = [];
+                finiteTime = time;
+                finiteTime(~finite) = [];
+                
+                %fit and subtract trend from data for this grid cell and
+                %channel
+                linCoeffs = polyfit(finiteTime, finiteTrend, 1);
+                trend = polyval(linCoeffs, finiteTime);
+                trend = shiftdim(trend, -2);
+                dataMat(lon, lat, finite, channel) = dataMat(lon, lat, finite, channel) - trend;
+                
+            end
             
         end
     end

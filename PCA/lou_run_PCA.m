@@ -4,9 +4,12 @@
 swPath = '/lou/s2m/dfeldman/osse_sw/';
 lwPath = '/lou/s2m/dfeldman/osse_lw/';
 
+addpath(genpath('~/Feldman/'));
+dbstop if error;
+
 for i = 0:9
     
-    if i == 1
+    if i >= 0 && i <= 3
         continue; %since I've already calculated for this decade
     end
     

@@ -8,12 +8,13 @@
 
 function scp_lou_to_remote(remoteStr, pw)
 
+%{
 %get files
 [~, files] = system('ls *.nc');
 files = strsplit(files, sprintf('\n'));
 
 %update password variable
-system(['setenv RSYNC_PASSWORD ', pw]);
+%system(['setenv RSYNC_PASSWORD ', pw]);
 
 %send files one by one
 for f = 1:length(files)
@@ -26,3 +27,8 @@ for f = 1:length(files)
     system(['dmget ', file]);
     system(['scp ', file, ' ', remoteStr]);
 end
+%}
+
+%retrieve files from tape and send them all at once
+system('dmget *.nc');
+system(['scp *.nc ', remoteStr]);

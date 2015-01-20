@@ -5,8 +5,10 @@
 %
 %e.g. of remoteStr:
 %'jpaige@edison.nersc.gov:/global/scratch2/sd/jpaige/PCA/all_sw/'
+%e.g. of searchStr:
+%'*.nc' or 'b30.036a.cam2.h0*.nc'
 
-function scp_lou_to_remote(remoteStr, pw)
+function scp_lou_to_remote(searchStr, remoteStr, pw)
 
 %{
 %get files
@@ -30,5 +32,5 @@ end
 %}
 
 %retrieve files from tape and send them all at once
-system('dmget *.nc');
-system(['scp *.nc ', remoteStr]);
+system(['dmget ', searchStr]);
+system(['scp ', searchStr, ' ', remoteStr]);

@@ -1,7 +1,7 @@
 %this script performs all moving average PCA analysis on Lou (for all
 %decades)
 
-function = lou_run_PCA(useSW, useLW)
+function lou_run_PCA(useSW, useLW)
 
 swPath = '/lou/s2m/dfeldman/osse_sw/';
 lwPath = '/lou/s2m/dfeldman/osse_lw/';

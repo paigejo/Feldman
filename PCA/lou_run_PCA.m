@@ -19,10 +19,6 @@ end
 
 for i = 0:9
     
-    if i >= 0 && i <= 3
-        continue; %since I've already calculated for this decade
-    end
-    
     %decade data specification strings
     iStr = [num2str(i), '9'];
     iMMStr = [num2str(i-1), '9'];

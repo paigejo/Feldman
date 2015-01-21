@@ -1,11 +1,21 @@
 %this script performs all moving average PCA analysis on Lou (for all
 %decades)
 
+function = lou_run_PCA(useSW, useLW)
+
 swPath = '/lou/s2m/dfeldman/osse_sw/';
 lwPath = '/lou/s2m/dfeldman/osse_lw/';
 
-addpath(genpath('~/Feldman/'));
 dbstop if error;
+
+commandStr = '';
+if useSW
+    commandStr = 'sw';
+end
+if useLW
+    commandStr = [commandStr, 'lw'];
+end
+    
 
 for i = 0:9
     
@@ -25,10 +35,8 @@ for i = 0:9
     disp(['Running PCA code on 20', iMMStr, '-20', iStr, ' decade']);
     
     %determine inputs for PCA function based on decade
-    savePath = ['/lou/s2j/jlpaige/osse_sw/b30.036a.cam2/20', iMMStr, '-20', iStr, '/'];
-    saveName = ['PCA_sw_MA_20', iMMStr, '-20', iStr, '.mat'];
-    useSW = 1;
-    useLW = 0;
+    savePath = ['/lou/s2j/jlpaige/osse_', commandStr, '/b30.036a.cam2/20', iMMStr, '-20', iStr, '/'];
+    saveName = ['PCA_', commandStr, '_MA_20', iMMStr, '-20', iStr, '.mat'];
     
     if i == 0
         searchStr = 'b30.042a.cam2.h0.200*.nc';
@@ -39,4 +47,6 @@ for i = 0:9
     %run PCA code
     lou_PCA_moving_avg(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
     
+end
+
 end

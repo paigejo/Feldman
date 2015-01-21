@@ -118,7 +118,7 @@ else
     numTimeSteps = length(lwFiles);
 end
 for time = 1:numTimeSteps
-    disp(['Timestep ', num2str(time), '/', numTimeSteps])
+    disp(['Timestep ', num2str(time), '/', num2str(numTimeSteps)])
     
     %get shortwave data, remove junk data at high wavenumbers
     if useSW

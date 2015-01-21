@@ -118,7 +118,7 @@ else
     numTimeSteps = length(lwFiles);
 end
 for time = 1:numTimeSteps
-    disp(['Timestep ', num2str(time), '/', num2str(length(swFiles))])
+    disp(['Timestep ', num2str(time), '/', numTimeSteps])
     
     %get shortwave data, remove junk data at high wavenumbers
     if useSW
@@ -200,7 +200,7 @@ for time = 1:numTimeSteps
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles
+clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles numTimeSteps
 
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
@@ -313,7 +313,7 @@ lonLatScoreMat(goodRows, :) = scoreMat;
 
 %reshape matrix so it has [lon lat time component] dimensions rather than
 %[lon*lat*time component] dimensions (12 since first year of data removed)
-lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles) - 12, size(lonLatScoreMat, 2)]);
+lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, numTimeSteps - 12, size(lonLatScoreMat, 2)]);
 
 %save results
 disp('saving results')

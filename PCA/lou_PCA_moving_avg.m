@@ -112,7 +112,12 @@ end
 %generate data matrix:
 disp('generating data matrix')
 
-for time = 1:length(swFiles)
+if useSW
+    numTimeSteps = length(swFiles);
+else
+    numTimeSteps = length(lwFiles);
+end
+for time = 1:numTimeSteps
     disp(['Timestep ', num2str(time), '/', num2str(length(swFiles))])
     
     %get shortwave data, remove junk data at high wavenumbers
@@ -181,7 +186,8 @@ for time = 1:length(swFiles)
     if useLW
         
         %convert to radiance in meters and micrometers from radiance in centimeters
-        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: FIX THIS
+        %data_LW = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: FIX THIS
+        data_LW = rad_hi_LW_CLR;
         
     end
     

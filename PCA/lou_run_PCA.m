@@ -19,10 +19,6 @@ end
 
 for i = 0:9
     
-    if i < 8 %already finished up to 70's so don't redo calculations
-        continue;
-    end
-    
     %decade data specification strings
     iStr = [num2str(i), '9'];
     iMMStr = [num2str(i-1), '9'];

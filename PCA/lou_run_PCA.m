@@ -35,7 +35,7 @@ for i = 0:9
     disp(['Running PCA code on 20', iMMStr, '-20', iStr, ' decade']);
     
     %determine inputs for PCA function based on decade
-    savePath = ['/lou/s2j/jlpaige/osse_', commandStr, '/b30.042a.cam2/20', iMMStr, '-20', iStr, '/'];
+    savePath = ['/lou/s2j/jlpaige/all_', commandStr, '/b30.042a.cam2/20', iMMStr, '-20', iStr, '/'];
     saveName = ['PCA_', commandStr, '_MA_20', iMMStr, '-20', iStr, '.mat'];
     
     if i == 0

@@ -1,7 +1,7 @@
 %This function performs PCA on Lou or Plieades using .nc files for a all
 %timesteps in sw and lw paths focusing on the WAVELENGTH_HRES and
-%RADIANCE_HRES_CLR variables for the longwave, and the WAVELENGTH_LRES,
-%RADIANCE_LRES_CLR, RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the
+%RADIANCE_HRES_ALL variables for the longwave, and the WAVELENGTH_LRES,
+%RADIANCE_LRES_ALL, RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the
 %shortwave.  Only the 6 most dominant principle components are considered.
 %PCA is performed on the Z-score matrix of the detrended data matrix
 %(assuming a moving average trend). The component scores, the proportion of
@@ -126,9 +126,9 @@ for time = 1:numTimeSteps
         swFile = swFiles{time};
         
         system(['dmget ', swFile]);
-        rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
+        rad_low_SW_ALL = ncread(swFile, 'RADIANCE_LRES_ALL');
         solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
-        rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
+        rad_low_SW_ALL = rad_low_SW_ALL(:, :, 1:length(waveNumLowSW));
         solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
     end
     
@@ -138,8 +138,8 @@ for time = 1:numTimeSteps
         lwFile = lwFiles{time};
         
         system(['dmget ', lwFile]);
-        rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
-        rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW));
+        rad_hi_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
+        rad_hi_LW_ALL = rad_hi_LW_ALL(:, :, 1:length(waveNumHiLW));
     end
     
     %allocate non-temporary variables and loop variables, if necessary.
@@ -152,16 +152,16 @@ for time = 1:numTimeSteps
         data_LW = [];
         
         if useSW
-            ncols = ncols + size(rad_low_SW_CLR, 3);
-            nLon = size(rad_low_SW_CLR, 1);
-            nLat = size(rad_low_SW_CLR, 2);
-            data_SW = ones(size(rad_low_SW_CLR, 1), size(rad_low_SW_CLR, 2), size(rad_low_SW_CLR, 3));
+            ncols = ncols + size(rad_low_SW_ALL, 3);
+            nLon = size(rad_low_SW_ALL, 1);
+            nLat = size(rad_low_SW_ALL, 2);
+            data_SW = ones(size(rad_low_SW_ALL, 1), size(rad_low_SW_ALL, 2), size(rad_low_SW_ALL, 3));
         end
         if useLW
-            ncols = ncols + size(rad_hi_LW_CLR, 3);
-            nLon = size(rad_hi_LW_CLR, 1);
-            nLat = size(rad_hi_LW_CLR, 2);
-            data_LW = ones(size(rad_hi_LW_CLR, 1), size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3));
+            ncols = ncols + size(rad_hi_LW_ALL, 3);
+            nLon = size(rad_hi_LW_ALL, 1);
+            nLat = size(rad_hi_LW_ALL, 2);
+            data_LW = ones(size(rad_hi_LW_ALL, 1), size(rad_hi_LW_ALL, 2), size(rad_hi_LW_ALL, 3));
         end
         
         dataMat = ones(nLon, nLat, nTime, ncols);
@@ -177,7 +177,7 @@ for time = 1:numTimeSteps
     
     if useSW
         %convert radiance to reflectance
-        data_SW = rad_low_SW_CLR*pi*10^-6./solarFlux;
+        data_SW = rad_low_SW_ALL*pi*10^-6./solarFlux;
         
     end
     
@@ -186,8 +186,8 @@ for time = 1:numTimeSteps
     if useLW
         
         %convert to radiance in meters and micrometers from radiance in centimeters
-        %data_LW = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: FIX THIS
-        data_LW = rad_hi_LW_CLR;
+        %data_LW = bsxfun(@times, rad_hi_LW_ALL*1e-4, waveNumHiLWSq); %TODO: FIX THIS
+        data_LW = rad_hi_LW_ALL;
         
     end
     

@@ -1,6 +1,6 @@
 %This function performs PCA using .nc files for a all timesteps in sw and
-%lw paths focusing on the WAVELENGTH_HRES and RADIANCE_HRES_CLR variables
-%for the longwave, and the WAVELENGTH_LRES, RADIANCE_LRES_CLR,
+%lw paths focusing on the WAVELENGTH_HRES and RADIANCE_HRES_ALL variables
+%for the longwave, and the WAVELENGTH_LRES, RADIANCE_LRES_ALL,
 %RADIANCE_LRES_ALL, and SOLAR_FLUX variables for the shortwave.  Only the 6
 %most dominant principle components are considered. PCA is performed on the
 %Z-score matrix of the detrended data matrix (assuming a moving average
@@ -10,7 +10,9 @@
 %savePath, which is /global/scratch2/sd/jpaige/PCA/.  Note that the
 %component scores are stored in a 4-dimensional matrix with dimensions [lon
 %lat time componentNumber]. Also, this 4-dimensional matrix may contain
-%NaNs.
+%NaNs.  The searchStr input is the search string going into the ls system
+%function, and is used to determine which data files should be used in the
+%analysis.
 
 %NOTE: the difference between this function and PCA.m is that a 1 year
 %moving average trend is subtracted instead of a linear regression.  Hence,
@@ -43,14 +45,14 @@ To get to reflectance = pi*radiance/solar flux
 NOTE: MATLAB ordering of radiance dimensions: lon, lat, wavelength
 %}
 
-function PCA_moving_avg(useSW, useLW, saveName, swPath, lwPath)
+function PCA_moving_avg(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
 useSW = logical(useSW);
 useLW = logical(useLW);
 
 %directories with spectroscopy files from $GRCRATCH
 %swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
 %lwPath = '/global/scratch2/sd/jpaige/PCA/osse_lw/';
-savePath = '/global/scratch2/sd/jpaige/PCA/';
+%savePath = '/global/scratch2/sd/jpaige/PCA/';
 
 %add string and svdsecon functions to path if necessary
 if isempty(strfind(path,'/global/u1/j/jpaige/git/Feldman;'))
@@ -62,13 +64,17 @@ end
 % operations separately)
 if useSW
     cd(swPath);
-    [~, swFiles] = system('ls');
+    [~, swFiles] = system(['ls ', searchStr]);
+    disp('Using the following shortwave files:')
+    disp(swFiles)
     swFiles = strsplit(swFiles, sprintf('\n'));
     nTime = length(swFiles);
 end
 if useLW
     cd(lwPath);
-    [~, lwFiles] = system('ls');
+    [~, lwFiles] = system(['ls ', searchStr]);
+    disp('Using the following longwave files:')
+    disp(lwFiles)
     lwFiles = strsplit(lwFiles, sprintf('\n'));
     nTime = length(lwFiles);
 end
@@ -104,17 +110,22 @@ end
 %generate data matrix:
 disp('generating data matrix')
 
-for time = 1:length(swFiles)
-    disp(['Timestep ', num2str(time), '/', num2str(length(swFiles))])
+if useSW
+    numTimeSteps = length(swFiles);
+else
+    numTimeSteps = length(lwFiles);
+end
+for time = 1:numTimeSteps
+    disp(['Timestep ', num2str(time), '/', num2str(numTimeSteps)])
     
     %get shortwave data, remove junk data at high wavenumbers
     if useSW
         cd(swPath);
         swFile = swFiles{time};
         
-        rad_low_SW_CLR = ncread(swFile, 'RADIANCE_LRES_CLR');
-        rad_low_SW_CLR = rad_low_SW_CLR(:, :, 1:length(waveNumLowSW));
+        rad_low_SW_ALL = ncread(swFile, 'RADIANCE_LRES_ALL');
         solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
+        rad_low_SW_ALL = rad_low_SW_ALL(:, :, 1:length(waveNumLowSW));
         solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
     end
     
@@ -123,8 +134,8 @@ for time = 1:length(swFiles)
         cd(lwPath);
         lwFile = lwFiles{time};
         
-        rad_hi_LW_CLR = ncread(lwFile, 'RADIANCE_HRES_CLR');
-        rad_hi_LW_CLR = rad_hi_LW_CLR(:, :, 1:length(waveNumHiLW));
+        rad_hi_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
+        rad_hi_LW_ALL = rad_hi_LW_ALL(:, :, 1:length(waveNumHiLW));
     end
     
     %allocate non-temporary variables and loop variables, if necessary.
@@ -137,16 +148,16 @@ for time = 1:length(swFiles)
         data_LW = [];
         
         if useSW
-            ncols = ncols + size(rad_low_SW_CLR, 3);
-            nLon = size(rad_low_SW_CLR, 1);
-            nLat = size(rad_low_SW_CLR, 2);
-            data_SW = ones(size(rad_low_SW_CLR, 1), size(rad_low_SW_CLR, 2), size(rad_low_SW_CLR, 3));
+            ncols = ncols + size(rad_low_SW_ALL, 3);
+            nLon = size(rad_low_SW_ALL, 1);
+            nLat = size(rad_low_SW_ALL, 2);
+            data_SW = ones(size(rad_low_SW_ALL, 1), size(rad_low_SW_ALL, 2), size(rad_low_SW_ALL, 3));
         end
         if useLW
-            ncols = ncols + size(rad_hi_LW_CLR, 3);
-            nLon = size(rad_hi_LW_CLR, 1);
-            nLat = size(rad_hi_LW_CLR, 2);
-            data_LW = ones(size(rad_hi_LW_CLR, 1), size(rad_hi_LW_CLR, 2), size(rad_hi_LW_CLR, 3));
+            ncols = ncols + size(rad_hi_LW_ALL, 3);
+            nLon = size(rad_hi_LW_ALL, 1);
+            nLat = size(rad_hi_LW_ALL, 2);
+            data_LW = ones(size(rad_hi_LW_ALL, 1), size(rad_hi_LW_ALL, 2), size(rad_hi_LW_ALL, 3));
         end
         
         dataMat = ones(nLon, nLat, nTime, ncols);
@@ -162,7 +173,7 @@ for time = 1:length(swFiles)
     
     if useSW
         %convert radiance to reflectance
-        data_SW = rad_low_SW_CLR*pi*10^-6./solarFlux;
+        data_SW = rad_low_SW_ALL*pi*10^-6./solarFlux;
         
     end
     
@@ -171,7 +182,8 @@ for time = 1:length(swFiles)
     if useLW
         
         %convert to radiance in meters and micrometers from radiance in centimeters
-        rad_hi_LW_CLR = bsxfun(@times, rad_hi_LW_CLR*1e-4, waveNumHiLWSq); %TODO: FIX THIS
+        %data_LW = bsxfun(@times, rad_hi_LW_ALL*1e-4, waveNumHiLWSq); %TODO: FIX THIS
+        data_LW = rad_hi_LW_ALL;
         
     end
     
@@ -184,7 +196,7 @@ for time = 1:length(swFiles)
 end
 
 %clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles
+clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles numTimeSteps
 
 %compute zscore matrix of detrended data matrix:
 disp('computing zscore/detrended matrix')
@@ -237,7 +249,26 @@ dataMat = dataMat(:, :, 13:end, :);
 
 %normalize each grid cell channel time series by its standard deviation
 disp('normalizing data matrix')
-dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3));
+%dataMat = bsxfun(@rdivide, dataMat, std(dataMat, 0, 3)); %std requires too
+%much memory here.  Must instead use for loop
+for lon = 1:size(dataMat, 1)
+    disp(['Current lon is: ', num2str(lon)]);
+    
+    for lat = 1:size(dataMat, 2)
+        for channel = 1:size(dataMat, 4)
+            
+            %calculate and normalize by standard deviation
+            trend = dataMat(lon, lat, :, channel);
+            finite = isfinite(trend);
+            finiteTrend = trend;
+            finiteTrend(~finite) = [];
+            stdev = std(finiteTrend);
+            
+            dataMat(lon, lat, :, channel) = dataMat(lon, lat, :, channel)/stdev;
+            
+        end
+    end
+end
 
 %reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
 disp('reshaping and cleaning data matrix')
@@ -276,7 +307,7 @@ lonLatScoreMat(goodRows, :) = scoreMat;
 
 %reshape matrix so it has [lon lat time component] dimensions rather than
 %[lon*lat*time component] dimensions (12 since first year of data removed)
-lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, length(swFiles) - 12, size(lonLatScoreMat, 2)]);
+lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, numTimeSteps - 12, size(lonLatScoreMat, 2)]);
 
 %save results
 disp('saving results')

@@ -41,7 +41,7 @@ for i = 0:9
     end
     
     %run PCA code
-    lou_PCA_moving_avg(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
+    PCA_moving_avg(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
     
 end
 

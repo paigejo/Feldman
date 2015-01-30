@@ -19,6 +19,10 @@ end
 
 for i = 0:9
     
+    if i < 3 %already did decades before the 30's
+        continue;
+    end
+    
     %decade data specification strings
     iStr = [num2str(i), '9'];
     iMMStr = [num2str(i-1), '9'];

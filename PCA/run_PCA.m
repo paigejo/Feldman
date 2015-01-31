@@ -19,7 +19,7 @@ end
 
 for i = 0:9
     
-    if i < 3 %already did decades before the 30's
+    if i < 4 %already did decades before the 30's
         continue;
     end
     

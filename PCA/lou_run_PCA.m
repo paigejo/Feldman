@@ -19,6 +19,10 @@ end
 
 for i = 0:9
     
+    if i < 5 %only do calculations on new decades
+        continue;
+    end
+    
     %decade data specification strings
     iStr = [num2str(i), '9'];
     iMMStr = [num2str(i-1), '9'];

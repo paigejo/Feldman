@@ -282,7 +282,11 @@ SPEspectrum = ones(size(dataMat, 2), numComponents+1);
 for i = 1:numComponents
     
     err_mat = dataMat - U(:, i) * S(i, i) * V(:, i)'; %mxn = mx1 x 1x1 x 1xn
-    SPE = err_mat.^2; %CHECK HERE IF ANY ELEMENT OF SPE IS HIGHER THAN dataMatSQ
+    SPE = err_mat.^2; %CHECK HERE IF ANY ELEMENT OF SPE IS HIGHER THAN dataMatSQ (.06 percent of PC1 predicted vals are greater than actual vals)
+    
+    SPEbadRows = sum(SPE, 2) > sum(dataMat.^2, 2);
+    SPEbadCols = sum(SPE, 1) > sum(dataMat.^2, 1);
+    
     SPEspectrum(:, i) = sum(SPE, 1);
     tmp = sum(SPE, 2);
     SPEspacetime = reshape(tmp, [nLon, nLat, numTimeSteps]);

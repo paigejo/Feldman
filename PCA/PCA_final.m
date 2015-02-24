@@ -83,7 +83,8 @@ end
 
 if useSW
     
-    %data at final several wavelength indices should be thrown out
+    %data at final several wavelength indices should be thrown out (and at
+    %the fifth wavenumber?)
     swBuffer = 10;
     
     %get wavenumber dimension, remove junk data at high wave numbers
@@ -282,16 +283,16 @@ SPEspectrum = ones(size(dataMat, 2), numComponents+1);
 for i = 1:numComponents
     
     err_mat = dataMat - U(:, i) * S(i, i) * V(:, i)'; %mxn = mx1 x 1x1 x 1xn
-    SPE = err_mat.^2; %CHECK HERE IF ANY ELEMENT OF SPE IS HIGHER THAN dataMatSQ (.06 percent of PC1 predicted vals are greater than actual vals)
+    SPE = err_mat.^2;
     
     %SPEbadRows = sum(SPE, 2) > sum(dataMat.^2, 2); %sum(SPEbadRows) is 0
+    %except for PC6 which has 132 bad SPE rows
     %SPEbadCols = sum(SPE, 1) > sum(dataMat.^2, 1); %sum(SPEbadCols) > 0
     
     SPEspectrum(:, i) = sum(SPE, 1);
-    tmp = sum(SPE, 2);
-    SPEspacetime = NaN*ones(length(goodRows), 1);
-    SPEspacetime(goodRows, :) = tmp;
-    SPEspacetime = reshape(SPEspacetime, [nLon, nLat, numTimeSteps]);
+    tmp = NaN*ones(length(goodRows), 1);
+    tmp(goodRows) = sum(SPE, 2);
+    SPEspacetime = reshape(tmp, [nLon, nLat, numTimeSteps]);
     
 end
 
@@ -299,7 +300,8 @@ end
 err_mat = dataMat - U * S * V';
 SPE = err_mat.^2;
 SPEspectrum(:, numComponents+1) = sum(SPE, 1);
-tmp = sum(SPE, 2);
+tmp = NaN*ones(length(goodRows), 1);
+tmp(goodrows) = sum(SPE, 2);
 SPEspacetime(:, :, :, numComponents+1) = reshape(tmp, [nLon, nLat, numTimeSteps]);
 
 %compute variance explained in total and broken down by space, time (and expectrum?)

@@ -36,7 +36,7 @@ for i = 0:9
     
     %determine inputs for PCA function based on decade
     savePath = ['/global/scratch2/sd/jpaige/PCA/all_', commandStr, '/b30.042a.cam2/20', iMMStr, '-20', iStr, '/'];
-    saveName = ['PCA_', commandStr, '_MA_20', iMMStr, '-20', iStr, '.mat'];
+    saveName = ['PCA_', commandStr, '_final_20', iMMStr, '-20', iStr, '.mat'];
     
     if i == 0
         searchStr = 'b30.042a.cam2.h0.200*.nc';
@@ -45,7 +45,7 @@ for i = 0:9
     end
     
     %run PCA code
-    PCA_moving_avg(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
+    PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
     
 end
 

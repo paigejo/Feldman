@@ -284,12 +284,14 @@ for i = 1:numComponents
     err_mat = dataMat - U(:, i) * S(i, i) * V(:, i)'; %mxn = mx1 x 1x1 x 1xn
     SPE = err_mat.^2; %CHECK HERE IF ANY ELEMENT OF SPE IS HIGHER THAN dataMatSQ (.06 percent of PC1 predicted vals are greater than actual vals)
     
-    SPEbadRows = sum(SPE, 2) > sum(dataMat.^2, 2);
-    SPEbadCols = sum(SPE, 1) > sum(dataMat.^2, 1);
+    %SPEbadRows = sum(SPE, 2) > sum(dataMat.^2, 2); %sum(SPEbadRows) is 0
+    %SPEbadCols = sum(SPE, 1) > sum(dataMat.^2, 1); %sum(SPEbadCols) > 0
     
     SPEspectrum(:, i) = sum(SPE, 1);
     tmp = sum(SPE, 2);
-    SPEspacetime = reshape(tmp, [nLon, nLat, numTimeSteps]);
+    SPEspacetime = NaN*ones(length(goodRows), 1);
+    SPEspacetime(goodRows, :) = tmp;
+    SPEspacetime = reshape(SPEspacetime, [nLon, nLat, numTimeSteps]);
     
 end
 
@@ -305,11 +307,11 @@ disp('computing variance explained')
 totalVar = norm(dataMat, 'fro')^2;
 VEtotal = diag(S).^2/totalVar;
 
-dataMatSQ = dataMat.^2; %TODO: figure out how to rename dataMat without having to define new variable!!!!!
-dataMatSQ = reshape(dataMatSQ, [nLon, nLat, numTimeSteps, size(dataMat, 2)]);
-VEspace = bsxfun(@rdivide, sum(SPEspacetime, 3), sum(sum(dataMatSQ, 3), 4));
-VEtime = bsxfun(@rdivide, sum(sum(SPEspacetime, 1), 2), sum(sum(sum(dataMatSQ, 1), 2), 4));
-VEspectrum = bsxfun(@rdivide, SPEspectrum, squeeze(sum(sum(sum(dataMatSQ, 1), 2), 3)));
+squareRowSums = NaN*ones(length(goodRows), 1);
+squareRowSums(goodRows) = sum(dataMat.^2, 2);
+squareRowSums = reshape(squareRowSums, [nLon, nLat, numTimeSteps]);
+VEspace = bsxfun(@rdivide, sum(SPEspacetime, 3), sum(squareRowSums, 3));
+VEtime = bsxfun(@rdivide, sum(sum(SPEspacetime, 1), 2), sum(sum(squareRowSums, 1), 2));
 
 %save results
 disp('saving results')

@@ -45,9 +45,12 @@ To get to reflectance = pi*radiance/solar flux
 NOTE: MATLAB ordering of radiance dimensions: lon, lat, wavelength
 %}
 
-function PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
+function PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr, lwHiRes)
 useSW = logical(useSW);
 useLW = logical(useLW);
+lwHiRes = logical(lwHiRes);
+
+badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
 
 %directories with spectroscopy files from $GRCRATCH
 %swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
@@ -81,16 +84,20 @@ end
 
 %Shortwave:
 
+waveNum = []; %SW units: nanometers.  LW units: cm^-1
+nSW = 0;
+nLW = 0;
 if useSW
     
     %data at final several wavelength indices should be thrown out (and at
     %the fifth wavenumber?)
     swBuffer = 10;
     
-    %get wavenumber dimension, remove junk data at high wave numbers
+    %get wavelength dimension, remove junk data at high wave lengths
     cd(swPath);
-    waveNumLowSW = ncread(swFiles{1}, 'WAVELENGTH_LRES');
-    waveNumLowSW = waveNumLowSW(1:(end-swBuffer));
+    tmp = ncread(swFiles{1}, 'WAVELENGTH_LRES');
+    nSW = length(tmp) - swBuffer;
+    waveNum = tmp(1:(end-swBuffer));
     
 end
 
@@ -98,36 +105,47 @@ end
 
 if useLW
     
-    %data at final several wavelength indices should be thrown out
-    lwBuffer = 4;
+    %data at final several wavenumber indices should be thrown out
+    if lwHiRes
+        lwBuffer = 4;
+    else
+        lwBuffer = 2;
+    end
     
     %get wavenumber dimension, remove junk data at high wave numbers
     cd(lwPath);
-    waveNumHiLW = ncread(lwFiles{1}, 'WAVELENGTH_HRES');
-    waveNumHiLW = waveNumHiLW(1:(end-lwBuffer));
+    if lwHiRes
+        tmp = ncread(lwFiles{1}, 'WAVELENGTH_HRES');
+    else
+        tmp = ncread(lwFiles{1}, 'WAVELENGTH_LRES');
+    end
+    nLW = length(tmp) - lwBuffer;
+    waveNum = [waveNum, tmp(1:(end-lwBuffer))];
     
 end
+    
 
 %generate data matrix:
 disp('generating data matrix')
 
 if useSW
-    numTimeSteps = length(swFiles);
+    nTimeSteps = length(swFiles);
 else
-    numTimeSteps = length(lwFiles);
+    nTimeSteps = length(lwFiles);
 end
-for time = 1:numTimeSteps
-    disp(['Timestep ', num2str(time), '/', num2str(numTimeSteps)])
+for time = 1:nTimeSteps
+    disp(['Timestep ', num2str(time), '/', num2str(nTimeSteps)])
     
-    %get shortwave data, remove junk data at high wavenumbers
+    %get shortwave data, remove junk data at high wavenumbers and over badDataThreshold
     if useSW
         cd(swPath);
         swFile = swFiles{time};
         
         rad_low_SW_ALL = ncread(swFile, 'RADIANCE_LRES_ALL');
-        solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
-        rad_low_SW_ALL = rad_low_SW_ALL(:, :, 1:length(waveNumLowSW));
-        solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
+        %solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
+        rad_low_SW_ALL = rad_low_SW_ALL(:, :, 1:nSW);
+        rad_low_SW_ALL(rad_low_SW_ALL > badDataThreshold) = NaN;
+        %solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
     end
     
     %get longwave data, remove junk data at high wavenumbers
@@ -136,7 +154,8 @@ for time = 1:numTimeSteps
         lwFile = lwFiles{time};
         
         rad_hi_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
-        rad_hi_LW_ALL = rad_hi_LW_ALL(:, :, 1:length(waveNumHiLW));
+        rad_hi_LW_ALL = rad_hi_LW_ALL(:, :, 1:nLW);
+        rad_hi_LW_ALL(rad_hi_LW_ALL > badDataThreshold) = NaN;
     end
     
     %allocate non-temporary variables and loop variables, if necessary.
@@ -144,37 +163,33 @@ for time = 1:numTimeSteps
     %data for a single lat/lon grid cell is easily grouped (for trend
     %removal, stdev calculations)
     if time == 1
-        ncols = 0;
+        nSpectra = nLW + nSW;
         data_SW = [];
         data_LW = [];
         
         if useSW
-            ncols = ncols + size(rad_low_SW_ALL, 3);
             nLon = size(rad_low_SW_ALL, 1);
             nLat = size(rad_low_SW_ALL, 2);
-            data_SW = ones(size(rad_low_SW_ALL, 1), size(rad_low_SW_ALL, 2), size(rad_low_SW_ALL, 3));
+            data_SW = ones(size(rad_low_SW_ALL, 1), size(rad_low_SW_ALL, 2), nSW);
         end
         if useLW
-            ncols = ncols + size(rad_hi_LW_ALL, 3);
             nLon = size(rad_hi_LW_ALL, 1);
             nLat = size(rad_hi_LW_ALL, 2);
-            data_LW = ones(size(rad_hi_LW_ALL, 1), size(rad_hi_LW_ALL, 2), size(rad_hi_LW_ALL, 3));
+            data_LW = ones(size(rad_hi_LW_ALL, 1), size(rad_hi_LW_ALL, 2), nLW);
         end
         
-        dataMat = ones(nLon, nLat, nTime, ncols);
-        
-        %modify wave number dimensions to match radiance variables
-        if useLW
-            waveNumHiLWSq = shiftdim(waveNumHiLW, -2);
-            waveNumHiLWSq = waveNumHiLWSq.^2;
-        end
+        dataMat = ones(nLon, nLat, nTime, nSpectra);
     end
     
     %shortwave:
     
     if useSW
         %convert radiance to reflectance
-        data_SW = rad_low_SW_ALL*pi*10^-6./solarFlux;
+        %data_SW = rad_low_SW_ALL*pi*10^-6./solarFlux;
+        
+        %Actually don't convert to reflectance, use radiance so comparable
+        %with longwave data
+        data_SW = rad_low_SW_ALL;
         
     end
     
@@ -184,6 +199,8 @@ for time = 1:numTimeSteps
         
         %convert to radiance in meters and micrometers from radiance in centimeters
         %data_LW = bsxfun(@times, rad_hi_LW_ALL*1e-4, waveNumHiLWSq); %TODO: FIX THIS
+        
+        %Actually no need to convert
         data_LW = rad_hi_LW_ALL;
         
     end
@@ -196,16 +213,12 @@ for time = 1:numTimeSteps
     dataMat(:, :, time, :) = permute(cat(3, data_SW, data_LW), [1 2 4 3]);
 end
 
-%clear memory except dataMat, savePath, and swFiles
-clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles numTimeSteps
+%clear memory except variables needed
+clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles waveNum nTimeSteps nLon nLat nSpectra
 
-%compute zscore matrix of detrended data matrix:
-disp('centering data matrix')
-
-%Modify data matrix so the average value for each grid cell and channel is
-%zero. Note that if less than 95% of the data for this grid cell and
-%channel is finite, than none of it is taken into account in the
-%calculations
+%If less than 95% of the data for this grid cell and channel is finite,
+%than none of it is taken into account in the calculations
+disp('marking bad data')
 for lon = 1:size(dataMat, 1)
     if mod(lon, 10) == 0
         disp(['Current lon is: ', num2str(lon)]);
@@ -214,10 +227,9 @@ for lon = 1:size(dataMat, 1)
     for lat = 1:size(dataMat, 2)
         for channel = 1:size(dataMat, 4)
             
-            %calculate and subtract 1 year moving average (note that
             %dataMat(lon, lat, :, channel) is the time series for a given
             %grid cell and channel, and non-finite numbers are not taken
-            %account in the moving average)
+            %account)
             series = dataMat(lon, lat, :, channel);
             finite = isfinite(series);
             
@@ -228,10 +240,6 @@ for lon = 1:size(dataMat, 1)
                 
             else
                 
-                %enough data is finite, so calculate and subtract mean
-                cntr = mean(series(finite));
-                dataMat(lon, lat, :, channel) = dataMat(lon, lat, :, channel) - cntr;
-                
             end
              
         end
@@ -240,11 +248,23 @@ end
 
 %reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
 disp('reshaping and cleaning data matrix')
-dataMat = reshape(dataMat, [size(dataMat, 1)*size(dataMat, 2)*size(dataMat, 3), size(dataMat, 4)]);
+dataMat = reshape(dataMat, [nLon*nLat*nTimeSteps, nSpectra]);
 
 %find rows with non-finite values, remove them
-goodRows = sum(isfinite(dataMat), 2) == size(dataMat, 2);
+goodRows = sum(isfinite(dataMat), 2) == nSpectra;
 dataMat = dataMat(goodRows, :);
+
+%Modify data matrix so the average value for each column is zero
+disp('centering and normalizing data matrix')
+for channel = 1:nSpectra
+    
+    %calculate and subtract mean of each column
+    dataMat(:, channel) = dataMat(:, channel) - mean(dataMat(:, channel));
+    
+    %normalize column by standard deviation
+    dataMat(:, channel) = dataMat(:, channel)/std(dataMat(:, channel));
+    
+end
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares
@@ -274,11 +294,11 @@ lonLatScoreMat(goodRows, :) = scoreMat;
 
 %reshape matrix so it has [lon lat time component] dimensions rather than
 %[lon*lat*time component] dimensions (12 since first year of data removed)
-lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, numTimeSteps, numComponents]);
+lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, nTimeSteps, numComponents]);
 
 %Calculate SPE for each PC individually
 disp('computing SPE')
-SPEspacetime = ones(nLon, nLat, numTimeSteps, numComponents+1);
+SPEspacetime = ones(nLon, nLat, nTimeSteps, numComponents+1);
 SPEspectrum = ones(size(dataMat, 2), numComponents+1);
 for i = 1:numComponents
     
@@ -292,7 +312,7 @@ for i = 1:numComponents
     SPEspectrum(:, i) = sum(SPE, 1);
     tmp = NaN*ones(length(goodRows), 1);
     tmp(goodRows) = sum(SPE, 2);
-    SPEspacetime = reshape(tmp, [nLon, nLat, numTimeSteps]);
+    SPEspacetime = reshape(tmp, [nLon, nLat, nTimeSteps]);
     
 end
 
@@ -301,8 +321,8 @@ err_mat = dataMat - U * S * V';
 SPE = err_mat.^2;
 SPEspectrum(:, numComponents+1) = sum(SPE, 1);
 tmp = NaN*ones(length(goodRows), 1);
-tmp(goodrows) = sum(SPE, 2);
-SPEspacetime(:, :, :, numComponents+1) = reshape(tmp, [nLon, nLat, numTimeSteps]);
+tmp(goodRows) = sum(SPE, 2);
+SPEspacetime(:, :, :, numComponents+1) = reshape(tmp, [nLon, nLat, nTimeSteps]);
 
 %compute variance explained in total and broken down by space, time (and expectrum?)
 disp('computing variance explained')
@@ -311,14 +331,14 @@ VEtotal = diag(S).^2/totalVar;
 
 squareRowSums = NaN*ones(length(goodRows), 1);
 squareRowSums(goodRows) = sum(dataMat.^2, 2);
-squareRowSums = reshape(squareRowSums, [nLon, nLat, numTimeSteps]);
+squareRowSums = reshape(squareRowSums, [nLon, nLat, nTimeSteps]);
 VEspace = bsxfun(@rdivide, sum(SPEspacetime, 3), sum(squareRowSums, 3));
 VEtime = bsxfun(@rdivide, sum(sum(SPEspacetime, 1), 2), sum(sum(squareRowSums, 1), 2));
 
 %save results
 disp('saving results')
 cd(savePath);
-save(saveName, 'lonLatScoreMat', 'V', 'SPEspacetime', 'SPEspectrum', 'VEtotal', 'VEspace', 'VEtime', 'VEspectrum');
+save(saveName, 'lonLatScoreMat', 'V', 'SPEspacetime', 'SPEspectrum', 'VEtotal', 'VEspace', 'VEtime', 'VEspectrum', 'waveNum');
 
 end
 

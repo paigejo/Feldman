@@ -1,7 +1,7 @@
 %this script performs all moving average PCA analysis on NERSC systems (for
 %all decades)
 
-function run_PCA(useSW, useLW)
+function run_PCA(useSW, useLW, lwHiRes)
 
 swPath = '/global/scratch2/sd/jpaige/PCA/sw_files/';
 lwPath = '/global/scratch2/sd/jpaige/PCA/lw_files/';
@@ -41,7 +41,7 @@ for i = 0:9
     end
     
     %run PCA code
-    PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr)
+    PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr, lwHiRes)
     
 end
 

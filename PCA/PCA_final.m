@@ -120,7 +120,7 @@ if useLW
         tmp = ncread(lwFiles{1}, 'WAVELENGTH_LRES');
     end
     nLW = length(tmp) - lwBuffer;
-    waveNum = [waveNum, tmp(1:(end-lwBuffer))];
+    waveNum = [waveNum; tmp(1:(end-lwBuffer))];
     
 end
     

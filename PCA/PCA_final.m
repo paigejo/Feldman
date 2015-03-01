@@ -134,7 +134,9 @@ else
     nTimeSteps = length(lwFiles);
 end
 for time = 1:nTimeSteps
-    disp(['Timestep ', num2str(time), '/', num2str(nTimeSteps)])
+    if mod(time, 12) == 0
+        disp(['Timestep ', num2str(time), '/', num2str(nTimeSteps)])
+    end
     
     %get shortwave data, remove junk data at high wavenumbers and over badDataThreshold
     if useSW
@@ -338,7 +340,7 @@ VEtime = bsxfun(@rdivide, sum(sum(SPEspacetime, 1), 2), sum(sum(squareRowSums, 1
 %save results
 disp('saving results')
 cd(savePath);
-save(saveName, 'lonLatScoreMat', 'V', 'SPEspacetime', 'SPEspectrum', 'VEtotal', 'VEspace', 'VEtime', 'VEspectrum', 'waveNum');
+save(saveName, 'lonLatScoreMat', 'V', 'SPEspacetime', 'SPEspectrum', 'VEtotal', 'VEspace', 'VEtime', 'waveNum');
 
 end
 

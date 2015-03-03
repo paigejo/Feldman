@@ -257,14 +257,15 @@ goodRows = sum(isfinite(dataMat), 2) == nSpectra;
 dataMat = dataMat(goodRows, :);
 
 %Modify data matrix so the average value for each column is zero
-disp('centering and normalizing data matrix')
+disp('centering data matrix')
+%disp('centering and normalizing data matrix')
 for channel = 1:nSpectra
     
     %calculate and subtract mean of each column
     dataMat(:, channel) = dataMat(:, channel) - mean(dataMat(:, channel));
     
     %normalize column by standard deviation
-    dataMat(:, channel) = dataMat(:, channel)/std(dataMat(:, channel));
+    %dataMat(:, channel) = dataMat(:, channel)/std(dataMat(:, channel));
     
 end
 

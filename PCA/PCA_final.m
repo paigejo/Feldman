@@ -301,7 +301,7 @@ lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, nTimeSteps, numComponents]
 %Calculate SPE for each PC individually
 disp('computing SPE')
 SPEspacetime = ones(nLon, nLat, nTimeSteps, numComponents+1);
-SPEspectrum = ones(size(dataMat, 2), numComponents+1);
+avgSPEspectrum = ones(size(dataMat, 2), numComponents+1);
 for i = 1:numComponents
     
     err_mat = dataMat - U(:, i) * S(i, i) * V(:, i)'; %mxn = mx1 x 1x1 x 1xn
@@ -311,9 +311,9 @@ for i = 1:numComponents
     %except for PC6 which has 132 bad SPE rows
     %SPEbadCols = sum(SPE, 1) > sum(dataMat.^2, 1); %sum(SPEbadCols) > 0
     
-    SPEspectrum(:, i) = sum(SPE, 1);
+    avgSPEspectrum(:, i) = myNanMean(SPE, 1);
     tmp = NaN*ones(length(goodRows), 1);
-    tmp(goodRows) = sum(SPE, 2);
+    tmp(goodRows) = nansum(SPE, 2);
     SPEspacetime = reshape(tmp, [nLon, nLat, nTimeSteps]);
     
 end
@@ -321,26 +321,28 @@ end
 %compute SPE, variance explained using all six PCs
 err_mat = dataMat - U * S * V';
 SPE = err_mat.^2;
-SPEspectrum(:, numComponents+1) = sum(SPE, 1);
 tmp = NaN*ones(length(goodRows), 1);
-tmp(goodRows) = sum(SPE, 2);
+tmp(goodRows) = nansum(SPE, 2);
 SPEspacetime(:, :, :, numComponents+1) = reshape(tmp, [nLon, nLat, nTimeSteps]);
+avgSPEspace = myNanMean(SPEspacetime, 3);
+avgSPEtime = myNanMean(SPEspacetime, [1, 2]);
+avgSPEspectrum(:, numComponents+1) = nanmean(SPE, 1);
 
-%compute variance explained in total and broken down by space, time (and expectrum?)
+%compute variance explained in total and broken down by space, time
 disp('computing variance explained')
 totalVar = norm(dataMat, 'fro')^2;
 VEtotal = diag(S).^2/totalVar;
 
 squareRowSums = NaN*ones(length(goodRows), 1);
-squareRowSums(goodRows) = sum(dataMat.^2, 2);
+squareRowSums(goodRows) = nansum(dataMat.^2, 2);
 squareRowSums = reshape(squareRowSums, [nLon, nLat, nTimeSteps]);
-VEspace = bsxfun(@rdivide, sum(SPEspacetime, 3), sum(squareRowSums, 3));
-VEtime = bsxfun(@rdivide, sum(sum(SPEspacetime, 1), 2), sum(sum(squareRowSums, 1), 2));
+VEspace = squeeze(bsxfun(@rdivide, nansum(SPEspacetime, 3), nansum(squareRowSums, 3)));
+VEtime = squeeze(bsxfun(@rdivide, nansum(nansum(SPEspacetime, 1), 2), nansum(nansum(squareRowSums, 1), 2)));
 
 %save results
 disp('saving results')
 cd(savePath);
-save(saveName, 'lonLatScoreMat', 'V', 'SPEspacetime', 'SPEspectrum', 'VEtotal', 'VEspace', 'VEtime', 'waveNum');
+save(saveName, 'lonLatScoreMat', 'V', 'avgSPEspace', 'avgSPEtime', 'avgSPEspectrum', 'VEtotal', 'VEspace', 'VEtime', 'waveNum');
 
 end
 

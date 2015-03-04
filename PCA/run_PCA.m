@@ -27,7 +27,7 @@ if normalize
     normStr = 'norm';
 else
     normStr = 'notnorm';
-    
+end
 
 for i = 0:9
     

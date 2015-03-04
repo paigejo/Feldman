@@ -45,10 +45,11 @@ To get to reflectance = pi*radiance/solar flux
 NOTE: MATLAB ordering of radiance dimensions: lon, lat, wavelength
 %}
 
-function PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr, lwHiRes)
+function PCA_final(useSW, useLW, saveName, savePath, swPath, lwPath, searchStr, lwHiRes, normalize)
 useSW = logical(useSW);
 useLW = logical(useLW);
 lwHiRes = logical(lwHiRes);
+normalize = logical(normalize);
 
 badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
 
@@ -261,15 +262,20 @@ goodRows = sum(isfinite(dataMat), 2) == nSpectra;
 dataMat = dataMat(goodRows, :);
 
 %Modify data matrix so the average value for each column is zero
-disp('centering data matrix')
-%disp('centering and normalizing data matrix')
+if normalize
+    disp('centering and normalizing data matrix')
+else
+    disp('centering data matrix')
+end
 for channel = 1:nSpectra
     
     %calculate and subtract mean of each column
     dataMat(:, channel) = dataMat(:, channel) - mean(dataMat(:, channel));
     
     %normalize column by standard deviation
-    %dataMat(:, channel) = dataMat(:, channel)/std(dataMat(:, channel));
+    if normalize
+    	dataMat(:, channel) = dataMat(:, channel)/std(dataMat(:, channel));
+    end
     
 end
 

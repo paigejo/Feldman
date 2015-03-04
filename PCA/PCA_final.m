@@ -221,7 +221,7 @@ for time = 1:nTimeSteps
 end
 
 %clear memory except variables needed
-clearvars -except dataMat useSW useLW swPath lwPath savePath saveName swFiles lwFiles waveNum nTimeSteps nLon nLat nSpectra
+clearvars -except dataMat useSW useLW normalize swPath lwPath savePath saveName swFiles lwFiles waveNum nTimeSteps nLon nLat nSpectra
 
 %If less than 95% of the data for this grid cell and channel is finite,
 %than none of it is taken into account in the calculations

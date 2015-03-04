@@ -155,9 +155,13 @@ for time = 1:nTimeSteps
         cd(lwPath);
         lwFile = lwFiles{time};
         
-        rad_hi_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
-        rad_hi_LW_ALL = rad_hi_LW_ALL(:, :, 1:nLW);
-        rad_hi_LW_ALL(rad_hi_LW_ALL > badDataThreshold) = NaN;
+        if lwHiRes
+            rad_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
+        else
+            rad_LW_ALL = ncread(lwFile, 'RADIANCE_LRES_ALL');
+        end
+        rad_LW_ALL = rad_LW_ALL(:, :, 1:nLW);
+        rad_LW_ALL(rad_LW_ALL > badDataThreshold) = NaN;
     end
     
     %allocate non-temporary variables and loop variables, if necessary.
@@ -175,9 +179,9 @@ for time = 1:nTimeSteps
             data_SW = ones(size(rad_low_SW_ALL, 1), size(rad_low_SW_ALL, 2), nSW);
         end
         if useLW
-            nLon = size(rad_hi_LW_ALL, 1);
-            nLat = size(rad_hi_LW_ALL, 2);
-            data_LW = ones(size(rad_hi_LW_ALL, 1), size(rad_hi_LW_ALL, 2), nLW);
+            nLon = size(rad_LW_ALL, 1);
+            nLat = size(rad_LW_ALL, 2);
+            data_LW = ones(size(rad_LW_ALL, 1), size(rad_LW_ALL, 2), nLW);
         end
         
         dataMat = ones(nLon, nLat, nTime, nSpectra);
@@ -203,7 +207,7 @@ for time = 1:nTimeSteps
         %data_LW = bsxfun(@times, rad_hi_LW_ALL*1e-4, waveNumHiLWSq); %TODO: FIX THIS
         
         %Actually no need to convert
-        data_LW = rad_hi_LW_ALL;
+        data_LW = rad_LW_ALL;
         
     end
     
@@ -281,16 +285,6 @@ scoreMat = U*S;
 
 %get number of lon and lat values using sample variable FLNS
 disp('reshaping score matrix')
-if useSW
-    cd(swPath);
-    tmp = ncread(swFiles{1}, 'FLNS');
-else
-    cd(lwPath);
-    tmp = ncread(lwFiles{1}, 'FLNS');
-end
-nLon = size(tmp, 1);
-nLat = size(tmp, 2);
-
 %fill in holes in scoreMat with NaNs
 lonLatScoreMat = NaN*ones(length(goodRows), size(scoreMat, 2));
 lonLatScoreMat(goodRows, :) = scoreMat;
@@ -325,9 +319,9 @@ SPE = err_mat.^2;
 tmp = NaN*ones(length(goodRows), 1);
 tmp(goodRows) = nansum(SPE, 2);
 SPEspacetime(:, :, :, numComponents+1) = reshape(tmp, [nLon, nLat, nTimeSteps]);
-avgSPEspace = myNanMean(SPEspacetime, 3);
-avgSPEtime = myNanMean(SPEspacetime, [1, 2]);
-avgSPEspectrum(:, numComponents+1) = nanmean(SPE, 1);
+avgSPEspace = squeeze(myNanMean(SPEspacetime, 3));
+avgSPEtime = squeeze(myNanMean(SPEspacetime, [1, 2]));
+avgSPEspectrum(:, numComponents+1) = squeeze(nanmean(SPE, 1));
 
 %compute variance explained in total and broken down by space, time
 disp('computing variance explained')

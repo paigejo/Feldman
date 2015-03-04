@@ -2,7 +2,7 @@
 %plot for each PC:
 
 %set these options
-useSW = 1;
+useSW = 0;
 useLW = 1;
 lwHiRes = 0;
 CLRorALL = 1; % 0 is clear-sky, 1 is all-sky
@@ -47,21 +47,21 @@ if doCalculations
         %determine the correct file to load based on i (decade):
         %decade data specification strings
         iStr = [num2str(i), '9'];
-        iMMStr = [num2str(i-1), '0'];
+        iMMStr = [num2str(i), '0'];
         
         %no data from 1999, so must modify strings for first decade
         if i == 0
             iMMStr = '00';
         end
         
-        fileName = ['PCA_', waveLStr, '_final_', inString, '20', iMMStr, '-20', iStr, '.mat'];
+        fileName = ['PCA_', waveLStr, '_final_20', iMMStr, '-20', iStr, '_', resStr, '.mat'];
         
-        %load data, initialize variables:
+        %load data, initialize variables if necessary:
         load(fileName);
-        if i == 1
+        if i == 0
             nChannels = size(V, 1);
             Vs = ones(nChannels, nPCs, nDecades);
-            lonLatScoreMats = ones(nLon, nLat, nTimesSteps, nPCs, nDecades);
+            lonLatScoreMats = ones(nLon, nLat, nTimeSteps, nPCs, nDecades);
             variancesExplained = ones(nPCs, nDecades);
             VEspace_all = ones(nLon, nLat, nPCs+1, nDecades);
             VEtime_all = ones(nTimeSteps, nPCs+1, nDecades);
@@ -70,7 +70,7 @@ if doCalculations
         %update variables with this decade's data
         Vs(:, :, i+1) = V;
         lonLatScoreMats(:, :, :, :, i+1) = lonLatScoreMat; %concatenate through time
-        variancesExplained(:, i+1) = varianceExplained;
+        variancesExplained(:, i+1) = VEtotal;
         VEspace_all(:, :, :, i+1) = VEspace;
         VEtime_all(:, :, i+1) = VEtime;
         

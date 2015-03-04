@@ -24,7 +24,7 @@ else
 end
 
 if normalize
-    normStr = 'norm';
+    normStr = 'cellnorm';
 else
     normStr = 'notnorm';
 end

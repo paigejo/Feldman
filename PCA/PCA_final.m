@@ -252,21 +252,35 @@ for lon = 1:size(dataMat, 1)
         end
     end
 end
+%set observations with a NaN to NaNs
+goodRows = sum(isfinite(dataMat), 4) == nSpectra;
+nanRows = ones(size(goodRows));
+nanRows(~goodRows) = NaN;
+dataMat = bsxfun(@times, dataMat, nanRows);
+
+%center and nomalize matrix
+if normalize
+    disp('centering and normalizing data matrix');
+else
+    disp('centering data matrix');
+end
+cntrs = nanmean(dataMat, 3);
+stds = nanstd(dataMat, 3);
+dataMat = bsxfun(@minus, dataMat, cntrs);
+dataMat = bsxfun(@rdivide, dataMat, stds);
 
 %reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
 disp('reshaping and cleaning data matrix')
 dataMat = reshape(dataMat, [nLon*nLat*nTimeSteps, nSpectra]);
+goodRows = reshape(goodRows, [nLon*nLat*nTimeSteps, 1]);
 
+%{
 %find rows with non-finite values, remove them
 goodRows = sum(isfinite(dataMat), 2) == nSpectra;
 dataMat = dataMat(goodRows, :);
 
 %Modify data matrix so the average value for each column is zero
-if normalize
-    disp('centering and normalizing data matrix')
-else
-    disp('centering data matrix')
-end
+disp('centering data matrix')
 for channel = 1:nSpectra
     
     %calculate and subtract mean of each column
@@ -278,6 +292,7 @@ for channel = 1:nSpectra
     end
     
 end
+%}
 
 %do PCA, find 6 principle components, note that S is the singular values
 %matrix, but contains singular values themselves not their squares

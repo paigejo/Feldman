@@ -273,6 +273,7 @@ dataMat = bsxfun(@rdivide, dataMat, stds);
 disp('reshaping and cleaning data matrix')
 dataMat = reshape(dataMat, [nLon*nLat*nTimeSteps, nSpectra]);
 goodRows = reshape(goodRows, [nLon*nLat*nTimeSteps, 1]);
+dataMat = dataMat(goodRows, :);
 
 %{
 %find rows with non-finite values, remove them

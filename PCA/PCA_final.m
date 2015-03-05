@@ -265,7 +265,7 @@ else
     disp('centering data matrix');
 end
 cntrs = nanmean(dataMat, 3);
-stds = nanstd(dataMat, 3);
+stds = nanstd(dataMat, 0, 3);
 dataMat = bsxfun(@minus, dataMat, cntrs);
 dataMat = bsxfun(@rdivide, dataMat, stds);
 

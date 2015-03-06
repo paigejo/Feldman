@@ -1,0 +1,144 @@
+%off China's coast:      lonI: 110, latI: 80
+%If an input variable is unnecessary, set its value to NaN
+function [RSE, RSEsamples, trueMean, sampleMeans, waveNum, lon, lat] = sampleSpectra(swFile, lwFile, nSamples, useSW, useLW, lwHiRes, latRange, lonRange)
+
+useSW = logical(useSW);
+useLW = logical(useLW);
+lwHiRes = logical(lwHiRes);
+
+badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%get wavenum/wavelength, lon/lat data:
+
+waveNum = []; %SW units: nanometers.  LW units: cm^-1
+nSW = 0;
+nLW = 0;
+
+%Shortwave:
+if useSW
+    
+    %data at final several wavelength indices should be thrown out (and at
+    %the fifth wavenumber?)
+    swBuffer = 10;
+    
+    %get wavelength dimension, remove junk data at high wave lengths
+    tmp = ncread(swFile, 'WAVELENGTH_LRES');
+    nSW = length(tmp) - swBuffer;
+    waveNum = tmp(1:(end-swBuffer));
+    
+end
+
+%Longwave:
+if useLW
+    
+    %data at final several wavenumber indices should be thrown out
+    if lwHiRes
+        lwBuffer = 4;
+    else
+        lwBuffer = 9;
+    end
+    
+    %get wavenumber dimension, remove junk data at high wave numbers
+    if lwHiRes
+        tmp = ncread(lwFile, 'WAVELENGTH_HRES');
+    else
+        tmp = ncread(lwFile, 'WAVELENGTH_LRES');
+    end
+    nLW = length(tmp) - lwBuffer;
+    waveNum = [waveNum; tmp(1:(end-lwBuffer))];
+
+end
+
+%get lon/lat data (only exists on lw file for some reason)
+lat = ncread(lwFile, 'lat');
+lon = ncread(lwFile, 'lon');
+
+%%%%%%%%%%%%%%%%%%%
+%get radiance data:
+
+%Shortwave: remove junk data at high wavenumbers and over badDataThreshold
+rad_low_SW_ALL = [];
+if useSW
+    
+    rad_low_SW_ALL = ncread(swFile, 'RADIANCE_LRES_ALL');
+    %solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
+    rad_low_SW_ALL = rad_low_SW_ALL(:, :, 1:nSW);
+    rad_low_SW_ALL(rad_low_SW_ALL > badDataThreshold) = NaN;
+    %solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
+end
+
+%Longwave: remove junk data at high wavenumbers and over badDataThreshold
+rad_LW_ALL = [];
+if useLW
+    
+    if lwHiRes
+        rad_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
+    else
+        rad_LW_ALL = ncread(lwFile, 'RADIANCE_LRES_ALL');
+    end
+    rad_LW_ALL = rad_LW_ALL(:, :, 1:nLW);
+    rad_LW_ALL(rad_LW_ALL > badDataThreshold) = NaN;
+end
+
+%allocate rads variable: 3-dimensional ([lon lat channel])
+rads = cat(3, rad_low_SW_ALL, rad_LW_ALL);
+nLon = size(rads, 1);
+nLat = size(rads, 2);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%calculate min and max lon/lat indices, filter all data:
+
+%calculate lon/lat range indices
+if sum(isnan(lonRange)) == 0 && sum(isnan(latRange)) == 0
+    
+    minLon = lonRange(1);
+    maxLon = lonRange(2);
+    minLat = latRange(1);
+    maxLat = latRange(2);
+    
+    [~, minLonI] = min(abs(lon - minLon));
+    [~, maxLonI] = min(abs(lon - maxLon));
+    [~, minLatI] = min(abs(lat - minLat));
+    [~, maxLatI] = min(abs(lat - maxLat));
+    
+    lonRangeI = minLonI:maxLonI;
+    latRangeI = minLatI:maxLatI;
+    
+else
+    
+    lonRangeI = 1:nLon;
+    latRangeI = 1:nLat;
+    
+end
+
+%filter data
+rads = rads(lonRangeI, latRangeI, :);
+
+%%%%%%%%%%%%%%%%%%
+%perform sampling:
+
+trueMean = shiftdim(myNanMean(rads, [1 2]), 1);
+samplesPerRound = 1;
+nRounds = floor(nSamples/samplesPerRound);
+
+sampleLons = randi([1 size(rads, 1)], samplesPerRound*nRounds, 1);
+sampleLats = randi([1 size(rads, 2)], samplesPerRound*nRounds, 1);
+sampleSpectra = ones(length(sampleLons), size(rads, 3));
+for n = 1:length(sampleLons)
+    sampleSpectra(n, :) = shiftdim(rads(sampleLons(n), sampleLats(n), :), 1);
+end
+
+%calculate averages
+spectraCumSum = nancumsum(sampleSpectra, 1);
+sampleNan = isnan(sampleSpectra);
+sampleSize = cumsum(~sampleNan, 1);
+
+roundCumSums = spectraCumSum((1:nRounds)*samplesPerRound, :);
+roundSampleSize = sampleSize((1:nRounds)*samplesPerRound, :);
+
+sampleMeans = roundCumSums./roundSampleSize;
+error = bsxfun(@minus, sampleMeans, trueMean);
+RSE = sqrt(sum(error.^2, 2));
+RSEsamples = (1:nRounds)*samplesPerRound;
+end

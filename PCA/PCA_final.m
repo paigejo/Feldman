@@ -110,7 +110,7 @@ if useLW
     if lwHiRes
         lwBuffer = 4;
     else
-        lwBuffer = 2;
+        lwBuffer = 9;
     end
     
     %get wavenumber dimension, remove junk data at high wave numbers
@@ -151,7 +151,7 @@ for time = 1:nTimeSteps
         %solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
     end
     
-    %get longwave data, remove junk data at high wavenumbers
+    %get longwave data, remove junk data at high wavenumbers and over badDataThreshold
     if useLW
         cd(lwPath);
         lwFile = lwFiles{time};
@@ -258,7 +258,7 @@ nanRows = ones(size(goodRows));
 nanRows(~goodRows) = NaN;
 dataMat = bsxfun(@times, dataMat, nanRows);
 
-%center and nomalize matrix
+%center and nomalize matrix by cell and channel
 if normalize
     disp('centering and normalizing data matrix');
 else

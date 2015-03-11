@@ -331,7 +331,7 @@ for i = 1:numComponents
     avgSPEspectrum(:, i) = myNanMean(SPE, 1);
     tmp = NaN*ones(length(goodRows), 1);
     tmp(goodRows) = nansum(SPE, 2);
-    SPEspacetime = reshape(tmp, [nLon, nLat, nTimeSteps]);
+    SPEspacetime(:, :, :, i) = reshape(tmp, [nLon, nLat, nTimeSteps]);
     
 end
 
@@ -363,7 +363,10 @@ save(saveName, 'lonLatScoreMat', 'V', 'avgSPEspace', 'avgSPEtime', 'avgSPEspectr
 
 end
 
+%problems with VEtime (PCs 2-6 and kinda PC 7), VEspace (PCs 2-6),
+%avgSPEspace (PCs 2-6), avgSPEtime (PCs 2-6)
 
+%avgSPEspectrum looks fine
 
 
 

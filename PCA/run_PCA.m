@@ -31,6 +31,11 @@ end
 
 for i = 0:9
     
+    %already done with first 6 decades
+    if i < 7
+        continue;
+    end
+    
     %decade data specification strings
     decadeStr = [num2str(i)];
     

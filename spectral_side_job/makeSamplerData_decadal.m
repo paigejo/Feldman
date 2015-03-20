@@ -8,9 +8,9 @@ for i = 0:9
     decadeStr = ['20', num2str(i), '0-20', num2str(i), '9'];
     
     %generate decadal data for different values of allSky, lwHiRes
-    sampleData_decadal(decadeStr, true, true);
-    sampleData_decadal(decadeStr, true, false);
-    sampleData_decadal(decadeStr, false, true);
-    sampleData_decadal(decadeStr, false, false);
+    samplerData_decadal(decadeStr, true, true);
+    samplerData_decadal(decadeStr, true, false);
+    samplerData_decadal(decadeStr, false, true);
+    samplerData_decadal(decadeStr, false, false);
     
 end

@@ -1,12 +1,15 @@
-%[RMSE, maxPctDiff, maxError, RMSEsamples, trueMean, sampleMeans, waveNum] = sampleSpectra(swFile, lwFile, nSamples, useSW, useLW, lwHiRes, allSky, latRange, lonRange)
-%Uses MCMC integration to estimate the spectral mean for a given month of
-%MODTRAN data by randomly sampling spectra from latitude and longitude.
+%[RMSE, maxPctDiff, maxError, RMSEsamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decadal(swSearchStr, lwSearchStr, nSamples, useSW, useLW, lwHiRes, allSky, latRange, lonRange)
+%calculate MCMC decadal spectral averages and their error from the true
+%spectral mean using a variety of error quantification schemes.
 %
 %inputs
-%swFile: the file to get shortwave data from.  If useSW = 0 this can be set
-%to anything
-%lwFile: file to get longwave data from (necessary no matter what useSW and
-%useLW are set to, since lat and lon coordinates are only in LW files)
+%swSearchStr: argument to system 'ls' command to get shortwave files from.
+%Only the files should be returned by ls (or their file paths). If useSW =
+%0 this can be set to anything
+%lwSearchStr: argument to system 'ls' command to get longwave data from
+%(necessary no matter what useSW and useLW are set to, since lat and lon
+%coordinates are only in LW files). Only the files should be returned by ls
+%(or their file paths).
 %nSamples: number of samples in the simulation
 %useSW: whether or not to use shortwave data
 %useLW: whether or not to use longwave data
@@ -24,7 +27,7 @@
 %outputs
 %RMSE: Root Mean Square Error in spectral estimate as function of sample
 %maxPctDiff: max percent error by channel in spectral estimate as function
-%of sample (in fraction units, not percent units)
+%of sample
 %maxError: max absolute error by channel in spectral estimate as function
 %of sample
 %RMSEsamples: number of samples at each index
@@ -33,13 +36,33 @@
 %waveNum: the wavenumber of longwave spectra and the wavelength of
 %shortwave spectra.  If useSW = useLW = 1, then this contains first
 %shortwave wavelengths then longwave wavenumbers in one vector.
-function [RMSE, maxPctDiff, maxError, RMSEsamples, trueMean, sampleMeans, waveNum] = sampleSpectra(swFile, lwFile, nSamples, useSW, useLW, lwHiRes, allSky, latRange, lonRange)
+function [RMSE, maxPctDiff, maxError, RMSEsamples, trueMean, roundMeans, waveNum] = sampleSpectra_decadal(swSearchStr, lwSearchStr, nSamples, useSW, useLW, lwHiRes, allSky, latRange, lonRange)
 
 useSW = logical(useSW);
 useLW = logical(useLW);
 lwHiRes = logical(lwHiRes);
 
 badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
+
+%%%%%%%%%%%%%%%%%%%%%
+%get sw and lw files:
+
+%sw files
+[~, tmp] = system(['ls ', swSearchStr]);
+swFiles = strsplit(tmp, sprintf('\n'));
+swFile = swFiles{1};
+
+%lw files
+[~, tmp] = system(['ls ', lwSearchStr]);
+lwFiles = strsplit(tmp, sprintf('\n'));
+lwFile = lwFiles{1};
+
+%calculate number of files
+if useSW
+    nTimeSteps = length(swFiles);
+else
+    nTimeSteps = length(lwFiles);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %get wavenum/wavelength, lon/lat data:
@@ -83,59 +106,16 @@ if useLW
 
 end
 
+nSpectra = nLW + nSW;
+
 %get lon/lat data (only exists on lw file for some reason)
 lat = ncread(lwFile, 'lat');
 lon = ncread(lwFile, 'lon');
-
-%%%%%%%%%%%%%%%%%%%
-%get radiance data:
-
-%Shortwave: remove junk data at high wavenumbers and over badDataThreshold
-rad_SW = [];
-if useSW
-    
-    if allSky
-        rad_SW = ncread(swFile, 'RADIANCE_LRES_ALL');
-    else
-        rad_SW = ncread(swFile, 'RADIANCE_LRES_CLR');
-    end
-    %solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
-    rad_SW = rad_SW(:, :, 1:nSW);
-    rad_SW(rad_SW > badDataThreshold) = NaN;
-    %solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
-end
-
-%Longwave: remove junk data at high wavenumbers and over badDataThreshold,
-rad_LW = [];
-if useLW
-    
-    if allSky
-        if lwHiRes
-            rad_LW = ncread(lwFile, 'RADIANCE_HRES_ALL');
-        else
-            rad_LW = ncread(lwFile, 'RADIANCE_LRES_ALL');
-        end
-    else
-        if lwHiRes
-            rad_LW = ncread(lwFile, 'RADIANCE_HRES_CLR');
-        else
-            rad_LW = ncread(lwFile, 'RADIANCE_LRES_CLR');
-        end
-    end
-    rad_LW = rad_LW(:, :, 1:nLW);
-    rad_LW(rad_LW > badDataThreshold) = NaN;
-end
-
-%allocate rads variable: 3-dimensional ([lon lat channel])
-rads = cat(3, rad_SW, rad_LW);
-nLon = size(rads, 1);
-nLat = size(rads, 2);
-
-%convert units from W/cm^2/sr/_ to mW/m^2/sr/_ (divide by 10? No, mult by 10^7)
-rads = rads*10^7;
+nLat = length(lat);
+nLon = length(lon);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%calculate min and max lon/lat indices, filter all data:
+%calculate min and max lon/lat indices:
 
 %calculate lon/lat range indices
 if sum(isnan(lonRange)) == 0 && sum(isnan(latRange)) == 0
@@ -160,33 +140,94 @@ else
     
 end
 
-%filter data
-rads = rads(lonRangeI, latRangeI, :);
+nLonFilt = length(lonRangeI);
+nLatFilt = length(latRangeI);
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%Generate data matrix:
+
+%prealocate data matrices
+dataMat = ones(nLonFilt, nLatFilt, nTimeSteps, nSpectra)*NaN;
+data_SW = [];
+data_LW = [];
+
+%fill data matrix
+for time = 1:nTimeSteps
+    if mod(time, 12) == 0
+        disp(['Timestep ', num2str(time), '/', num2str(nTimeSteps)])
+    end
+    
+    %get shortwave data, remove junk data at high wavenumbers and over badDataThreshold
+    if useSW
+        swFile = swFiles{time};
+        
+        rad_low_SW_ALL = ncread(swFile, 'RADIANCE_LRES_ALL');
+        %solarFlux = ncread(swFile, 'SOLAR_FLUX'); %in W/cm^2/nm
+        data_SW = rad_low_SW_ALL(:, :, 1:nSW);
+        data_SW(data_SW > badDataThreshold) = NaN;
+        %solarFlux = solarFlux(:, :, 1:length(waveNumLowSW));
+    end
+    
+    %get longwave data, remove junk data at high wavenumbers and over badDataThreshold
+    if useLW
+        lwFile = lwFiles{time};
+        
+        if lwHiRes
+            rad_LW_ALL = ncread(lwFile, 'RADIANCE_HRES_ALL');
+        else
+            rad_LW_ALL = ncread(lwFile, 'RADIANCE_LRES_ALL');
+        end
+        data_LW = rad_LW_ALL(:, :, 1:nLW);
+        data_LW(data_LW > badDataThreshold) = NaN;
+    end
+    
+    %combine shortwave, longwave data
+    rads = cat(3, data_SW, data_LW);
+    
+    %filter data by lat/lon
+    rads = rads(lonRangeI, latRangeI, :);
+    
+    %add rads to data matrix
+    dataMat(:, :, time, :) = rads;
+    
+end
+
+%convert units from W/cm^2/sr/_ to mW/m^2/sr/_ (divide by 10? No, mult by 10^7)
+dataMat = dataMat*10^7;
 
 %%%%%%%%%%%%%%%%%%
 %perform sampling:
 
-trueMean = shiftdim(myNanMean(rads, [1 2]), 1);
+%intialize variables, get random sample indices
 samplesPerRound = 1;
 nRounds = floor(nSamples/samplesPerRound);
+nSamples = samplesPerRound*nRounds;
+sampleFiles = randi([1 nTimeSteps], nSamples, 1);
+sampleLons = randi([1 nLonFilt], nSamples, 1);
+sampleLats = randi([1 nLatFilt], nSamples, 1);
+sampleRows = (sampleFiles-1)*nLonFilt*nLatFilt + (sampleLats-1)*nLonFilt + sampleLons;
 
-sampleLons = randi([1 size(rads, 1)], samplesPerRound*nRounds, 1);
-sampleLats = randi([1 size(rads, 2)], samplesPerRound*nRounds, 1);
-sampleSpectra = ones(length(sampleLons), size(rads, 3));
-for n = 1:length(sampleLons)
-    sampleSpectra(n, :) = shiftdim(rads(sampleLons(n), sampleLats(n), :), 1);
-end
+%generate sample matrix
+dataMat = reshape(dataMat, [nLonFilt*nLatFilt*nTimeSteps, nSpectra]);
+sampleSpectra = dataMat(sampleRows, :);
 
-%calculate averages
+%%%%%%%%%%%%%%
+%run analysis:
+
+%calculate true mean
+trueMean = myNanMean(dataMat, 1);
+
+%calculate running averages
 spectraCumSum = nancumsum(sampleSpectra, 1);
 sampleNan = isnan(sampleSpectra);
 sampleSize = cumsum(~sampleNan, 1);
-
 roundCumSums = spectraCumSum((1:nRounds)*samplesPerRound, :);
 roundSampleSize = sampleSize((1:nRounds)*samplesPerRound, :);
+roundMeans = roundCumSums./roundSampleSize;
 
-sampleMeans = roundCumSums./roundSampleSize;
-error = bsxfun(@minus, sampleMeans, trueMean);
+%calculate error
+error = bsxfun(@minus, roundMeans, trueMean);
 maxPctDiff = max(abs(bsxfun(@rdivide, error, trueMean)), [], 2);
 RMSE = sqrt(mean(error.^2, 2));
 RMSEsamples = (1:nRounds)*samplesPerRound;

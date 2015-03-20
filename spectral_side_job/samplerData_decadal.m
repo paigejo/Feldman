@@ -1,4 +1,4 @@
-function samplerData_decadal(decadeStr, allSky, lwHiRes)
+function samplerData_decadal(decadeRoot, allSky, lwHiRes)
 %same as samplerPlots() but for decadal averages.  decadeStr should be
 %something like '2000-2009', specifying the decade the data is from.
 
@@ -9,8 +9,11 @@ makePlots = false; %set to true only when testing code on desktop
 %swSearchStr = '/Users/paigejo/git/Feldman/PCA/test_data/nc_files/sw/*';
 %lwSearchStr = '/Users/paigejo/git/Feldman/PCA/test_data/nc_files/lw/*';
 %savePath = '/Users/paigejo/git/Feldman/spectral_side_job';
-swSearchStr = ['/global/scratch2/sd/jpaige/PCA/sw_files/*', decadeStr, '*.nc'];
-lwSearchStr = ['/global/scratch2/sd/jpaige/PCA/lw_files/*', decadeStr, '*.nc'];
+swSearchStr = ['/global/scratch2/sd/jpaige/PCA/sw_files/*', decadeRoot, '*.nc'];
+lwSearchStr = ['/global/scratch2/sd/jpaige/PCA/lw_files/*', decadeRoot, '*.nc'];
+
+%other setup parameters
+decadeStr = [decadeRoot, '0-', decadeRoot, '9'];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

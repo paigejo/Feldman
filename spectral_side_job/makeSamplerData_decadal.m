@@ -5,7 +5,7 @@ cd(savePath);
 
 for i = 0:9
     
-    decadeStr = ['20', num2str(i), '0-20', num2str(i), '9'];
+    decadeStr = ['20', num2str(i)];
     
     %generate decadal data for different values of allSky, lwHiRes
     samplerData_decadal(decadeStr, true, true);

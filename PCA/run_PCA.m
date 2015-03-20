@@ -31,8 +31,8 @@ end
 
 for i = 0:9
     
-    %already done with first 6 decades
-    if i < 7
+    %already done with first 9 decades
+    if i < 9
         continue;
     end
     

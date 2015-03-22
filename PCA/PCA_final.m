@@ -51,7 +51,7 @@ useLW = logical(useLW);
 lwHiRes = logical(lwHiRes);
 normalize = logical(normalize);
 
-badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
+%badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
 
 %directories with spectroscopy files from $GRCRATCH
 %swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';
@@ -317,8 +317,8 @@ lonLatScoreMat = reshape(lonLatScoreMat, [nLon, nLat, nTimeSteps, numComponents]
 
 %Calculate SPE for each PC individually
 disp('computing SPE')
-SPEspacetime = ones(nLon, nLat, nTimeSteps, numComponents+1);
-avgSPEspectrum = ones(size(dataMat, 2), numComponents+1);
+SPEspacetime = ones(nLon, nLat, nTimeSteps, numComponents+1)*NaN;
+avgSPEspectrum = ones(size(dataMat, 2), numComponents+1)*NaN;
 for i = 1:numComponents
     
     err_mat = dataMat - U(:, i) * S(i, i) * V(:, i)'; %mxn = mx1 x 1x1 x 1xn

@@ -7,10 +7,17 @@ for i = 0:9
     
     decadeStr = ['20', num2str(i)];
     
+    disp(['Sampling for ' decadeStr, '0-', decadeStr, '9 decade'])
+    
     %generate decadal data for different values of allSky, lwHiRes
-    samplerData_decadal(decadeStr, true, true);
+    disp('all-sky, low-res')
     samplerData_decadal(decadeStr, true, false);
-    samplerData_decadal(decadeStr, false, true);
+    disp('all-sky, hi-res')
+    samplerData_decadal(decadeStr, true, true);
+    disp('clear-sky, low-res')
     samplerData_decadal(decadeStr, false, false);
+    disp('clear-sky, hi-res')
+    samplerData_decadal(decadeStr, false, true);
+    
     
 end

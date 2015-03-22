@@ -52,6 +52,7 @@ lwHiRes = logical(lwHiRes);
 normalize = logical(normalize);
 
 %badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
+badDataThreshold = Inf;
 
 %directories with spectroscopy files from $GRCRATCH
 %swPath = '/global/scratch2/sd/jpaige/PCA/osse_sw/';

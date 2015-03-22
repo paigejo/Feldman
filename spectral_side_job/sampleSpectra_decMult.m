@@ -207,9 +207,9 @@ samplesPerRound = 1;
 nRounds = floor(nSamples/samplesPerRound);
 nSamples = samplesPerRound*nRounds;
 RMSEsamples = (1:nRounds)*samplesPerRound;
-sampleFiles = randi([1 nTimeSteps], nSamples, n);
-sampleLons = randi([1 nLonFilt], nSamples, n);
-sampleLats = randi([1 nLatFilt], nSamples, n);
+sampleFiles = randi([1 nTimeSteps], nSamples, nSimulations);
+sampleLons = randi([1 nLonFilt], nSamples, nSimulations);
+sampleLats = randi([1 nLatFilt], nSamples, nSimulations);
 sampleRows = (sampleFiles-1)*nLonFilt*nLatFilt + (sampleLats-1)*nLonFilt + sampleLons;
 
 %reshape dataMat for easier sampling

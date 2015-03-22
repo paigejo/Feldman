@@ -159,8 +159,8 @@ legend('True', 'Estimate');
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %Shortwave Tests:
 
-useSW = 0;
-useLW = 1;
+useSW = 1;
+useLW = 0;
 
 %Global Test:
 latRange = NaN;

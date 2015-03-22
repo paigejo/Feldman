@@ -167,13 +167,20 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %sampleSpectra_multiple plots (multiple simulations):
 
+disp('Running multiple simulations')
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %Shortwave Tests:
+
+disp('Shortwave tests')
 
 useSW = 1;
 useLW = 0;
 
 %Global Test:
+
+disp('Global')
+
 latRange = NaN;
 lonRange = NaN;
 [RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
@@ -210,6 +217,9 @@ if makePlots
 end
 
 %Arctic Test:
+
+disp('Arctic')
+
 latRange = [70 90];
 lonRange = [0 100];
 [RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
@@ -246,6 +256,9 @@ if makePlots
 end
 
 %Tropical West Pacific Test:
+
+disp('Tropical West Pacific')
+
 latRange = [-10 10];
 lonRange = [100 150];
 [RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
@@ -284,10 +297,15 @@ end
 %%%%%%%%%%%%%%%%
 %Longwave Tests:
 
+disp('Longwave tests')
+
 useSW = 0;
 useLW = 1;
 
 %Longwave Global Test
+
+disp('Global')
+
 latRange = NaN;
 lonRange = NaN;
 
@@ -319,6 +337,9 @@ if makePlots
 end
 
 %Arctic Test:
+
+disp('Arctic')
+
 latRange = [70 90];
 lonRange = [0 100];
 [RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
@@ -349,6 +370,9 @@ if makePlots
 end
 
 %Tropical West Pacific Test:
+
+disp('Tropical West Pacific')
+
 latRange = [-10 10];
 lonRange = [100 150];
 [RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);

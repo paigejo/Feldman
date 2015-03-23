@@ -354,8 +354,8 @@ VEtotal = diag(S).^2/totalVar;
 squareRowSums = NaN*ones(length(goodRows), 1);
 squareRowSums(goodRows) = nansum(dataMat.^2, 2);
 squareRowSums = reshape(squareRowSums, [nLon, nLat, nTimeSteps]);
-VEspace = squeeze(bsxfun(@rdivide, nansum(SPEspacetime, 3), nansum(squareRowSums, 3)));
-VEtime = squeeze(bsxfun(@rdivide, nansum(nansum(SPEspacetime, 1), 2), nansum(nansum(squareRowSums, 1), 2)));
+VEspace = 1 - squeeze(bsxfun(@rdivide, nansum(SPEspacetime, 3), nansum(squareRowSums, 3)));
+VEtime = 1 - squeeze(bsxfun(@rdivide, nansum(nansum(SPEspacetime, 1), 2), nansum(nansum(squareRowSums, 1), 2)));
 
 %save results
 disp('saving results')

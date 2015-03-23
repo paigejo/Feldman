@@ -3,7 +3,9 @@
 savePath = '/global/u1/j/jpaige/git/Feldman/spectral_side_job/results';
 cd(savePath);
 
-for i = 0:9
+%for i = 0:9
+
+i = 0; %only one decade is necessary
     
     decadeStr = ['20', num2str(i)];
     
@@ -20,4 +22,4 @@ for i = 0:9
     samplerData_decadal(decadeStr, false, true);
     
     
-end
+%end

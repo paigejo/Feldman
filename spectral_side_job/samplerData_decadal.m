@@ -3,8 +3,8 @@ function samplerData_decadal(decadeRoot, allSky, lwHiRes)
 %something like '2000-2009', specifying the decade the data is from.
 
 %user setup parameters:
-nSamples = 1000;
-nSimulations = 200;
+nSamples = 5000;
+nSimulations = 500;
 makePlots = false; %set to true only when testing code on desktop
 %swSearchStr = '/Users/paigejo/git/Feldman/PCA/test_data/nc_files/sw/*';
 %lwSearchStr = '/Users/paigejo/git/Feldman/PCA/test_data/nc_files/lw/*';

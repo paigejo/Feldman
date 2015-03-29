@@ -42,7 +42,8 @@ useSW = logical(useSW);
 useLW = logical(useLW);
 lwHiRes = logical(lwHiRes);
 
-badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
+%badDataThreshold = 1e6; %if radiance values are higher than this, set to NaN
+badDataThreshold = Inf;
 
 %%%%%%%%%%%%%%%%%%%%%
 %get sw and lw files:

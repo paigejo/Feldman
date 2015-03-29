@@ -5,7 +5,6 @@
 function M = myNanMean(X, dim)
 
 tot = ~isnan(X);
-totWeight = sum(tot(:));
 M = X;
 for i = 1:length(dim)
     d = dim(i);

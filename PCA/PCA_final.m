@@ -340,10 +340,13 @@ end
 err_mat = dataMat - U * S * V';
 SPE = err_mat.^2;
 tmp = NaN*ones(length(goodRows), 1);
+nData = tmp;
 tmp(goodRows) = nansum(SPE, 2);
+nData(goodRows) = sum(isnan(SPE), 2);
 SPEspacetime(:, :, :, numComponents+1) = reshape(tmp, [nLon, nLat, nTimeSteps]);
-avgSPEspace = squeeze(myNanMean(SPEspacetime, 3));
-avgSPEtime = squeeze(myNanMean(SPEspacetime, [1, 2]));
+nDataSpacetime = reshape(nData, [nLon, nLat, nTimeSteps]);
+avgSPEspace = squeeze(myNanSum(SPEspacetime, 3)./nansum(nDataSpacetime, 3));
+avgSPEtime = squeeze(myNanSum(SPEspacetime, [1, 2])./myNanSum(nDataSpacetime, [1, 2]));
 avgSPEspectrum(:, numComponents+1) = squeeze(nanmean(SPE, 1));
 
 %compute variance explained in total and broken down by space, time

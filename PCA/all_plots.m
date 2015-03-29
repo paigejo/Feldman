@@ -6,7 +6,7 @@ useSW = 1;
 useLW = 0;
 lwHiRes = 0;
 CLRorALL = 1; % 0 is clear-sky, 1 is all-sky
-doCalculations = 0; %if 1, calculates certain variables for plots.  If the calculations are already done set to 0.
+doCalculations = 1; %if 1, calculates certain variables for plots.  If the calculations are already done set to 0.
 
 %start code:
 
@@ -65,6 +65,9 @@ if doCalculations
             variancesExplained = ones(nPCs, nDecades)*NaN;
             VEspace_all = ones(nLon, nLat, nPCs+1, nDecades)*NaN;
             VEtime_all = ones(nTimeSteps, nPCs+1, nDecades)*NaN;
+            avgSPEspace_all = ones(nLon, nLat, nPCs+1, nDecades)*NaN;
+            avgSPEtime_all = ones(nTimeSteps, nPCs+1, nDecades)*NaN;
+            avgSPEspectrum_all = ones(nChannels, nPCs+1, nDecades)*NaN;
         end
         
         %update variables with this decade's data
@@ -73,6 +76,9 @@ if doCalculations
         variancesExplained(:, i+1) = VEtotal;
         VEspace_all(:, :, :, i+1) = VEspace;
         VEtime_all(:, :, i+1) = VEtime;
+        avgSPEspace_all(:, :, :, i+1) = avgSPEspace;
+        avgSPEtime_all(:, :, i+1) = avgSPEtime;
+        avgSPEspectrum_all(:, :, i+1) = avgSPEspectrum;
         
     end
     
@@ -100,9 +106,10 @@ if doCalculations
     disp('Calculating score trend slopes')
     scoreTrendSlopes = ones(nLon, nLat, nPCs, nDecades)*NaN;
     for dec = 1:size(lonLatScoreMats, 5)
+        disp(['Current decade is: ', num2str(dec)])
         
         for lon = 1:size(lonLatScoreMats, 1)
-            if mod(lon, 10) == 0
+            if mod(lon, 50) == 0
                 disp(['Current lon is: ', num2str(lon)]);
             end
             
@@ -141,9 +148,10 @@ if doCalculations
     disp('Calculating score trend detection times')
     trendDetectionTimes = ones(size(scoreTrendSlopes))*NaN;
     for dec = 1:size(lonLatScoreMats, 5)
+        disp(['Current decade is: ', num2str(dec)])
         
         for lon = 1:size(lonLatScoreMats, 1)
-            if mod(lon, 10) == 0
+            if mod(lon, 50) == 0
                 disp(['Current lon is: ', num2str(lon)]);
             end
             
@@ -184,7 +192,40 @@ if doCalculations
     scoreTrendSlopes = permute(scoreTrendSlopes, [2 1 3 4]);
     trendDetectionTimes = permute(trendDetectionTimes, [2 1 3 4]);
     VEspace_all = permute(VEspace_all, [2 1 3 4]);
+    avgSPEspace_all = permute(avgSPEspace_all, [2 1 3 4]);
 
+end
+
+%plot average PCs
+avgVs = nanmean(Vs, 3); %average over the decades
+for PC = 1:6
+    
+    figure;
+    if ~(useSW && useLW)
+        
+        plot(waveNum, avgVs(:, PC));
+        title(['PC', num2str(PC), ' Averaged Over All Decades ', titleString])
+        
+        if useSW
+            xlabel('Wavelength (nm)');
+            
+        elseif useLW
+            xlabel('Wavenumber (cm^{-1})');
+            
+        end
+        
+    else
+        
+        plot(waveNum(1:nSW), avgVs(1:nSW, PC), 'b');
+        hold on;
+        plot(waveNum((nSW+1):end), avgVs((nSW+1):end, PC), 'r');
+        title(['PC', num2str(PC), ' Averaged Over All Decades ', titleString])
+        xlabel('Wavelength (nm), Wavenumber (cm^{-1})');
+        legend('Shortwave', 'Longwave');
+        hold off;
+        
+    end
+    
 end
 
 clim = [0 max(angles(:))+max(angles(:))/254]; %add to max so there is slight difference between max and no data color
@@ -270,25 +311,26 @@ for PC = 1:nPCs %PC should go up to 6
     
 end
 
-%Plot PC1-6 score trend detection times as function of grid cell and
-%channel
-finiteTrendDetectionTimes = trendDetectionTimes(isfinite(trendDetectionTimes));
-high = max(finiteTrendDetectionTimes(:))/12;
-low = min(finiteTrendDetectionTimes(:))/12;
+%Plot PC1-6 score average trend detection times as function of grid cell
+%and channel
+avgTrendDetectionTimes = nanmean(trendDetectionTimes, 4)/12; %in years
+maxTime = 500;
+avgTrendDetectionTimes(avgTrendDetectionTimes > maxTime) = maxTime; %set detection times above max to max
+finiteDetectionTimes = avgTrendDetectionTimes(isfinite(avgTrendDetectionTimes(:)));
+high = max(finiteDetectionTimes);
+low = min(finiteDetectionTimes);
 range = high - low;
-clim = [low-range/253 high];
 cmap = jet(256);
-for PC = 1:size(finiteTrendDetectionTimes, 3) %PC should go up to 6
-    
-    avgTrendDetectionTimes = nanmean(finiteTrendDetectionTimes(:, :, PC, :)/12, 4);
+for PC = 1:size(avgTrendDetectionTimes, 3) %PC should go up to 6
     
     figure;
-    a = imagesc(avgTrendDetectionTimes, clim);
+    
+    imagesc(avgTrendDetectionTimes(:, :, PC))
     colormap(cmap);
     set(gca,'YDir','normal');
     colorbar();
     title(['AR(1) Average Trend Detection Time for PC ', num2str(PC) ' Scores ', titleString]);
-    set(a,'AlphaData',~isnan(avgTrendDetectionTimes));
+    %set(a,'AlphaData',~isnan(avgTrendDetectionTimes));
     
 end
 
@@ -344,8 +386,16 @@ end
 
 %Variance explaned plots go here
 cmap = jet(256);
+
+%temporal plot
+VEtime_avg = nanmean(VEtime_all, 3); %average over decades
+figure;
+plot((1:length(VEtime_avg))/12, VEtime_avg);
+title(['Average Variance Explained by Principal Components ', titleString]);
+xlabel('Time (Years)');
+legend('PC1','PC2','PC3','PC4','PC5','PC6', 'PC1-6')
+
 for PC = 1:(nPCs+1)
-    
     
     PCstr = ['PC ', num2str(PC)];
     if PC == 7
@@ -362,73 +412,53 @@ for PC = 1:(nPCs+1)
     title(['Average Variance Explained by ', PCstr ' ', titleString]);
     set(a,'AlphaData',~isnan(tmp_space));
     
-    %temporal plot
-    tmp_time = nanmean(VEtime_all(:, PC, :), 3);
-    figure;
-    plot(tmp_time);
-    title(['Average Variance Explained by ', PCstr ' ', titleString]);
-    xlabel('Timestep (Months)');
-    
 end
 
 %SPE plots go here
-for i = 0:(nDecades-1)
+
+%temporal error plots
+figure;
+tmp_time = nanmean(avgSPEtime_all, 3);
+plot((1:length(avgSPEtime))/12, tmp_time);
+xlabel('Time (Years)');
+ylabel('SPE');
+title('Average SPE Through Time');
+legend('PC1','PC2','PC3','PC4','PC5','PC6', 'PC1-6')
+
+%spatial and spectral plots:
+for PC = 1:(nPCs+1)
     
-    %determine the correct file to load based on i (decade):
-    %decade data specification strings
-    iStr = [num2str(i), '9'];
-    iMMStr = [num2str(i-1), '0'];
-    
-    %no data from 1999, so must modify strings for first decade
-    if i == 0
-        iMMStr = '00';
+    %spectral error plots
+    PCstr = ['PC ', num2str(PC)];
+    if PC == 7
+        PCstr = 'First Six PCs';
     end
     
-    fileName = ['PCA_', waveLStr, '_final_', inString, '20', iMMStr, '-20', iStr, '.mat']; 
-    
-    %load data:
-    load(fileName, 'avgSPEspace', 'avgSPEspectrum', 'avgSPEtime');
-    
-    for PC = 1:(nPCs+1)
+    figure;
+    tmp_spectral = nanmean(avgSPEspectrum_all(:, PC, :), 3);
+    if useSW && useLW
+        plot(waveNum(1:nSW), tmp_spectral(1:nSW), 'b');
+        hold on;
+        plot(waveNum((nSW+1):end), tmp_spectral((nSW+1):end), 'r');
+        xlabel('Wavelength (nm), Wavenumber (cm^{-1})');
+        hold off;
         
-        %spectral error plots
-        PCstr = ['PC ', num2str(PC)];
-        if PC == 7
-            PCstr = 'First Six PCs';
-        end
+    elseif useSW
+        plot(waveNum, tmp_spectral, 'b');
+        xlabel('Wavelength (nm)');
         
-        figure;
-        if useSW && useLW
-            plot(waveNum(1:nSW), SPEspectrum(1:nSW, i+1), 'b');
-            hold on;
-            plot(waveNum((nSW+1):end), SPEspectrum((nSW+1):end, i+1), 'r');
-            xlabel('Wavelength (nm), Wavenumber (cm^{-1})');
-            hold off;
-            
-        elseif useSW
-            plot(waveNum, SPEspectrum(:, i+1), 'b');
-            xlabel('Wavelength (nm)');
-            
-        elseif useLW
-            plot(waveNum, SPEspectrum(:, i+1), 'r');
-            xlabel('Wavenumber (cm^{-1})')'
-            
-        end
-        title(['Mean SPE For ', PCstr, ' in the ', iMMstr, '''s ', titleString]);
-        
-        %spatial error plots
-        figure;
-        imagesc(avgSPEspace(:, :, i));
-        colobar();
-        title(['Mean SPE For ', PCstr, ' in the ', iMMstr, '''s ', titleString]);
-        
-        %temporal error plots
-        figure;
-        plot((1:length(avgSPEtime))/12, avgSPEtime(:, PC));
-        xlabel('Time (Years)');
-        ylabel('SPE');
-        title('SPE Through Time');
+    elseif useLW
+        plot(waveNum, tmp_spectral, 'r');
+        xlabel('Wavenumber (cm^{-1})')'
         
     end
+    title(['Mean SPE For ', PCstr, ' ', titleString]);
+    
+    %spatial error plots
+    figure;
+    tmp_space = nanmean(avgSPEspace_all(:, :, PC, :), 4);
+    imagesc(tmp_space);
+    colorbar();
+    title(['Mean SPE For ', PCstr, ' ', titleString]);
     
 end

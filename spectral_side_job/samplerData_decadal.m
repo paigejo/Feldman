@@ -183,9 +183,9 @@ disp('Global')
 
 latRange = NaN;
 lonRange = NaN;
-[RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
+[RMSE, maxPctDiff, maxError, numSamples, trueMean, ~, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
 
-save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'sampleMeans', 'waveNum', 'swSearchStr');
+save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'waveNum', 'swSearchStr');
 
 if makePlots
     
@@ -222,9 +222,9 @@ disp('Arctic')
 
 latRange = [70 90];
 lonRange = [0 100];
-[RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
+[RMSE, maxPctDiff, maxError, numSamples, trueMean, ~, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
 
-save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'sampleMeans', 'waveNum', 'swSearchStr');
+save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'waveNum', 'swSearchStr');
 
 if makePlots
     
@@ -261,9 +261,9 @@ disp('Tropical West Pacific')
 
 latRange = [-10 10];
 lonRange = [100 150];
-[RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
+[RMSE, maxPctDiff, maxError, numSamples, trueMean, ~, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
 
-save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'sampleMeans', 'waveNum', 'swSearchStr');
+save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'waveNum', 'swSearchStr');
 
 if makePlots
     
@@ -309,9 +309,9 @@ disp('Global')
 latRange = NaN;
 lonRange = NaN;
 
-[RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
+[RMSE, maxPctDiff, maxError, numSamples, trueMean, ~, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
 
-save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'sampleMeans', 'waveNum', 'lwSearchStr');
+save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'waveNum', 'lwSearchStr');
 
 if makePlots
     
@@ -342,9 +342,9 @@ disp('Arctic')
 
 latRange = [70 90];
 lonRange = [0 100];
-[RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
+[RMSE, maxPctDiff, maxError, numSamples, trueMean, ~, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
 
-save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'sampleMeans', 'waveNum', 'lwSearchStr');
+save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'waveNum', 'lwSearchStr');
 
 if makePlots
     
@@ -375,9 +375,9 @@ disp('Tropical West Pacific')
 
 latRange = [-10 10];
 lonRange = [100 150];
-[RMSE, maxPctDiff, maxError, numSamples, trueMean, sampleMeans, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
+[RMSE, maxPctDiff, maxError, numSamples, trueMean, ~, waveNum] = sampleSpectra_decMult(swSearchStr, lwSearchStr, nSamples, nSimulations, useSW, useLW, lwHiRes, allSky, latRange, lonRange);
 
-save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'sampleMeans', 'waveNum', 'lwSearchStr');
+save(makeSaveName(latRange, lonRange), 'RMSE', 'maxPctDiff', 'maxError', 'numSamples', 'trueMean', 'waveNum', 'lwSearchStr');
 
 if makePlots
     

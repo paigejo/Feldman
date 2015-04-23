@@ -259,22 +259,38 @@ nanRows = ones(size(goodRows));
 nanRows(~goodRows) = NaN;
 dataMat = bsxfun(@times, dataMat, nanRows);
 
-%center and nomalize matrix by cell and channel
-if normalize
-    disp('centering and normalizing data matrix');
-else
-    disp('centering data matrix');
+%center and nomalize matrix by cell and channel if only using SW or LW (but
+%not both)
+if normalize && (~useSW || ~useLW)
+    disp('normalizing data matrix');
+    stds = nanstd(dataMat, 0, 3);
+    dataMat = bsxfun(@rdivide, dataMat, stds);
+    
 end
+disp('centering data matrix');
 cntrs = nanmean(dataMat, 3);
-stds = nanstd(dataMat, 0, 3);
 dataMat = bsxfun(@minus, dataMat, cntrs);
-dataMat = bsxfun(@rdivide, dataMat, stds);
 
 %reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
 disp('reshaping and cleaning data matrix')
 dataMat = reshape(dataMat, [nLon*nLat*nTimeSteps, nSpectra]);
 goodRows = reshape(goodRows, [nLon*nLat*nTimeSteps, 1]);
 dataMat = dataMat(goodRows, :);
+
+%if both SW and LW data is included, normalize using RMS std for SW and
+%separately for LW
+if normalize && useSW && useLW
+    disp('normalizing data matrix')
+    
+    %calculate RMS variance
+    swVar = nanmean(nanvar(dataMat(:, 1:nSW), 1));
+    lwVar = nanmean(nanvar(dataMat(:, (nSW+1):end), 1));
+    
+    %normalize
+    dataMat(:, 1:nSW) = dataMat(:, 1:nSW)/sqrt(swVar);
+    dataMat(:, (nSW+1):end) = dataMat(:, (nSW+1):end)/sqrt(lwVar);
+    
+end
 
 %{
 %find rows with non-finite values, remove them

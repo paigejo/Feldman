@@ -267,18 +267,24 @@ if normalize && (~useSW || ~useLW)
     dataMat = bsxfun(@rdivide, dataMat, stds);
     
 end
-disp('centering data matrix');
-cntrs = nanmean(dataMat, 3);
-dataMat = bsxfun(@minus, dataMat, cntrs);
+%only center by gridcell-spectral value pairings for non-combined PCA
+if ~useSW || ~useLW
+    disp('centering data matrix');
+    cntrs = nanmean(dataMat, 3);
+    dataMat = bsxfun(@minus, dataMat, cntrs);
+    
+end
 
 %reshape matrix so it has dimensions [time*lat*lon, channel] in preparation for PCA
 disp('reshaping and cleaning data matrix')
 dataMat = reshape(dataMat, [nLon*nLat*nTimeSteps, nSpectra]);
 goodRows = reshape(goodRows, [nLon*nLat*nTimeSteps, 1]);
+
+%filter out bad data
 dataMat = dataMat(goodRows, :);
 
 %if both SW and LW data is included, normalize using RMS std for SW and
-%separately for LW
+%separately for LW.  Mean-center each column of the data matrix.
 if normalize && useSW && useLW
     disp('normalizing data matrix')
     
@@ -289,6 +295,14 @@ if normalize && useSW && useLW
     %normalize
     dataMat(:, 1:nSW) = dataMat(:, 1:nSW)/sqrt(swVar);
     dataMat(:, (nSW+1):end) = dataMat(:, (nSW+1):end)/sqrt(lwVar);
+    
+end
+
+if useSW && useLW
+    %center the data mat
+    disp('centering data matrix')
+    cntrs = nanmean(dataMat, 1);
+    dataMat = bsxfun(@minus, dataMat, cntrs);
     
 end
 

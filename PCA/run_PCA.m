@@ -31,12 +31,10 @@ end
 
 for i = 0:9
     
-    %already done with first 9 decades
-    %{
-    if i < 9
+    %already done with first 7 decades
+    if i < 8
         continue;
     end
-    %}
     
     %decade data specification strings
     decadeStr = [num2str(i)];
